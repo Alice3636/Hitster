@@ -1,0 +1,55 @@
+# --- Java ---
+*.class
+*.log
+*.ctxt
+*.mtj.tmp/
+
+# Package Files
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# --- Maven ---
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+
+# --- Gradle ---
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!gradle-wrapper.properties
+
+# --- IntelliJ IDEA ---
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# --- Eclipse ---
+.classpath
+.project
+.settings/
+bin/
+
+# --- VS Code ---
+.vscode/
+.factorypath
+
+# --- OS Specifics ---
+.DS_Store
+Thumbs.db
+
+# --- JavaFX / UI Notes ---
+# שים לב: קבצי .fxml ו-.css הם בדרך כלל קבצי מקור (Source)
+# ולכן לא נהוג לשים אותם ב-gitignore, אלא אם כן הם נוצרים אוטומטית (Generated).
