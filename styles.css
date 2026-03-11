@@ -1,92 +1,103 @@
-/* styles.css - עיצוב גיימינג בהשראת התמונה */
-
-/* טעינת הפונט החיצוני (למקרה שתרצי להטמיע אותו בפרויקט בעתיד) */
-/* @font-face {
-    font-family: 'Orbitron';
-    src: url('fonts/Orbitron-Bold.ttf'); 
-} */
-
-/* 1. רקע: גרדיאנט עמוק וכהה של סגול וכחול */
 .root {
-    /* שילוב של כחול כהה מאוד וסגול חציל */
-    -fx-background-color: linear-gradient(to bottom right, #0f0c29, #302b63, #24243e);
-    /* שימוש בפונט הגיימינג שהותקן במחשב (למשל Orbitron) */
-    -fx-font-family: 'Orbitron', 'Audiowide', 'Segoe UI Black', sans-serif;
+    -fx-background-color: radial-gradient(center 50% 50%, radius 120%, #210838, #05050a);
 }
 
-/* 2. קופסת הלוגין: שקופה יותר, מסגרת ניאון דקה */
-.login-box {
-    -fx-background-color: rgba(20, 20, 30, 0.7); /* כהה ושקוף יותר */
-    -fx-background-radius: 15;
-    /* מסגרת זוהרת עדינה בצבע תכלת-סגול */
-    -fx-border-color: linear-gradient(to right, #00d2ff, #9013fe);
-    -fx-border-radius: 15;
-    -fx-border-width: 1.5px;
-    /* צללית רכה ועמוקה */
-    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.8), 50, 0.3, 0, 15);
-    -fx-padding: 40;
+.desktop-panel {
+    -fx-background-color: rgba(12, 8, 20, 0.92);
+    -fx-background-radius: 16;
+    -fx-border-color: linear-gradient(to bottom right, #ff007a, #9013fe, #00d2ff);
+    -fx-border-radius: 16;
+    -fx-border-width: 3px;
+    -fx-effect: dropshadow(gaussian, rgba(255, 0, 122, 0.3), 80, 0.5, 0, 10);
 }
 
-/* 3. כותרת: פונט גיימינג גדול עם אפקט זוהר חזק */
-.login-title {
+.login-title, .register-title {
     -fx-text-fill: #ffffff;
-    -fx-font-size: 48px; /* גדול יותר */
-    -fx-font-weight: bold;
-    /* אפקט זוהר (Glow) כפול: אחד כחול ואחד סגול */
-    -fx-effect: dropshadow(gaussian, #00d2ff, 20, 0.6, 0, 0), dropshadow(gaussian, #9013fe, 10, 0.3, 0, 0);
-    -fx-spacing: 8px; /* מרווח גדול בין האותיות למראה עתידני */
+    -fx-effect: dropshadow(gaussian, #00d2ff, 25, 0.6, 0, 0), dropshadow(gaussian, #ff007a, 10, 0.4, 0, 0); 
 }
 
-/* 4. שדות קלט */
+.subtitle {
+    -fx-text-fill: #00d2ff; 
+    -fx-effect: dropshadow(gaussian, rgba(0, 210, 255, 0.6), 12, 0.3, 0, 0);
+}
+
+.field-label {
+    -fx-text-fill: #f5f5fa; 
+}
+
 .text-field {
-    -fx-background-color: rgba(40, 40, 55, 0.8);
+    -fx-background-color: #080510; 
     -fx-text-fill: #ffffff;
-    -fx-prompt-text-fill: #8e8e9e;
-    -fx-background-radius: 5;
-    -fx-border-color: transparent;
-    -fx-font-size: 14px;
-    -fx-padding: 12 15;
+    -fx-prompt-text-fill: #606075;
+    -fx-background-radius: 8;
+    -fx-border-color: #4a2a75; 
+    -fx-border-width: 2px;
+    -fx-border-radius: 8;
 }
 
 .text-field:focused {
-    /* בפוקוס: מסגרת תחתונה זוהרת */
-    -fx-background-color: rgba(50, 50, 65, 0.9);
-    -fx-border-color: linear-gradient(to right, #00d2ff, #9013fe);
-    -fx-border-width: 0 0 2 0;
+    -fx-background-color: #100a20;
+    -fx-border-color: #ff007a; 
+    -fx-effect: dropshadow(gaussian, rgba(255, 0, 122, 0.6), 15, 0.4, 0, 0);
 }
 
-/* 5. כפתור כניסה */
-.login-button {
-    /* גרדיאנט תואם למסגרת */
-    -fx-background-color: linear-gradient(to right, #00d2ff, #9013fe);
+.login-button, .register-button {
+    -fx-background-color: linear-gradient(to right, #ff007a, #9013fe, #00d2ff);
     -fx-text-fill: white;
-    -fx-font-size: 18px;
     -fx-font-weight: bold;
-    -fx-background-radius: 5;
+    -fx-font-size: 28px;
+    -fx-background-radius: 8;
     -fx-cursor: hand;
-    /* זוהר עדין מסביב לכפתור */
-    -fx-effect: dropshadow(three-pass-box, rgba(0, 210, 255, 0.3), 15, 0, 0, 3);
+    -fx-effect: dropshadow(gaussian, rgba(144, 19, 254, 0.6), 30, 0.4, 0, 5);
 }
 
-.login-button:hover {
-    -fx-background-color: linear-gradient(to right, #3a7bd5, #a538ff);
+.login-button:hover, .register-button:hover {
     -fx-scale-x: 1.03;
     -fx-scale-y: 1.03;
 }
 
-/* 6. כפתור חזרה וקישורים - נשארים נקיים */
 .back-button {
     -fx-background-color: transparent;
-    -fx-text-fill: rgba(255, 255, 255, 0.5);
-    -fx-font-size: 24px;
+    -fx-text-fill: #ff007a; 
     -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, #ff007a, 15, 0.4, 0, 0);
 }
-.back-button:hover { -fx-text-fill: #00d2ff; }
+
+.back-button:hover {
+    -fx-text-fill: #ffffff; 
+    -fx-effect: dropshadow(gaussian, #ffffff, 20, 0.7, 0, 0);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+.normal-text {
+    -fx-text-fill: #a0a0b5; 
+}
 
 .hyperlink {
-    -fx-text-fill: #8e8e9e;
-    -fx-font-size: 13px;
+    -fx-text-fill: #00d2ff;
     -fx-border-color: transparent;
     -fx-underline: false;
 }
-.hyperlink:hover { -fx-text-fill: #ffffff; }
+
+.hyperlink:hover {
+    -fx-text-fill: #ff007a; 
+    -fx-underline: true;
+}
+
+.eye-icon {
+    -fx-cursor: hand;
+    -fx-opacity: 0.6;
+}
+
+.eye-icon:hover {
+    -fx-opacity: 1.0;
+    -fx-effect: dropshadow(gaussian, #ff007a, 15, 0.8, 0, 0); 
+}
+
+.login-here-text:hover, .register-here-text:hover {
+    -fx-fill: #ff007a; 
+    -fx-cursor: hand; 
+    -fx-font-size: 28px; 
+    -fx-font-weight: bold; 
+}
