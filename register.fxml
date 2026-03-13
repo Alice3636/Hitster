@@ -50,7 +50,7 @@
                                  <font>
                                     <Font size="26.0" />
                                  </font></Label>
-                              <TextField fx:id="emailField" prefHeight="60.0" promptText="Enter your email" styleClass="text-field">
+                              <TextField fx:id="emailField" prefHeight="60.0" styleClass="text-field">
                                  <font>
                                     <Font size="26.0" />
                                  </font></TextField>
@@ -63,7 +63,7 @@
                                  <font>
                                     <Font size="26.0" />
                                  </font></Label>
-                              <TextField fx:id="usernameField" prefHeight="60.0" promptText="Choose a username" styleClass="text-field">
+                              <TextField fx:id="usernameField" prefHeight="60.0" styleClass="text-field">
                                  <font>
                                     <Font size="26.0" />
                                  </font></TextField>
@@ -83,7 +83,7 @@
                               <StackPane alignment="CENTER_RIGHT">
                                  <children>
                                     <TextField fx:id="passwordTextField" prefHeight="60.0" promptText="Enter password" styleClass="text-field" visible="false" />
-                                    <PasswordField fx:id="passwordField" prefHeight="60.0" promptText="Enter password" styleClass="text-field">
+                                    <PasswordField fx:id="passwordField" prefHeight="60.0" styleClass="text-field">
                                        <font>
                                           <Font size="26.0" />
                                        </font></PasswordField>
@@ -109,7 +109,7 @@
                               <StackPane alignment="CENTER_RIGHT">
                                  <children>
                                     <TextField fx:id="confirmPasswordTextField" prefHeight="60.0" promptText="Repeat password" styleClass="text-field" visible="false" />
-                                    <PasswordField fx:id="confirmPasswordField" prefHeight="60.0" promptText="Repeat password" styleClass="text-field">
+                                    <PasswordField fx:id="confirmPasswordField" prefHeight="60.0" styleClass="text-field">
                                        <font>
                                           <Font size="26.0" />
                                        </font></PasswordField>
