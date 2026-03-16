@@ -3,111 +3,129 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1080.0" prefWidth="1920.0" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hitster.client.controllers.GameController">
    <children>
-      <Button fx:id="backButton" mnemonicParsing="false" onAction="#handleBack" style="-fx-font-size: 50px; -fx-padding: 0;" styleClass="back-button" text="←" AnchorPane.leftAnchor="30.0" AnchorPane.topAnchor="30.0" />
-      
-      <VBox alignment="CENTER" spacing="60.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="20.0">
+
+      <VBox alignment="CENTER" spacing="30.0" AnchorPane.bottomAnchor="80.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
          <children>
             
-            <HBox alignment="CENTER" spacing="40.0">
+            <VBox maxWidth="1200.0" spacing="10.0">
                <children>
-                  <HBox alignment="CENTER" spacing="15.0" styleClass="game-timeline-panel">
-                     <padding>
-                        <Insets bottom="15.0" left="20.0" right="20.0" top="15.0" />
-                     </padding>
+                  <HBox alignment="BOTTOM_LEFT" prefHeight="65.0" prefWidth="1304.0">
                      <children>
-                        <Button mnemonicParsing="false" onAction="#scrollOpponentLeft" styleClass="timeline-arrow" text="&lt;" />
-                        <HBox fx:id="opponentCardContainer" alignment="CENTER" minWidth="660.0" prefWidth="660.0" spacing="15.0" />
-                        <Button mnemonicParsing="false" onAction="#scrollOpponentRight" styleClass="timeline-arrow" text="&gt;" />
-                     </children>
-                  </HBox>
-                  
-                  <VBox alignment="CENTER_LEFT" spacing="10.0">
-                     <children>
-                        <Label fx:id="opponentCardsLabel" style="-fx-font-size: 35px;" styleClass="profile-text-main" text="Cards: 0" />
-                        <Label style="-fx-font-size: 35px; -fx-text-fill: #00d2ff;" styleClass="profile-text-main" text="Tokens: 1" />
-                     </children>
-                  </VBox>
-               </children>
-            </HBox>
-
-            <StackPane VBox.vgrow="ALWAYS">
-               <children>
-                  
-                  <VBox alignment="CENTER" spacing="20.0" pickOnBounds="false">
-                     <children>
-                        <StackPane fx:id="draggableMysteryCard" styleClass="mystery-disc">
+                        <Label styleClass="player-name-text" text="OPPONENT'S TIMELINE" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <HBox alignment="BOTTOM_RIGHT" spacing="30.0">
                            <children>
-                              <Label style="-fx-font-size: 90px; -fx-text-fill: #ffffff;" text="?" />
-                           </children>
-                        </StackPane>
-                        <StackPane styleClass="timer-box">
-                           <children>
-                              <Label fx:id="timerLabel" styleClass="timer-text" text="00:30" />
-                           </children>
-                        </StackPane>
-                     </children>
-                  </VBox>
-
-                  <HBox alignment="CENTER_RIGHT" pickOnBounds="false">
-                     <children>
-                        <VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="346.0" prefWidth="362.0" spacing="25.0" styleClass="guess-popup-panel">
-                           <padding>
-                              <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
-                           </padding>
-                           <children>
-                              <Label style="-fx-font-size: 45px;" styleClass="subtitle" text="GUESS!" />
-                              <TextField fx:id="artistField" prefWidth="300.0" promptText="Artist Name" styleClass="text-field" />
-                              <TextField fx:id="songField" prefWidth="300.0" promptText="Song Name" styleClass="text-field" />
-                              <Button mnemonicParsing="false" onAction="#handleGuess" prefWidth="200.0" style="-fx-font-size: 22px; -fx-border-radius: 10; -fx-background-radius: 10;" styleClass="leaderboard-btn" text="SUBMIT" />
-                           </children>
-                        </VBox>
-                     </children>
-                     <StackPane.margin>
-                        <Insets right="50.0" />
-                     </StackPane.margin>
-                  </HBox>
-                  
-               </children>
-            </StackPane>
-
-            <HBox alignment="CENTER" spacing="40.0">
-               <children>
-                  <HBox alignment="CENTER" spacing="15.0" styleClass="game-timeline-panel">
-                     <padding>
-                        <Insets bottom="15.0" left="20.0" right="20.0" top="15.0" />
-                     </padding>
-                     <children>
-                        <Button mnemonicParsing="false" onAction="#scrollPlayerLeft" styleClass="timeline-arrow" text="&lt;" />
-                        <HBox fx:id="playerCardContainer" alignment="CENTER" minWidth="660.0" prefWidth="660.0" spacing="15.0" />
-                        <Button mnemonicParsing="false" onAction="#scrollPlayerRight" styleClass="timeline-arrow" text="&gt;" />
-                     </children>
-                  </HBox>
-                  
-                  <VBox alignment="CENTER_LEFT" spacing="15.0">
-                     <children>
-                        <Label fx:id="playerCardsLabel" style="-fx-font-size: 35px;" styleClass="profile-text-main" text="Cards: 0" />
-                        <HBox alignment="CENTER_LEFT" spacing="15.0">
-                           <children>
-                              <Label style="-fx-font-size: 35px; -fx-text-fill: #00d2ff;" styleClass="profile-text-main" text="Tokens: 2" />
-                              <Button mnemonicParsing="false" onAction="#handleUseToken" styleClass="use-token-btn" text="USE" />
-                              
-                              <Button mnemonicParsing="false" onAction="#debugAddCard" styleClass="leaderboard-btn" style="-fx-font-size: 14px;" text="+ Add Card (Test)" />
+                              <Label styleClass="stats-text" text="Cards: 0" />
+                              <Label styleClass="stats-text" text="Tokens: 0" />
                            </children>
                         </HBox>
                      </children>
+                     <padding>
+                        <Insets left="15.0" right="15.0" />
+                     </padding>
+                  </HBox>
+                  <HBox alignment="CENTER" maxWidth="-Infinity" minWidth="-Infinity" prefHeight="220.0" prefWidth="1304.0" spacing="15.0" styleClass="timeline-container">
+                     <children>
+                        <Button minWidth="60.0" mnemonicParsing="false" styleClass="scroll-arrow-btn" text="◄" />
+                        <ScrollPane hbarPolicy="NEVER" prefHeight="160.0" prefWidth="1052.0" styleClass="timeline-scroll" vbarPolicy="NEVER">
+                           <content>
+                              <HBox fx:id="opponentTimelineHBox" alignment="CENTER_LEFT" prefHeight="210.0" spacing="20.0">
+                                 <padding>
+                                    <Insets left="10.0" right="10.0" />
+                                 </padding>
+                              </HBox>
+                           </content>
+                        </ScrollPane>
+                        <Button minWidth="60.0" mnemonicParsing="false" styleClass="scroll-arrow-btn" text="►" />
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+
+            <AnchorPane maxWidth="1200.0" prefHeight="330.0">
+               <children>
+                  <VBox alignment="CENTER" spacing="15.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <children>
+                        <ImageView fitHeight="346.0" fitWidth="243.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@card.png" />
+                           </image>
+                        </ImageView>
+                        <Label minHeight="-Infinity" minWidth="-Infinity" prefHeight="64.0" prefWidth="147.0" styleClass="timer-box" text="00:30" textAlignment="CENTER">
+                           <font>
+                              <Font size="32.0" />
+                           </font></Label>
+                     </children>
+                  </VBox>
+
+                  <VBox alignment="CENTER" layoutY="46.0" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="335.0" prefWidth="368.0" spacing="20.0" styleClass="guess-panel" AnchorPane.bottomAnchor="30.0" AnchorPane.rightAnchor="32.0" AnchorPane.topAnchor="46.0">
+                     <children>
+                        <Label styleClass="guess-title" text="GUESS!" />
+                        <TextField fx:id="guessArtistField" prefHeight="50.0" promptText="Artist Name" styleClass="text-field" />
+                        <TextField fx:id="guessSongField" prefHeight="50.0" promptText="Song Name" styleClass="text-field" />
+                        <Button fx:id="submitGuessButton" mnemonicParsing="false" prefHeight="50.0" prefWidth="400.0" styleClass="play-button" text="SUBMIT">
+                           <font>
+                              <Font name="System Bold" size="24.0" />
+                           </font>
+                        </Button>
+                     </children>
+                     <padding>
+                        <Insets bottom="30.0" left="30.0" right="30.0" top="20.0" />
+                     </padding>
                   </VBox>
                </children>
-            </HBox>
+            </AnchorPane>
+
+            <VBox maxWidth="1200.0" spacing="10.0">
+               <children>
+                  <HBox alignment="BOTTOM_LEFT">
+                     <children>
+                        <Label styleClass="player-name-text" text="MY TIMELINE" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <HBox alignment="BOTTOM_RIGHT" spacing="30.0">
+                           <children>
+                              <Label styleClass="stats-text" text="Cards: 0" />
+                              <Label styleClass="stats-text" text="Tokens: 0" />
+                              <Button fx:id="useTokenButton" mnemonicParsing="false" prefHeight="43.0" prefWidth="142.0" styleClass="token-btn" text="USE TOKEN" />
+                           </children>
+                        </HBox>
+                     </children>
+                     <padding>
+                        <Insets left="15.0" right="15.0" />
+                     </padding>
+                  </HBox>
+                  <HBox alignment="CENTER" minWidth="-Infinity" prefHeight="250.0" prefWidth="1294.0" spacing="15.0" styleClass="timeline-container">
+                     <children>
+                        <Button minWidth="60.0" mnemonicParsing="false" prefHeight="84.0" prefWidth="158.0" styleClass="scroll-arrow-btn" text="◄" />
+                        <ScrollPane hbarPolicy="NEVER" prefWidth="1050.0" styleClass="timeline-scroll" vbarPolicy="NEVER">
+                           <content>
+                              <HBox fx:id="playerTimelineHBox" alignment="CENTER_LEFT" prefHeight="210.0" spacing="20.0">
+                                 <padding>
+                                    <Insets left="10.0" right="10.0" />
+                                 </padding>
+                              </HBox>
+                           </content>
+                        </ScrollPane>
+                        <Button minWidth="60.0" mnemonicParsing="false" prefHeight="84.0" prefWidth="144.0" styleClass="scroll-arrow-btn" text="►" />
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
 
          </children>
       </VBox>
+      <Button fx:id="backButton" layoutX="40.0" layoutY="40.0" mnemonicParsing="false" onAction="#handleBack" styleClass="back-button" text="←" AnchorPane.leftAnchor="40.0" AnchorPane.topAnchor="40.0" />
    </children>
 </AnchorPane>
