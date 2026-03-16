@@ -1,0 +1,9 @@
+database:
+  host: "mysql-13f3e246-hitster.k.aivencloud.com"
+  port: 21862
+  name: "DB_Hitster"
+  # TODO: update to basic user not root
+  user: "avnadmin"
+  ssl:
+    mode: "REQUIRED"
+    ca_cert: "/mysql/to/ca.pem"
