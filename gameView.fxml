@@ -15,7 +15,6 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1080.0" prefWidth="1920.0" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hitster.client.controllers.GameController">
    <children>
-
       <VBox alignment="CENTER" spacing="30.0" AnchorPane.bottomAnchor="80.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
          <children>
             
@@ -63,9 +62,9 @@
                               <Image url="@card.png" />
                            </image>
                         </ImageView>
-                        <Label minHeight="-Infinity" minWidth="-Infinity" prefHeight="64.0" prefWidth="147.0" styleClass="timer-box" text="00:30" textAlignment="CENTER">
+                        <Label minHeight="-Infinity" minWidth="-Infinity" prefHeight="64.0" prefWidth="124.0" styleClass="timer-box" text="00:30" textAlignment="CENTER">
                            <font>
-                              <Font size="32.0" />
+                              <Font size="24.0" />
                            </font></Label>
                      </children>
                   </VBox>
@@ -75,11 +74,7 @@
                         <Label styleClass="guess-title" text="GUESS!" />
                         <TextField fx:id="guessArtistField" prefHeight="50.0" promptText="Artist Name" styleClass="text-field" />
                         <TextField fx:id="guessSongField" prefHeight="50.0" promptText="Song Name" styleClass="text-field" />
-                        <Button fx:id="submitGuessButton" mnemonicParsing="false" prefHeight="50.0" prefWidth="400.0" styleClass="play-button" text="SUBMIT">
-                           <font>
-                              <Font name="System Bold" size="24.0" />
-                           </font>
-                        </Button>
+                        <Button fx:id="submitGuessButton" mnemonicParsing="false" prefHeight="50.0" prefWidth="400.0" styleClass="play-button" text="SUBMIT" />
                      </children>
                      <padding>
                         <Insets bottom="30.0" left="30.0" right="30.0" top="20.0" />
@@ -126,6 +121,7 @@
 
          </children>
       </VBox>
+
       <Button fx:id="backButton" layoutX="40.0" layoutY="40.0" mnemonicParsing="false" onAction="#handleBack" styleClass="back-button" text="←" AnchorPane.leftAnchor="40.0" AnchorPane.topAnchor="40.0" />
    </children>
 </AnchorPane>
