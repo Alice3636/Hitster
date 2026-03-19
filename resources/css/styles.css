@@ -470,10 +470,6 @@
     -fx-effect: dropshadow(gaussian, rgba(0, 210, 255, 0.5), 10, 0.3, 0, 0);
 }
 
-/* ------------------------------------------------------------- */
-/* --------------- ADMIN SCREEN ADDITIONS ---------------------- */
-/* ------------------------------------------------------------- */
-
 .admin-title {
     -fx-text-fill: #ffffff;
     -fx-font-size: 70px;
@@ -638,7 +634,6 @@
     -fx-background-color: #00d2ff;
 }
 
-/* כפתור העיפרון למסך השירים */
 .pencil-edit-btn {
     -fx-background-color: transparent;
     -fx-text-fill: #00d2ff;
@@ -653,10 +648,6 @@
     -fx-scale-x: 1.1;
     -fx-scale-y: 1.1;
 }
-
-/* ------------------------------------------------------------- */
-/* --------------- ADMIN ACCOUNTS SCREEN ADDITIONS ------------- */
-/* ------------------------------------------------------------- */
 
 .admin-title-accounts {
     -fx-text-fill: #ffffff;
@@ -801,4 +792,134 @@
     -fx-effect: dropshadow(gaussian, rgba(0, 230, 118, 0.6), 10, 0.4, 0, 0);
     -fx-scale-x: 1.1;
     -fx-scale-y: 1.1;
+}
+
+.glow-table {
+    -fx-background-color: transparent;
+    -fx-border-color: #e6007e;
+    -fx-border-width: 2px;
+    -fx-border-radius: 10px;
+}
+
+.glow-table .viewport {
+    -fx-background-color: transparent;
+}
+
+.glow-table .column-header-background {
+    -fx-background-color: rgba(20, 20, 30, 0.9);
+    -fx-border-color: #3bc6f8;
+    -fx-border-width: 0 0 2px 0;
+    -fx-mouse-transparent: true;
+}
+
+.glow-table .column-header {
+    -fx-background-color: transparent;
+}
+
+.glow-table .column-header .label {
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.glow-table .table-row-cell {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent rgba(255, 255, 255, 0.1) transparent;
+}
+
+.glow-table .table-row-cell:empty {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.glow-table .table-cell {
+    -fx-text-fill: white;
+    -fx-alignment: CENTER;
+    -fx-font-size: 18px;
+}
+
+.glow-table .placeholder .label {
+    -fx-text-fill: #3bc6f8;
+    -fx-font-size: 20px;
+}
+
+.profile-text-main {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 40px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(0, 210, 255, 0.6), 15, 0.4, 0, 0);
+}
+
+.profile-text-sub {
+    -fx-text-fill: #a0a0b5;
+    -fx-font-size: 24px;
+}
+
+.edit-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #ff007a;
+    -fx-font-size: 35px;
+    -fx-cursor: hand;
+}
+
+.edit-btn:hover {
+    -fx-text-fill: #ffffff;
+    -fx-effect: dropshadow(gaussian, rgba(255, 0, 122, 0.8), 15, 0.6, 0, 0);
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+}
+
+.avatar-circle {
+    -fx-background-color: transparent;
+    -fx-border-color: linear-gradient(to bottom right, #ff007a, #9013fe, #00d2ff);
+    -fx-border-width: 4px;
+    -fx-border-radius: 100;
+    -fx-pref-width: 130px;
+    -fx-pref-height: 130px;
+    -fx-max-width: 130px;
+    -fx-max-height: 130px;
+    -fx-effect: dropshadow(gaussian, rgba(144, 19, 254, 0.6), 30, 0.5, 0, 0);
+}
+
+.stat-circle {
+    -fx-background-color: rgba(0, 210, 255, 0.1);
+    -fx-background-radius: 50;
+    -fx-border-color: #00d2ff;
+    -fx-border-width: 3px;
+    -fx-border-radius: 50;
+    -fx-pref-width: 100px;
+    -fx-pref-height: 100px;
+    -fx-max-width: 100px;
+    -fx-max-height: 100px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 210, 255, 0.4), 20, 0.4, 0, 0);
+}
+
+.stat-value {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 35px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(0, 210, 255, 0.8), 10, 0.5, 0, 0);
+}
+
+.danger-button {
+    -fx-background-color: transparent;
+    -fx-border-color: #ff003c;
+    -fx-border-width: 3px;
+    -fx-border-radius: 15;
+    -fx-background-radius: 15;
+    -fx-text-fill: #ff003c;
+    -fx-cursor: hand;
+    -fx-letter-spacing: 4px;
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(255, 0, 60, 0.3), 20, 0.3, 0, 0);
+}
+
+.danger-button:hover {
+    -fx-background-color: rgba(255, 0, 60, 0.15);
+    -fx-text-fill: #ffffff;
+    -fx-border-color: #ffffff;
+    -fx-effect: dropshadow(gaussian, rgba(255, 0, 60, 0.8), 30, 0.6, 0, 0);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
 }

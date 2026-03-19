@@ -43,7 +43,7 @@
          <children>
             <VBox alignment="CENTER_RIGHT" prefHeight="160.0" prefWidth="420.0">
                <children>
-                  <Button mnemonicParsing="false" onAction="#toggleSideMenu" styleClass="hamburger-icon" text="✕">
+                  <Button mnemonicParsing="false" onAction="#closeSideMenu" styleClass="hamburger-icon" text="✕">
                      <font>
                         <Font name="System Bold" size="48.0" />
                      </font>
@@ -53,7 +53,7 @@
                   </Button>
                </children>
             </VBox>
-            <VBox spacing="15.0">
+            <VBox id="sideMenu" spacing="15.0">
                <children>
                   <Button fx:id="profileButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#goToProfile" prefHeight="90.0" styleClass="sidebar-btn" text="My Profile" />
                   <Button fx:id="adminModeButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#goToAdminMode" prefHeight="90.0" styleClass="sidebar-btn" text="Admin Mode" />

@@ -43,20 +43,21 @@ public class LobbyController {
 
     @FXML
     void goToAdminMode(ActionEvent event) {
-
+        
     }
 
     @FXML
     void goToLeaderboard(ActionEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/leaderboard.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/resources/views/leaderboard.fxml"));
             Parent root = loader.load();
             Scene scene = new Scene(root);
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(scene);
+            stage.setMaximized(true); 
             stage.show();
         } 
-        catch (IOException e) {
+        catch (Exception e) {
             e.printStackTrace();
             System.out.println("Error loading screen.");
         }
@@ -64,12 +65,24 @@ public class LobbyController {
 
     @FXML
     void goToProfile(ActionEvent event) {
-
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/resources/views/profile.fxml"));
+            Parent root = loader.load();
+            Scene scene = new Scene(root);
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(scene);
+            stage.setMaximized(true); 
+            stage.show();
+        } 
+        catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error loading screen.");
+        }
     }
 
     @FXML
     void handleLogout(ActionEvent event) {
-
+        
     }
 
     @FXML
@@ -94,7 +107,11 @@ public class LobbyController {
 
     @FXML
     void toggleSideMenu(ActionEvent event) {
-
+        sideMenuPanel.setVisible(true);
     }
 
+    @FXML
+    void closeSideMenu(ActionEvent event) {
+        sideMenuPanel.setVisible(false);
+    }
 }

@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1080.0" prefWidth="1920.0" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hitster.client.controllers.LeaderboardController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1080.0" prefWidth="1920.0" stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hitster.client.controllers.LeaderboardController">
    <children>
       <Button fx:id="backButton" layoutX="50.0" layoutY="50.0" mnemonicParsing="false" onAction="#handleBack" styleClass="back-button" text="←" AnchorPane.leftAnchor="50.0" AnchorPane.topAnchor="50.0">
          <font>
@@ -28,9 +28,9 @@
                   </Label>
                   <TableView fx:id="leaderboardTable" maxWidth="1100.0" prefHeight="700.0" prefWidth="1100.0" styleClass="glow-table">
                     <columns>
-                      <TableColumn fx:id="rankColumn" editable="false" prefWidth="150.0" reorderable="false" sortable="false" text="RANK" />
-                      <TableColumn fx:id="playerColumn" editable="false" prefWidth="700.0" reorderable="false" sortable="false" text="PLAYER" />
-                        <TableColumn fx:id="winsColumn" editable="false" prefWidth="245.0" reorderable="false" sortable="false" text="WINS" />
+                      <TableColumn fx:id="rankColumn" editable="false" prefWidth="150.0" sortable="false" text="RANK" />
+<TableColumn fx:id="playerColumn" editable="false" prefWidth="700.0" sortable="false" text="PLAYER" />
+<TableColumn fx:id="winsColumn" editable="false" prefWidth="245.0" sortable="false" text="WINS" />
                     </columns>
                      <columnResizePolicy>
                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />

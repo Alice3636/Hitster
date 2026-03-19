@@ -12,12 +12,13 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("../../../resources/views/lobby.fxml"));
         Parent root = loader.load();
-        Scene scene = new Scene(root, 1920, 1080);
+        Scene scene = new Scene(root);
         primaryStage.setTitle("Hitster Online");
         primaryStage.setScene(scene);
-        primaryStage.setResizable(false); 
+        primaryStage.setMaximized(true); 
         primaryStage.show();
     }
+    
 
     public static void main(String[] args) {
         launch(args); 
