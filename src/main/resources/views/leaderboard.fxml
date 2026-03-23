@@ -12,11 +12,7 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1080.0" prefWidth="1920.0" stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hitster.client.controllers.LeaderboardController">
    <children>
-      <Button fx:id="backButton" layoutX="50.0" layoutY="50.0" mnemonicParsing="false" onAction="#handleBack" styleClass="back-button" text="←" AnchorPane.leftAnchor="50.0" AnchorPane.topAnchor="50.0">
-         <font>
-            <Font size="55.0" />
-         </font>
-      </Button>
+      
       <StackPane prefHeight="1080.0" prefWidth="1920.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
             <VBox alignment="CENTER" maxWidth="1400.0" spacing="30.0">
@@ -28,9 +24,9 @@
                   </Label>
                   <TableView fx:id="leaderboardTable" maxWidth="1100.0" prefHeight="700.0" prefWidth="1100.0" styleClass="glow-table">
                     <columns>
-                      <TableColumn fx:id="rankColumn" editable="false" prefWidth="150.0" sortable="false" text="RANK" />
-<TableColumn fx:id="playerColumn" editable="false" prefWidth="700.0" sortable="false" text="PLAYER" />
-<TableColumn fx:id="winsColumn" editable="false" prefWidth="245.0" sortable="false" text="WINS" />
+                        <TableColumn fx:id="rankColumn" editable="false" prefWidth="150.0" sortable="false" reorderable="false" text="RANK" />
+                        <TableColumn fx:id="playerColumn" editable="false" prefWidth="700.0" sortable="false" reorderable="false" text="PLAYER" />
+                        <TableColumn fx:id="winsColumn" editable="false" prefWidth="245.0" sortable="false" reorderable="false" text="WINS" />
                     </columns>
                      <columnResizePolicy>
                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
@@ -40,5 +36,12 @@
             </VBox>
          </children>
       </StackPane>
+
+      <Button fx:id="backButton" layoutX="50.0" layoutY="50.0" mnemonicParsing="false" onAction="#handleBack" styleClass="back-button" text="←" AnchorPane.leftAnchor="50.0" AnchorPane.topAnchor="50.0">
+         <font>
+            <Font size="55.0" />
+         </font>
+      </Button>
+      
    </children>
 </AnchorPane>

@@ -116,10 +116,11 @@
 
 .leaderboard-title {
     -fx-text-fill: #ffffff;
-    -fx-font-size: 90px;
+    -fx-font-size: 110px;
     -fx-font-weight: bold;
-    -fx-effect: dropshadow(gaussian, rgba(0, 210, 255, 0.4), 10, 0.3, 0, 0); 
-    -fx-letter-spacing: 8px;
+    -fx-letter-spacing: 12px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 210, 255, 0.6), 25, 0.4, 0, 0),
+                dropshadow(gaussian, rgba(255, 0, 122, 0.4), 15, 0.2, 0, 0); 
 }
 
 .play-button {
@@ -805,26 +806,74 @@
     -fx-background-color: transparent;
 }
 
+.glow-table .corner,
+.glow-table .filler,
+.glow-table .show-hide-columns-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.glow-table {
+    -fx-background-color: transparent;
+    -fx-border-color: #e6007e;
+    -fx-border-width: 3px;
+    -fx-border-radius: 12px;
+    -fx-effect: dropshadow(gaussian, rgba(230, 0, 126, 0.5), 20, 0.3, 0, 0); 
+}
+
+.glow-table .viewport {
+    -fx-background-color: transparent;
+}
+
+
 .glow-table .column-header-background {
-    -fx-background-color: rgba(20, 20, 30, 0.9);
+    -fx-background-color: rgba(15, 5, 25, 0.95);
     -fx-border-color: #3bc6f8;
-    -fx-border-width: 0 0 2px 0;
+    -fx-border-width: 0 0 3px 0;
     -fx-mouse-transparent: true;
 }
 
 .glow-table .column-header {
     -fx-background-color: transparent;
+    -fx-mouse-transparent: true;
+    -fx-size: 60px; 
 }
 
 .glow-table .column-header .label {
-    -fx-text-fill: white;
-    -fx-font-size: 16px;
+    -fx-text-fill: #00d2ff;
+    -fx-font-size: 26px; 
     -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(0, 210, 255, 0.6), 10, 0.4, 0, 0);
 }
+
 
 .glow-table .table-row-cell {
     -fx-background-color: transparent;
     -fx-border-color: transparent transparent rgba(255, 255, 255, 0.1) transparent;
+    -fx-border-width: 0 0 2px 0;
+    -fx-cell-size: 65px;
+}
+
+.glow-table .table-row-cell:odd {
+    -fx-background-color: rgba(255, 255, 255, 0.03); 
+}
+
+.glow-table .table-cell {
+    -fx-text-fill: #ffffff;
+    -fx-alignment: CENTER;
+    -fx-font-size: 28px; 
+    -fx-font-weight: bold;
+}
+
+
+.glow-table .table-row-cell:hover {
+    -fx-background-color: rgba(255, 0, 122, 0.3);
+    -fx-effect: dropshadow(gaussian, rgba(255, 0, 122, 0.8), 20, 0.5, 0, 0);
+}
+
+.glow-table .table-row-cell:hover .table-cell {
+    -fx-text-fill: #00d2ff; 
+    -fx-font-size: 30px; 
 }
 
 .glow-table .table-row-cell:empty {
@@ -832,16 +881,26 @@
     -fx-border-color: transparent;
 }
 
-.glow-table .table-cell {
-    -fx-text-fill: white;
-    -fx-alignment: CENTER;
-    -fx-font-size: 18px;
+.glow-table .scroll-bar:vertical {
+    -fx-background-color: transparent;
+}
+
+.glow-table .scroll-bar:vertical .thumb {
+    -fx-background-color: #e6007e;
+    -fx-background-radius: 5em;
+}
+
+.glow-table .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #00d2ff;
+    -fx-effect: dropshadow(gaussian, rgba(0, 210, 255, 0.8), 10, 0.5, 0, 0);
 }
 
 .glow-table .placeholder .label {
     -fx-text-fill: #3bc6f8;
-    -fx-font-size: 20px;
+    -fx-font-size: 26px;
 }
+
+
 
 .profile-text-main {
     -fx-text-fill: #ffffff;

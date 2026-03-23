@@ -1,0 +1,9 @@
+database:
+  host: "mysql-13f3e246-hitster.k.aivencloud.com"
+  port: 21862
+  name: "DB_Hitster"
+  user: "avnadmin"
+  #password here
+  ssl:
+    mode: "REQUIRED"
+    ca_cert: "D:/Alice/Please Make The Order/Alice - Academy/Sadna/Hitster/ca.pem" # <--- הנתיב המלא לקובץ אצלך

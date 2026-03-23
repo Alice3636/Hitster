@@ -1,4 +1,5 @@
 package com.hitster.client.controllers;
+import com.hitster.DatabaseLogic;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
@@ -6,7 +7,6 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import java.io.IOException;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -42,14 +42,39 @@ public class LobbyController {
     private Label statusLabel;
 
     @FXML
-    void goToAdminMode(ActionEvent event) {
+    public void initialize() {
+        String currentUsername = "alice"; 
         
+        boolean isAdmin = DatabaseLogic.isUserAdmin(currentUsername);
+        
+        if (!isAdmin) {
+            adminModeButton.setVisible(false); 
+            adminModeButton.setManaged(false); 
+        }
+    }
+
+    @FXML
+    void goToAdminMode(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/AdminEditSongs.fxml"));
+            Parent root = loader.load();
+            Scene scene = new Scene(root);
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(scene);
+            stage.setMaximized(true); 
+            stage.show();
+        } 
+        catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error loading screen.");
+        }
+    
     }
 
     @FXML
     void goToLeaderboard(ActionEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/resources/views/leaderboard.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/leaderboard.fxml"));
             Parent root = loader.load();
             Scene scene = new Scene(root);
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
@@ -66,7 +91,7 @@ public class LobbyController {
     @FXML
     void goToProfile(ActionEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/resources/views/profile.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/profile.fxml"));
             Parent root = loader.load();
             Scene scene = new Scene(root);
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
