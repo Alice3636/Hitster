@@ -4,6 +4,7 @@ database:
   name: "DB_Hitster"
   # TODO: update to basic user not root
   user: "avnadmin"
+  password: "AVNS_sB1HXeOW0sSvMsZ2_ek"
   ssl:
     mode: "REQUIRED"
     ca_cert: "/mysql/to/ca.pem"
