@@ -1,4 +1,4 @@
-package com.hitster.controller;
+package com.hitster.Controller;
 
 import com.hitster.dto.LobbyJoinRequest;
 import com.hitster.dto.LobbyJoinResponse;

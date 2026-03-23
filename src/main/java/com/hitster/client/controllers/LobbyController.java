@@ -1,4 +1,5 @@
 package com.hitster.client.controllers;
+
 import com.hitster.DatabaseLogic;
 
 import javafx.event.ActionEvent;
@@ -55,7 +56,7 @@ public class LobbyController {
 
     @FXML
     void goToAdminMode(ActionEvent event) {
-        try {
+         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/AdminEditSongs.fxml"));
             Parent root = loader.load();
             Scene scene = new Scene(root);
@@ -68,7 +69,6 @@ public class LobbyController {
             e.printStackTrace();
             System.out.println("Error loading screen.");
         }
-    
     }
 
     @FXML

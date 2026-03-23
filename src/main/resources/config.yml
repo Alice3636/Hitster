@@ -3,7 +3,7 @@ database:
   port: 21862
   name: "DB_Hitster"
   user: "avnadmin"
-  #password here
+  password: "AVNS_sB1HXeOW0sSvMsZ2_ek"
   ssl:
     mode: "REQUIRED"
     ca_cert: "D:/Alice/Please Make The Order/Alice - Academy/Sadna/Hitster/ca.pem" # <--- הנתיב המלא לקובץ אצלך
