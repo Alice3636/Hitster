@@ -13,8 +13,20 @@ public class PlayerScore {
         this.winnings = winnings;
     }
 
-    public int getRank() { return rank; }
-    public int getId() { return id; }
-    public String getPlayer() { return player; }
-    public int getWinnings() { return winnings; } 
+    public int getRank() {
+        return rank; 
+    }
+
+    public int getId() {
+        return id; 
+    }
+
+
+    public String getPlayer() {
+        return player;
+    }
+
+    public int getWinnings() {
+        return winnings;
+    } 
 }

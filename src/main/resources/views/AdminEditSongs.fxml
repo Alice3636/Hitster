@@ -32,21 +32,21 @@
             
             <HBox alignment="CENTER_LEFT" spacing="20.0">
                <children>
-                  <TextField fx:id="searchField" prefHeight="60.0" promptText="Search Song 🔍" styleClass="search-field" HBox.hgrow="ALWAYS" />
+                  <TextField fx:id="searchField" prefHeight="60.0" promptText="Search Song 🔍" style="-fx-padding: 0 20 0 20;" styleClass="search-field" HBox.hgrow="ALWAYS" />
                   <Button fx:id="addSongButton" mnemonicParsing="false" prefHeight="60.0" prefWidth="200.0" styleClass="add-action-btn" text="+ Add Song" />
                   <Button fx:id="deleteSelectedButton" mnemonicParsing="false" prefHeight="60.0" prefWidth="220.0" styleClass="danger-action-btn" text="🗑 Delete Selected" />
                </children>
             </HBox>
 
-            <TableView fx:id="songsTable" prefHeight="700.0" styleClass="admin-table" VBox.vgrow="ALWAYS">
+            <TableView fx:id="songsTable" fixedCellSize="55.0" prefHeight="700.0" styleClass="admin-table" VBox.vgrow="ALWAYS">
               <columns>
-                <TableColumn fx:id="selectColumn" prefWidth="80.0" reorderable="false" sortable="false" text="Select" />
-                <TableColumn fx:id="idColumn" prefWidth="80.0" reorderable="false" sortable="false" text="ID" />
-                <TableColumn fx:id="titleColumn" prefWidth="350.0" reorderable="false" sortable="false" text="Song title" />
-                  <TableColumn fx:id="artistColumn" prefWidth="250.0" reorderable="false" sortable="false" text="Artist" />
-                  <TableColumn fx:id="yearColumn" prefWidth="120.0" reorderable="false" sortable="false" text="Year" />
-                  <TableColumn fx:id="linkColumn" prefWidth="450.0" reorderable="false" sortable="false" text="Link" />
-                  <TableColumn fx:id="editColumn" prefWidth="100.0" reorderable="false" sortable="false" text="Edit" />
+                <TableColumn fx:id="selectColumn" prefWidth="80.0" reorderable="false" sortable="false" style="-fx-alignment: CENTER;" text="Select" />
+                <TableColumn fx:id="idColumn" prefWidth="80.0" reorderable="false" sortable="false" style="-fx-alignment: CENTER;" text="ID" />
+                <TableColumn fx:id="titleColumn" prefWidth="350.0" reorderable="false" sortable="false" style="-fx-alignment: CENTER;" text="Song title" />
+                <TableColumn fx:id="artistColumn" prefWidth="250.0" reorderable="false" sortable="false" style="-fx-alignment: CENTER;" text="Artist" />
+                <TableColumn fx:id="yearColumn" prefWidth="120.0" reorderable="false" sortable="false" style="-fx-alignment: CENTER;" text="Year" />
+                <TableColumn fx:id="linkColumn" prefWidth="450.0" reorderable="false" sortable="false" style="-fx-alignment: CENTER;" text="Link" />
+                <TableColumn fx:id="editColumn" prefWidth="100.0" reorderable="false" sortable="false" style="-fx-alignment: CENTER;" text="Edit" />
               </columns>
                <columnResizePolicy>
                   <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
@@ -55,6 +55,6 @@
          </children>
       </VBox>
 
-      <Button fx:id="backButton" layoutX="40.0" layoutY="40.0" mnemonicParsing="false" onAction="#handleBack" styleClass="back-button" text="←" AnchorPane.leftAnchor="40.0" AnchorPane.topAnchor="40.0" />
+      <Button fx:id="backButton" layoutX="40.0" layoutY="40.0" mnemonicParsing="false" onAction="#handleBack" style="-fx-padding: 0;" styleClass="back-button" text="←" AnchorPane.leftAnchor="40.0" AnchorPane.topAnchor="40.0" />
    </children>
 </AnchorPane>

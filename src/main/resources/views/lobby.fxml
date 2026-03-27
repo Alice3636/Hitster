@@ -55,9 +55,9 @@
             </VBox>
             <VBox id="sideMenu" spacing="15.0">
                <children>
-                  <Button fx:id="profileButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#goToProfile" prefHeight="90.0" styleClass="sidebar-btn" text="My Profile" />
-                  <Button fx:id="adminModeButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#goToAdminMode" prefHeight="90.0" styleClass="sidebar-btn" text="Admin Mode" />
-                  <Button fx:id="logoutButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleLogout" prefHeight="90.0" styleClass="sidebar-btn" text="Logout" />
+                  <Button fx:id="profileButton" alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#goToProfile" prefHeight="90.0" style="-fx-padding: 20 0 20 50;" styleClass="sidebar-btn" text="My Profile" />
+                  <Button fx:id="adminModeButton" alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#goToAdminMode" prefHeight="90.0" style="-fx-padding: 20 0 20 50;" styleClass="sidebar-btn" text="Admin Mode" />
+                  <Button fx:id="logoutButton" alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleLogout" prefHeight="90.0" style="-fx-padding: 20 0 20 50;" styleClass="sidebar-btn" text="Logout" />
                </children>
                <VBox.margin>
                   <Insets top="30.0" />

@@ -17,7 +17,6 @@
    <children>
       <VBox alignment="CENTER" spacing="30.0" AnchorPane.bottomAnchor="80.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
          <children>
-            
             <VBox maxWidth="1200.0" spacing="10.0">
                <children>
                   <HBox alignment="BOTTOM_LEFT" prefHeight="65.0" prefWidth="1304.0">
@@ -35,9 +34,9 @@
                         <Insets left="15.0" right="15.0" />
                      </padding>
                   </HBox>
-                  <HBox alignment="CENTER" maxWidth="-Infinity" minWidth="-Infinity" prefHeight="220.0" prefWidth="1304.0" spacing="15.0" styleClass="timeline-container">
+                  <HBox alignment="CENTER" maxWidth="-Infinity" minWidth="-Infinity" prefHeight="220.0" prefWidth="1304.0" spacing="15.0" style="-fx-padding: 10px;" styleClass="timeline-container">
                      <children>
-                        <Button minWidth="60.0" mnemonicParsing="false" styleClass="scroll-arrow-btn" text="◄" />
+                        <Button minWidth="60.0" mnemonicParsing="false" style="-fx-padding: 0;" styleClass="scroll-arrow-btn" text="◄" />
                         <ScrollPane hbarPolicy="NEVER" prefHeight="160.0" prefWidth="1052.0" styleClass="timeline-scroll" vbarPolicy="NEVER">
                            <content>
                               <HBox fx:id="opponentTimelineHBox" alignment="CENTER_LEFT" prefHeight="210.0" spacing="20.0">
@@ -47,7 +46,7 @@
                               </HBox>
                            </content>
                         </ScrollPane>
-                        <Button minWidth="60.0" mnemonicParsing="false" styleClass="scroll-arrow-btn" text="►" />
+                        <Button minWidth="60.0" mnemonicParsing="false" style="-fx-padding: 0;" styleClass="scroll-arrow-btn" text="►" />
                      </children>
                   </HBox>
                </children>
@@ -62,10 +61,11 @@
                               <Image url="@card.png" />
                            </image>
                         </ImageView>
-                        <Label minHeight="-Infinity" minWidth="-Infinity" prefHeight="64.0" prefWidth="124.0" styleClass="timer-box" text="00:30" textAlignment="CENTER">
+                        <Label minHeight="-Infinity" minWidth="-Infinity" prefHeight="64.0" prefWidth="124.0" style="-fx-padding: 5px 25px;" styleClass="timer-box" text="00:30" textAlignment="CENTER">
                            <font>
                               <Font size="24.0" />
-                           </font></Label>
+                           </font>
+                        </Label>
                      </children>
                   </VBox>
 
@@ -101,9 +101,9 @@
                         <Insets left="15.0" right="15.0" />
                      </padding>
                   </HBox>
-                  <HBox alignment="CENTER" minWidth="-Infinity" prefHeight="250.0" prefWidth="1294.0" spacing="15.0" styleClass="timeline-container">
+                  <HBox alignment="CENTER" minWidth="-Infinity" prefHeight="250.0" prefWidth="1294.0" spacing="15.0" style="-fx-padding: 10px;" styleClass="timeline-container">
                      <children>
-                        <Button minWidth="60.0" mnemonicParsing="false" prefHeight="84.0" prefWidth="158.0" styleClass="scroll-arrow-btn" text="◄" />
+                        <Button minWidth="60.0" mnemonicParsing="false" prefHeight="84.0" prefWidth="158.0" style="-fx-padding: 0;" styleClass="scroll-arrow-btn" text="◄" />
                         <ScrollPane hbarPolicy="NEVER" prefWidth="1050.0" styleClass="timeline-scroll" vbarPolicy="NEVER">
                            <content>
                               <HBox fx:id="playerTimelineHBox" alignment="CENTER_LEFT" prefHeight="210.0" spacing="20.0">
@@ -113,7 +113,7 @@
                               </HBox>
                            </content>
                         </ScrollPane>
-                        <Button minWidth="60.0" mnemonicParsing="false" prefHeight="84.0" prefWidth="144.0" styleClass="scroll-arrow-btn" text="►" />
+                        <Button minWidth="60.0" mnemonicParsing="false" prefHeight="84.0" prefWidth="144.0" style="-fx-padding: 0;" styleClass="scroll-arrow-btn" text="►" />
                      </children>
                   </HBox>
                </children>
@@ -122,6 +122,6 @@
          </children>
       </VBox>
 
-      <Button fx:id="backButton" layoutX="40.0" layoutY="40.0" mnemonicParsing="false" onAction="#handleBack" styleClass="back-button" text="←" AnchorPane.leftAnchor="40.0" AnchorPane.topAnchor="40.0" />
+      <Button fx:id="backButton" layoutX="40.0" layoutY="40.0" mnemonicParsing="false" onAction="#handleBack" style="-fx-padding: 0;" styleClass="back-button" text="←" AnchorPane.leftAnchor="40.0" AnchorPane.topAnchor="40.0" />
    </children>
 </AnchorPane>
