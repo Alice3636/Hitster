@@ -1,4 +1,4 @@
-package model;
+package com.hitster.model;
 
 public enum GameStatus {
     WAITING_FOR_PLAYERS,

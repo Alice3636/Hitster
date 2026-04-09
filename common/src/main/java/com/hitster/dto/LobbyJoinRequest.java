@@ -1,4 +1,4 @@
-package dto;
+package com.hitster.dto;
 
 public class LobbyJoinRequest {
     private String playerId;

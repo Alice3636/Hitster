@@ -1,4 +1,4 @@
-package dto;
+package com.hitster.dto;
 import java.util.List;
 
 public class GameStateDTO {

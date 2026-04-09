@@ -1,4 +1,4 @@
-package model;
+package com.hitster.model;
 
 public class LastTurnData {
 

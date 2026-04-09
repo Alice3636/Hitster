@@ -1,12 +1,13 @@
-package mapper;
+package com.hitster.mapper;
 
-import dto.GameStateDTO;
-import model.GameSession;
-import model.Player;
-import model.SongCard;
+import com.hitster.model.GameSession;
+import com.hitster.model.Player;
+import com.hitster.model.SongCard;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import com.hitster.dto.GameStateDTO;
 
 public class GameStateMapper {
 

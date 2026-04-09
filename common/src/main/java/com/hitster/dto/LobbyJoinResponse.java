@@ -1,4 +1,4 @@
-package dto;
+package com.hitster.dto;
 
 public class LobbyJoinResponse {
     private String roomId;
