@@ -1,5 +1,18 @@
 package com.hitster.controllers;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import com.fasterxml.jackson.core.JsonParser;
+import com.hitster.network.GameNetworkService;
+import com.hitster.session.GameManager;
+import com.hitster.session.UserSession;
+
+import javafx.application.Platform;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 //import com.hitster.DatabaseLogic;
 
 import javafx.event.ActionEvent;
@@ -42,18 +55,22 @@ public class LobbyController {
     @FXML
     private Label statusLabel;
 
+    private final GameNetworkService networkService = new GameNetworkService();
+    private ScheduledExecutorService pollingExecutor;
+
     @FXML
     public void initialize() {
-        /*
-        String currentUsername = "alice"; 
-        
-        boolean isAdmin = DatabaseLogic.isUserAdmin(currentUsername);
-        
-        if (!isAdmin) {
+        UserSession.getInstance().setUserName("Alice");
+        UserSession.getInstance().setIsAdmin(true);
+        UserSession.getInstance().setUserId(36L);
+
+
+
+        if (!UserSession.getInstance().getIsAdmin()) {
             adminModeButton.setVisible(false); 
             adminModeButton.setManaged(false); 
         }
-        */
+        
     }
 
     @FXML
@@ -115,21 +132,74 @@ public class LobbyController {
     @FXML
     void handlePlay(ActionEvent event) {
         
+
         if (playButton.getText().equals("Cancel")) {
+            stopPolling();
             statusLabel.setVisible(false);
             statusLabel.setManaged(false);
             playButton.setText("LETS ROLL!");
             leaderboardButton.setDisable(false);
             hamburgerButton.setDisable(false);
+            networkService.leaveLobby();
         }
         else {
-            statusLabel.setVisible(true);
-            statusLabel.setManaged(true);
-            playButton.setText("Cancel");
-            leaderboardButton.setDisable(true);
-            hamburgerButton.setDisable(true);
+           
+            networkService.joinLobby().thenAccept(response -> {
+            if (response.statusCode() == 200) {
+                Platform.runLater(() -> {
+                    statusLabel.setText("Looking for an opponent...");
+                    playButton.setText("Cancel");
+                    statusLabel.setVisible(true);
+                    statusLabel.setManaged(true);
+                    leaderboardButton.setDisable(true);
+                    hamburgerButton.setDisable(true);
+                });
+                startMatchmakingPolling();
+            } else {
+                Platform.runLater(() ->  statusLabel.setText("Failed joining the queue!"));
+            }
+        });
+            
         }
 
+    }
+
+    private void startMatchmakingPolling() {
+        pollingExecutor = Executors.newSingleThreadScheduledExecutor();
+        pollingExecutor.scheduleAtFixedRate(() -> {
+            networkService.checkMatchStatus().thenAccept(response -> {
+                String body = response.body();
+                
+                if (body.contains("\"FOUND\"")) {
+                    stopPolling();
+                    Gson gson = new Gson();
+                    JsonObject jsonResponse = JsonParser.parseString(body).getAsJsonObject();
+                    Long gameId = jsonResponse.get("game_id").getAsLong();
+                    GameManager.getInstance().startGame(gameId);
+                    Platform.runLater(() -> {
+                         try {
+                            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/profile.fxml"));
+                            Parent root = loader.load();
+                            Scene scene = new Scene(root);
+                            Stage stage = (Stage)  statusLabel.getScene().getWindow();
+                            stage.setScene(scene);
+                            stage.setMaximized(true); 
+                            stage.show();
+                        } 
+                        catch (Exception e) {
+                            e.printStackTrace();
+                            System.out.println("Error loading screen.");
+                        }
+                    });
+                }
+            });
+        }, 0, 2, TimeUnit.SECONDS);
+    }
+
+    private void stopPolling() {
+        if (pollingExecutor != null && !pollingExecutor.isShutdown()) {
+            pollingExecutor.shutdown();
+        }
     }
 
     @FXML
