@@ -6,7 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 
-import com.hitster.DBManager;
+import com.hitster.repository.DBManager;
 
 public class DatabaseService {
 
