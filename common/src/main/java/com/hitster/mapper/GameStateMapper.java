@@ -1,5 +1,10 @@
 package com.hitster.mapper;
 
+
+/*
+The Code here is not updated according to the new GameStateDTO
+*/
+
 import com.hitster.model.GameSession;
 import com.hitster.model.Player;
 import com.hitster.model.SongCard;
@@ -15,7 +20,7 @@ public class GameStateMapper {
         Player p1 = session.getPlayer1();
         Player p2 = session.getPlayer2();
 
-        return new GameStateDTO(
+        return new GameStateDTO();/*(
                 session.getId(),
                 session.getStatus() != null ? session.getStatus().name() : null,
                 session.getTurnNumber(),
@@ -30,7 +35,7 @@ public class GameStateMapper {
                 p2.getTokens(),
                 toTimelineStrings(session.getPlayer1Timeline()),
                 toTimelineStrings(session.getPlayer2Timeline())
-        );
+        );*/
     }
 
     private static List<String> toTimelineStrings(List<SongCard> timeline) {
