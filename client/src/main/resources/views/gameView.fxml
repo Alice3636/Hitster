@@ -58,7 +58,7 @@
                      <children>
                         <ImageView fitHeight="346.0" fitWidth="243.0" pickOnBounds="true" preserveRatio="true">
                            <image>
-                              <Image url="@card.png" />
+                              <Image url="@../images/card.png" />
                            </image>
                         </ImageView>
                         <Label minHeight="-Infinity" minWidth="-Infinity" prefHeight="64.0" prefWidth="124.0" style="-fx-padding: 5px 25px;" styleClass="timer-box" text="00:30" textAlignment="CENTER">
