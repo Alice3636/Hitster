@@ -4,16 +4,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import com.fasterxml.jackson.core.JsonParser;
 import com.hitster.network.GameNetworkService;
 import com.hitster.session.GameManager;
 import com.hitster.session.UserSession;
 
 import javafx.application.Platform;
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-//import com.hitster.DatabaseLogic;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
@@ -172,7 +169,6 @@ public class LobbyController {
                 
                 if (body.contains("\"FOUND\"")) {
                     stopPolling();
-                    Gson gson = new Gson();
                     JsonObject jsonResponse = JsonParser.parseString(body).getAsJsonObject();
                     Long gameId = jsonResponse.get("game_id").getAsLong();
                     GameManager.getInstance().startGame(gameId);
