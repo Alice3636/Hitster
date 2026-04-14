@@ -1,12 +1,12 @@
-package com.hitster.model;
+package com.hitster.dto;
 
-public class PlayerScore {
+public class PlayerScoreDTO {
     private int rank; 
     private int id;
     private String player;
     private int winnings;
 
-    public PlayerScore(int rank, int id, String player, int winnings) {
+    public PlayerScoreDTO(int rank, int id, String player, int winnings) {
         this.rank = rank;
         this.id = id;
         this.player = player;
