@@ -78,4 +78,20 @@ public class LeaderboardController {
             });
         }
 
+            @FXML
+        void handleBack(ActionEvent event) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/lobby.fxml"));
+                Parent root = loader.load();
+                Scene scene = new Scene(root);
+                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                stage.setScene(scene);
+                stage.setMaximized(true);
+                stage.show();
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("Error returning to lobby.");
+            }
+        }
+
 }

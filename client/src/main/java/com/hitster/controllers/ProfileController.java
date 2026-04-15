@@ -1,21 +1,28 @@
 package com.hitster.controllers;
 
-//import com.fasterxml.jackson.databind.deser.DataFormatReaders.Match;
-//import com.hitster.DatabaseLogic;
-//import com.hitster.model.PlayerScore;
-import com.hitster.model.MatchHistoryObj;
-//import javafx.collections.ObservableList;
+import com.hitster.dto.MatchHistoryDTO;
+import com.hitster.dto.UserProfileDTO;
+import com.hitster.network.UserNetworkService;
+
+import java.util.Optional;
+
+import com.google.gson.Gson;
+import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-//import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
@@ -26,22 +33,22 @@ public class ProfileController {
     private Button backButton;
 
     @FXML
-    private TableColumn<MatchHistoryObj, String> dateCol;
+    private TableColumn<MatchHistoryDTO, String> dateCol;
 
     @FXML
     private Label emailLabel;
 
     @FXML
-    private TableView<MatchHistoryObj> matchHistoryTable;
+    private TableView<MatchHistoryDTO> matchHistoryTable;
 
     @FXML
-    private TableColumn<MatchHistoryObj, String> opponentCol;
+    private TableColumn<MatchHistoryDTO, String> opponentCol;
 
     @FXML
     private ImageView profileImageView;
 
     @FXML
-    private TableColumn<MatchHistoryObj, String> resultCol;
+    private TableColumn<MatchHistoryDTO, String> resultCol;
 
     @FXML
     private Label totalWinsLabel;
@@ -52,33 +59,43 @@ public class ProfileController {
     @FXML
     private Label winRateLabel;
 
+    private final UserNetworkService userNetworkService = new UserNetworkService();
+
     @FXML
     public void initialize() {
-        /*
-        int currentUserId = 9; 
-        String username = DatabaseLogic.getUsername(currentUserId);
-        String email = DatabaseLogic.getEmail(currentUserId);
-        int winnings = DatabaseLogic.getTotalWinnings(currentUserId);
-        String winRate = DatabaseLogic.getWinRate(currentUserId);
+        opponentCol.setCellValueFactory(new PropertyValueFactory<>("enemyUsername"));
+        dateCol.setCellValueFactory(new PropertyValueFactory<>("date"));
+        resultCol.setCellValueFactory(new PropertyValueFactory<>("gameStatus"));
 
-        fillMatchHistory();
+        loadUserProfile();
+    }
 
-        if (totalWinsLabel != null) {
-            totalWinsLabel.setText(String.valueOf(winnings));
-        }
-
-        if (usernameLabel != null) {
-            usernameLabel.setText(username);
-        }
-
-        if (emailLabel != null) {
-            emailLabel.setText(email);
-        }
-
-        if (winRateLabel != null) {
-            winRateLabel.setText(winRate);
-        }
-        */
+    private void loadUserProfile() {
+        userNetworkService.getUserProfile().thenAccept(response -> {
+            if (response.statusCode() == 200) {
+                String jsonBody = response.body();
+                
+                Gson gson = new Gson();
+                UserProfileDTO userProfile = gson.fromJson(jsonBody, UserProfileDTO.class);
+                
+                Platform.runLater(() -> {
+                    if (usernameLabel != null) usernameLabel.setText(userProfile.getUsername());
+                    if (emailLabel != null) emailLabel.setText(userProfile.getEmail());
+                    if (totalWinsLabel != null) totalWinsLabel.setText(String.valueOf(userProfile.getTotalWins()));
+                    if (winRateLabel != null) winRateLabel.setText(String.format("%.1f%%", userProfile.getWinRate()));
+                    
+                    if (userProfile.getMatchHistory() != null) {
+                        ObservableList<MatchHistoryDTO> tableData = FXCollections.observableArrayList(userProfile.getMatchHistory());
+                        matchHistoryTable.setItems(tableData);
+                    }
+                });
+            } else {
+                System.out.println("Failed to load profile. Status: " + response.statusCode());
+            }
+        }).exceptionally(ex -> {
+            ex.printStackTrace();
+            return null;
+        });
     }
 
     @FXML
@@ -97,39 +114,63 @@ public class ProfileController {
         }
     }
 
-    @FXML
-    void fillMatchHistory() {
-        /*
-        opponentCol.setCellValueFactory(new PropertyValueFactory<>("enemy_username"));
-        dateCol.setCellValueFactory(new PropertyValueFactory<>("date"));
-        resultCol.setCellValueFactory(new PropertyValueFactory<>("gameStatus"));
-        
-        ObservableList<MatchHistoryObj> matchHistory = DatabaseLogic.getMatchHistory();
-        
-        matchHistoryTable.setItems(matchHistory);
-        */
-    }
-
-
+    
 
     @FXML
-    void handleDeleteAccount(ActionEvent event) {
+    void handleEditUsername(ActionEvent event) {
+        TextInputDialog dialog = new TextInputDialog(usernameLabel.getText());
+        dialog.setTitle("Edit Username");
+        dialog.setHeaderText("Choose a new username");
+        dialog.setContentText("Username:");
 
+        Optional<String> result = dialog.showAndWait();
+        
+        result.ifPresent(newUsername -> {
+            if (!newUsername.trim().isEmpty() && !newUsername.equals(usernameLabel.getText())) {
+                sendUpdateRequest(newUsername, emailLabel.getText());
+            }
+        });
     }
 
     @FXML
     void handleEditEmail(ActionEvent event) {
+        TextInputDialog dialog = new TextInputDialog(emailLabel.getText());
+        dialog.setTitle("Edit Email");
+        dialog.setHeaderText("Enter your new email address");
+        dialog.setContentText("Email:");
 
+        Optional<String> result = dialog.showAndWait();
+        
+        result.ifPresent(newEmail -> {
+            if (!newEmail.trim().isEmpty() && !newEmail.equals(emailLabel.getText())) {
+                sendUpdateRequest(usernameLabel.getText(), newEmail);
+            }
+        });
+    }
+
+    private void sendUpdateRequest(String newUsername, String newEmail) {
+        userNetworkService.updateProfileDetails(newUsername, newEmail).thenAccept(response -> {
+            Platform.runLater(() -> {
+                if (response.statusCode() == 200) {
+                    usernameLabel.setText(newUsername);
+                    emailLabel.setText(newEmail);
+                    System.out.println("Profile updated successfully");
+                } else if (response.statusCode() == 409) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Update Failed");
+                    alert.setHeaderText("Error");
+                    alert.setContentText("This username or email is already taken!");
+                    alert.showAndWait();
+                } else {
+                    System.out.println("Failed to update. Server returned: " + response.statusCode());
+                }
+            });
+        }).exceptionally(ex -> {
+            ex.printStackTrace();
+            return null;
+        });
     }
 
     @FXML
-    void handleEditUsername(ActionEvent event) {
-
-    }
-
-    @FXML
-    void handleUploadImage(MouseEvent event) {
-
-    }
-
+    void handleUploadImage(MouseEvent event) {}
 }

@@ -9,8 +9,8 @@ import java.sql.SQLException;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import com.hitster.model.MatchHistoryObj;
-import com.hitster.model.PlayerScore;
+import com.hitster.dto.MatchHistoryDTO;
+import com.hitster.dto.PlayerScoreDTO;
 
 public class DatabaseLogic {
 
@@ -56,9 +56,9 @@ public class DatabaseLogic {
         }
     }
 
-    public static ObservableList<PlayerScore> getLeaderboardData() {
+    public static ObservableList<PlayerScoreDTO> getLeaderboardData() {
         int currentRank = 1;
-        ObservableList<PlayerScore> leaderboard = FXCollections.observableArrayList();
+        ObservableList<PlayerScoreDTO> leaderboard = FXCollections.observableArrayList();
     
         String query = "SELECT user_id, username, total_winnings FROM Users ORDER BY total_winnings DESC LIMIT 100"; 
         
@@ -71,7 +71,7 @@ public class DatabaseLogic {
                 String player = rs.getString("username");
                 int winnings = rs.getInt("total_winnings"); 
                 
-                leaderboard.add(new PlayerScore(currentRank, id, player, winnings));
+                leaderboard.add(new PlayerScoreDTO(currentRank, id, player, winnings));
                 currentRank++;
             }
         } catch (Exception e) {
@@ -172,10 +172,10 @@ public class DatabaseLogic {
     //        return winRate+"%";
     //}
 
-    public static ObservableList<MatchHistoryObj> getMatchHistory() {
+    public static ObservableList<MatchHistoryDTO> getMatchHistory() {
         int CurrentUserId = 9;
         String result;
-        ObservableList<MatchHistoryObj> matchHistory = FXCollections.observableArrayList();
+        ObservableList<MatchHistoryDTO> matchHistory = FXCollections.observableArrayList();
         String query = "SELECT g.player1_id, g.player2_id, g.game_date, g.winner_id, u.username AS enemy_name FROM Games g JOIN Users u ON u.user_id = CASE WHEN g.player1_id = ? THEN g.player2_id ELSE g.player1_id END WHERE g.player1_id = ? OR g.player2_id = ? ORDER BY g.game_date DESC LIMIT 100";
         
         try (Connection conn = DBManager.connect();
@@ -194,7 +194,7 @@ public class DatabaseLogic {
                     } else {
                         result = "LOST";
                     }
-                    matchHistory.add(new MatchHistoryObj(enemyName, date, result));
+                    matchHistory.add(new MatchHistoryDTO(enemyName, date, result));
                 }
             }
             

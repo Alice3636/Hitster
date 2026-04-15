@@ -1,6 +1,8 @@
 package com.hitster.network;
 
+import com.google.gson.Gson;
 import com.hitster.config.AppConfig;
+import com.hitster.dto.UpdateProfileDTO;
 import com.hitster.session.UserSession;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -43,6 +45,23 @@ public class UserNetworkService {
                 .header("Authorization", "Bearer " + token)
                 .DELETE()
                 .build();
+        return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());
+    }
+
+    public CompletableFuture<HttpResponse<String>> updateProfileDetails(String newUsername, String newEmail) {
+        String token = UserSession.getInstance().getToken();
+        UpdateProfileDTO updateRequest = new UpdateProfileDTO(newUsername, newEmail);
+        
+        Gson gson = new Gson();
+        String jsonPayload = gson.toJson(updateRequest);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(AppConfig.BASE_API_URL + "/users/me"))
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + token)
+                .PUT(HttpRequest.BodyPublishers.ofString(jsonPayload))
+                .build();
+
         return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());
     }
 }
