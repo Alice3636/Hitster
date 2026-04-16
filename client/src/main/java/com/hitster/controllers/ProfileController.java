@@ -1,9 +1,12 @@
 package com.hitster.controllers;
 
+import com.hitster.client.utils.SceneNavigator;
 import com.hitster.dto.MatchHistoryDTO;
 import com.hitster.dto.UserProfileDTO;
 import com.hitster.network.UserNetworkService;
+import com.hitster.session.UserSession;
 
+import java.io.IOException;
 import java.util.Optional;
 
 import com.google.gson.Gson;
@@ -18,6 +21,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -169,6 +173,48 @@ public class ProfileController {
             ex.printStackTrace();
             return null;
         });
+    }
+
+    @FXML
+    private void onDeleteAccountClick() {
+    Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+    confirmAlert.setTitle("Delete Account");
+    confirmAlert.setHeaderText("Are you sure you want to delete your account?");
+    confirmAlert.setContentText("This action is final and your game data cannot be restored.");
+
+    confirmAlert.showAndWait().ifPresent(response -> {
+        if (response == ButtonType.OK) {
+            userNetworkService.deleteAccount().thenAccept(httpResponse -> {
+                Platform.runLater(() -> {
+                    if (httpResponse.statusCode() == 200) {
+                        handleDeletionSuccess();
+                    } else {
+                        showErrorAlert("Deletion Error", "The server failed to delete the account. Please try again later.");
+                    }
+                });
+            }).exceptionally(ex -> {
+                Platform.runLater(() -> showErrorAlert("Network Error", "Could not connect to the server."));
+                return null;
+            });
+        }
+    });
+    }
+
+    private void handleDeletionSuccess() {
+        UserSession.getInstance().cleanUserSession();
+        try {
+            SceneNavigator.loadScene(SceneNavigator.LOGIN_SCREEN);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void showErrorAlert(String title, String message) {
+    Alert alert = new Alert(Alert.AlertType.ERROR);
+    alert.setTitle(title);
+    alert.setHeaderText(null);
+    alert.setContentText(message);
+    alert.showAndWait();
     }
 
     @FXML
