@@ -31,7 +31,6 @@ public class DatabaseLogic {
         return false;
     }
 
-    // FIX 1: Swapped ObservableList for standard java.util.List
     public static List<PlayerScore> getLeaderboardData() {
         int currentRank = 1;
         List<PlayerScore> leaderboard = new ArrayList<>();
@@ -109,7 +108,6 @@ public class DatabaseLogic {
         return winRate + "%";
     }
 
-    // FIX 2: Swapped ObservableList for standard java.util.List
     public static List<MatchHistoryObj> getMatchHistory(int userId) {
         List<MatchHistoryObj> matchHistory = new ArrayList<>();
         String sql = "{CALL sp_GetMatchHistory(?)}";

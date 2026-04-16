@@ -5,7 +5,7 @@ import java.util.UUID;
 public class AuthService {
 
     // Register user and return an API token
-    public static int register(String username, String email, String password, String picturePath) {
+    public static String register(String username, String email, String password, String picturePath) {
         String hash = PasswordUtil.hashPassword(password);
         int userId = DatabaseService.registerUser(username, email, hash, picturePath);
 
