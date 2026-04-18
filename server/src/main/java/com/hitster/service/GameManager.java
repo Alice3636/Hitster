@@ -1,14 +1,17 @@
 package com.hitster.service;
 
-import org.springframework.stereotype.Service;
-
+import com.hitster.controller.NotFoundException;
+import com.hitster.dto.GuessSongRequestDTO;
+import com.hitster.dto.PlaceSongRequestDTO;
 import com.hitster.engine.GameEngine;
+import com.hitster.model.GamePhase;
 import com.hitster.model.GameSession;
+import com.hitster.model.GameStatus;
 import com.hitster.model.Player;
 import com.hitster.model.Room;
 import com.hitster.model.Song;
-import com.hitster.model.TurnAction;
 import com.hitster.model.TurnResult;
+import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.List;
@@ -53,38 +56,80 @@ public class GameManager {
         return activeGames.get(gameId);
     }
 
-    public TurnResult submitTurn(String gameId, TurnAction action) {
+    public TurnResult placeSong(String gameId, String playerId, PlaceSongRequestDTO request) {
         GameSession session = activeGames.get(gameId);
 
         if (session == null) {
-            throw new IllegalArgumentException("Game not found: " + gameId);
+            throw new NotFoundException("Game not found: " + gameId);
         }
 
-        return gameEngine.submitTurn(session, action);
+        return gameEngine.placeSong(
+                session,
+                playerId,
+                request.getIndex_position(),
+                request.getSongId()
+        );
     }
 
-    public boolean challengeLastTurn(String gameId, String challengerId) {
+    public TurnResult guessSong(String gameId, String playerId, GuessSongRequestDTO request) {
         GameSession session = activeGames.get(gameId);
 
         if (session == null) {
-            throw new IllegalArgumentException("Game not found: " + gameId);
+            throw new NotFoundException("Game not found: " + gameId);
+        }
+
+        return gameEngine.guessSong(
+                session,
+                playerId,
+                request.getArtist(),
+                request.getSong_name()
+        );
+    }
+
+    public boolean challengeLastTurn(String gameId, String challengerId, Integer suggestedIndex) {
+        GameSession session = activeGames.get(gameId);
+
+        if (session == null) {
+            throw new NotFoundException("Game not found: " + gameId);
         }
 
         Player challenger = session.getPlayerById(challengerId);
 
         if (challenger == null) {
-            throw new IllegalArgumentException("Player not found: " + challengerId);
+            throw new NotFoundException("Player not found: " + challengerId);
         }
 
-        return gameEngine.challengeLastTurn(session, challenger);
+        return gameEngine.challengeLastTurn(session, challenger, suggestedIndex);
     }
+
     public void skipChallengeWindow(String gameId) {
         GameSession session = activeGames.get(gameId);
 
         if (session == null) {
-            throw new IllegalArgumentException("Game not found: " + gameId);
+            throw new NotFoundException("Game not found: " + gameId);
         }
 
         gameEngine.skipChallengeWindow(session);
+    }
+
+    public GameSession quitGame(String gameId, String playerId) {
+        GameSession session = activeGames.get(gameId);
+
+        if (session == null) {
+            throw new NotFoundException("Game not found: " + gameId);
+        }
+
+        Player quitter = session.getPlayerById(playerId);
+
+        if (quitter == null) {
+            throw new NotFoundException("Player not found: " + playerId);
+        }
+
+        Player winner = session.getOpponent(quitter);
+        session.setWinner(winner);
+        session.setStatus(GameStatus.FINISHED);
+        session.setPhase(GamePhase.GAME_FINISHED);
+
+        return session;
     }
 }
