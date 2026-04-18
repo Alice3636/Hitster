@@ -1,110 +1,23 @@
 package com.hitster.service;
 
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-
+import com.hitster.dto.AdminSongDTO;
+import com.hitster.dto.AdminUserDTO;
+import com.hitster.dto.LeaderboardDTO;
+import com.hitster.dto.LeaderboardEntryDTO;
+import com.hitster.dto.UpdateMeRequestDTO;
+import com.hitster.dto.UserMeDTO;
 import com.hitster.repository.DBManager;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DatabaseService {
 
-    public static void main(String[] args) {
-
-        // Simple integration test for the main DB flow
-        System.out.println("=== Starting integration test ===");
-
-        // --- 1. Register two users ---
-        System.out.println("\n[1] Registering test players...");
-
-        // Use timestamp so emails are unique on every run
-        long timestamp = System.currentTimeMillis();
-
-        int player1Id = DatabaseService.registerUser(
-                "GamerA_" + timestamp,
-                "a" + timestamp + "@test.com",
-                "hash_a");
-
-        int player2Id = DatabaseService.registerUser(
-                "GamerB_" + timestamp,
-                "b" + timestamp + "@test.com",
-                "hash_b");
-
-        if (player1Id > 0 && player2Id > 0) {
-            System.out.println("Players created successfully. IDs: " + player1Id + ", " + player2Id);
-        } else {
-            System.err.println("Failed to create players. Stopping test.");
-            return;
-        }
-
-        // --- 2. Login data check ---
-        System.out.println("\n[2] Checking login data...");
-
-        // Retrieve stored password hash
-        String fetchedHash = DatabaseService.getUserPasswordHash("a" + timestamp + "@test.com");
-
-        // Basic validation
-        if ("hash_a".equals(fetchedHash)) {
-            System.out.println("Login data looks correct.");
-        } else {
-            System.err.println("Password hash mismatch.");
-        }
-
-        // --- 3. Create a new game ---
-        System.out.println("\n[3] Creating new game with 5 songs...");
-
-        int gameId = DatabaseService.startNewGame(player1Id, player2Id, 5);
-
-        if (gameId > 0) {
-            System.out.println("Game created. ID: " + gameId);
-        } else {
-            System.err.println("Game creation failed. Stopping test.");
-            return;
-        }
-
-        // --- 4. Simulate a few turns ---
-        System.out.println("\n[4] Simulating gameplay...");
-
-        // Turn 1 - player 1
-        String song1 = DatabaseService.getNextSong(gameId);
-        System.out.println("Song for turn 1: " + (song1 != null ? song1 : "No songs available"));
-
-        // Assume player 1 guessed correctly and got 10 points
-        boolean scoreUpdated = DatabaseService.updateScore(gameId, player1Id, 10, player2Id);
-        System.out.println("Score updated for player 1 (10 pts). Turn switched? " + scoreUpdated);
-
-        // Turn 2 - player 2
-        String song2 = DatabaseService.getNextSong(gameId);
-        System.out.println("Song for turn 2: " + (song2 != null ? song2 : "No songs available"));
-
-        // Assume player 2 failed (0 points)
-        DatabaseService.updateScore(gameId, player2Id, 0, player1Id);
-        System.out.println("Score updated for player 2 (0 pts). Turn back to player 1.");
-
-        // --- 5. End the game ---
-        System.out.println("\n[5] Ending the game...");
-
-        // Player 1 wins and gets reward
-        boolean gameEnded = DatabaseService.endGame(gameId, player1Id, 50.0);
-
-        if (gameEnded) {
-            System.out.println("Game finished. Player " + player1Id + " declared winner.");
-        } else {
-            System.err.println("Error while closing the game.");
-        }
-
-        System.out.println("\n=== Test completed ===");
-    }
-
-    // Single shared DB connection
     static Connection conn = DBManager.connect();
 
-    /**
-     * Registers a new user in the system
-     *
-     * @return new user ID, or -1 if something failed
-     */
+    // ================= USERS =================
+
     public static int registerUser(String username, String email, String passwordHash) {
         String sql = "{CALL sp_RegisterUser(?, ?, ?, ?)}";
 
@@ -113,132 +26,325 @@ public class DatabaseService {
             cstmt.setString(2, email);
             cstmt.setString(3, passwordHash);
             cstmt.registerOutParameter(4, Types.INTEGER);
-
             cstmt.execute();
             return cstmt.getInt(4);
-
         } catch (SQLException e) {
             e.printStackTrace();
             return -1;
         }
     }
 
-    /**
-     * Retrieves the stored password hash for login validation
-     *
-     * @return password hash from DB or null if user not found
-     */
-    public static String getUserPasswordHash(String email) {
-        String sql = "{CALL sp_GetUser(?)}";
+    public static boolean usernameExists(String username) {
+        String sql = "SELECT 1 FROM Users WHERE username = ? LIMIT 1";
 
-        try (CallableStatement cstmt = conn.prepareCall(sql)) {
-            cstmt.setString(1, email);
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, username);
 
-            try (ResultSet rs = cstmt.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getString("password_hash");
-                }
+            try (ResultSet rs = pstmt.executeQuery()) {
+                return rs.next();
             }
-
         } catch (SQLException e) {
-            System.err.println("Error retrieving login data:");
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
-    /**
-     * Starts a new game and randomly assigns songs
-     *
-     * @return game ID or -1 if creation failed
-     */
-    public static int startNewGame(int player1Id, int player2Id, int numSongs) {
-        String sql = "{CALL sp_StartNewGame(?, ?, ?, ?)}";
-
-        try (CallableStatement cstmt = conn.prepareCall(sql)) {
-            cstmt.setInt(1, player1Id);
-            cstmt.setInt(2, player2Id);
-            cstmt.setInt(3, numSongs);
-            cstmt.registerOutParameter(4, Types.INTEGER);
-
-            cstmt.execute();
-            return cstmt.getInt(4);
-
-        } catch (SQLException e) {
-            System.err.println("Error creating new game:");
-            e.printStackTrace();
-            return -1;
-        }
-    }
-
-    /**
-     * Returns the next song that hasn't been played yet
-     *
-     * @return formatted song info or null if no songs left
-     */
-    public static String getNextSong(int gameId) {
-        String sql = "{CALL sp_GetNextSong(?)}";
-
-        try (CallableStatement cstmt = conn.prepareCall(sql)) {
-            cstmt.setInt(1, gameId);
-
-            try (ResultSet rs = cstmt.executeQuery()) {
-                if (rs.next()) {
-                    String title = rs.getString("title");
-                    String artist = rs.getString("artist");
-                    String path = rs.getString("song_path");
-
-                    return title + " by " + artist + " [" + path + "]";
-                }
-            }
-
-        } catch (SQLException e) {
-            System.err.println("Error retrieving next song:");
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
-    /**
-     * Updates player score and switches the turn
-     */
-    public static boolean updateScore(int gameId, int playerId, int pointsToAdd, int nextTurnPlayerId) {
-        String sql = "{CALL sp_UpdateScore(?, ?, ?, ?)}";
-
-        try (CallableStatement cstmt = conn.prepareCall(sql)) {
-            cstmt.setInt(1, gameId);
-            cstmt.setInt(2, playerId);
-            cstmt.setInt(3, pointsToAdd);
-            cstmt.setInt(4, nextTurnPlayerId);
-
-            int rowsAffected = cstmt.executeUpdate();
-            return rowsAffected > 0;
-
-        } catch (SQLException e) {
-            System.err.println("Error updating score:");
             e.printStackTrace();
             return false;
         }
     }
 
-    /**
-     * Ends the game and updates the winner's earnings
-     */
-    public static boolean endGame(int gameId, int winnerId, double winningsAmount) {
-        String sql = "{CALL sp_EndGame(?, ?, ?)}";
+    public static boolean emailExists(String email) {
+        String sql = "SELECT 1 FROM Users WHERE email = ? LIMIT 1";
 
-        try (CallableStatement cstmt = conn.prepareCall(sql)) {
-            cstmt.setInt(1, gameId);
-            cstmt.setInt(2, winnerId);
-            cstmt.setDouble(3, winningsAmount);
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, email);
 
-            int rowsAffected = cstmt.executeUpdate();
-            return rowsAffected > 0;
-
+            try (ResultSet rs = pstmt.executeQuery()) {
+                return rs.next();
+            }
         } catch (SQLException e) {
-            System.err.println("Error ending the game:");
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean usernameExistsForOtherUser(Long userId, String username) {
+        String sql = "SELECT 1 FROM Users WHERE username = ? AND user_id <> ? LIMIT 1";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, username);
+            pstmt.setLong(2, userId);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean emailExistsForOtherUser(Long userId, String email) {
+        String sql = "SELECT 1 FROM Users WHERE email = ? AND user_id <> ? LIMIT 1";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, email);
+            pstmt.setLong(2, userId);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static String getUserPasswordHash(String email) {
+        String sql = "SELECT password_hash FROM Users WHERE email = ?";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, email);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("password_hash");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public static Long getUserIdByEmail(String email) {
+        String sql = "SELECT user_id FROM Users WHERE email = ?";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, email);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getLong("user_id");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public static String getUsernameByEmail(String email) {
+        String sql = "SELECT username FROM Users WHERE email = ?";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, email);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("username");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public static boolean isAdminByEmail(String email) {
+        String sql = "SELECT is_admin FROM Users WHERE email = ?";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, email);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getBoolean("is_admin");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public static List<AdminUserDTO> getAllUsers() {
+        String sql = "SELECT user_id, username, email, is_admin FROM Users ORDER BY user_id";
+        List<AdminUserDTO> users = new ArrayList<>();
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                users.add(new AdminUserDTO(
+                        rs.getLong("user_id"),
+                        rs.getString("username"),
+                        rs.getString("email"),
+                        rs.getBoolean("is_admin")
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return users;
+    }
+
+    public static boolean deleteUserById(Long userId) {
+        String sql = "DELETE FROM Users WHERE user_id = ?";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setLong(1, userId);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static UserMeDTO getUserMeById(Long userId) {
+        String sql = "SELECT user_id, username, email, is_admin, total_winnings, profile_picture_path " +
+                "FROM Users WHERE user_id = ?";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setLong(1, userId);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return new UserMeDTO(
+                            rs.getLong("user_id"),
+                            rs.getString("username"),
+                            rs.getString("email"),
+                            rs.getBoolean("is_admin"),
+                            rs.getObject("total_winnings") != null ? rs.getInt("total_winnings") : null,
+                            rs.getString("profile_picture_path")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public static boolean updateCurrentUser(Long userId, UpdateMeRequestDTO request) {
+        String sql = "UPDATE Users SET username = ?, email = ?, profile_picture_path = ? WHERE user_id = ?";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, request.getUsername());
+            pstmt.setString(2, request.getEmail());
+            pstmt.setString(3, request.getProfilePicturePath());
+            pstmt.setLong(4, userId);
+
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static LeaderboardDTO getLeaderboard() {
+        String sql = "SELECT user_id, username, total_winnings, profile_picture_path " +
+                "FROM Users ORDER BY total_winnings DESC, user_id ASC";
+        List<LeaderboardEntryDTO> entries = new ArrayList<>();
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                Integer winnings = rs.getObject("total_winnings") != null ? rs.getInt("total_winnings") : 0;
+
+                entries.add(new LeaderboardEntryDTO(
+                        rs.getLong("user_id"),
+                        rs.getString("username"),
+                        winnings,
+                        rs.getString("profile_picture_path")
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return new LeaderboardDTO(entries);
+    }
+
+    // ================= SONGS =================
+
+    public static List<AdminSongDTO> getAllSongs() {
+        String sql = "SELECT song_id, title, artist, release_year, song_path FROM Songs ORDER BY song_id";
+        List<AdminSongDTO> songs = new ArrayList<>();
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                songs.add(new AdminSongDTO(
+                        rs.getLong("song_id"),
+                        rs.getString("title"),
+                        rs.getString("artist"),
+                        rs.getInt("release_year"),
+                        rs.getString("song_path")
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return songs;
+    }
+
+    public static Long createSong(String title, String artist, int releaseYear, String audioUrl) {
+        String sql = "INSERT INTO Songs (title, artist, release_year, song_path, cover_path) VALUES (?, ?, ?, ?, ?)";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setString(1, title);
+            pstmt.setString(2, artist);
+            pstmt.setInt(3, releaseYear);
+            pstmt.setString(4, audioUrl);
+            pstmt.setString(5, null);
+
+            int affected = pstmt.executeUpdate();
+            if (affected == 0) {
+                return null;
+            }
+
+            try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                if (rs.next()) {
+                    return rs.getLong(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public static boolean updateSong(Long songId, String title, String artist, int releaseYear, String audioUrl) {
+        String sql = "UPDATE Songs SET title = ?, artist = ?, release_year = ?, song_path = ? WHERE song_id = ?";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, title);
+            pstmt.setString(2, artist);
+            pstmt.setInt(3, releaseYear);
+            pstmt.setString(4, audioUrl);
+            pstmt.setLong(5, songId);
+
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean deleteSongById(Long songId) {
+        String sql = "DELETE FROM Songs WHERE song_id = ?";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setLong(1, songId);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }

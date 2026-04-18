@@ -4,7 +4,7 @@ import java.util.List;
 
 public class GameStateDTO {
 
-    private Long gameId;
+    private String gameId;
     private String gameStatus; 
     private int turnNumber;
     private int timeLeftSeconds; 
@@ -33,8 +33,8 @@ public class GameStateDTO {
     }
 
 
-    public Long getGameId() { return gameId; }
-    public void setGameId(Long gameId) { this.gameId = gameId; }
+    public String getGameId() { return gameId; }
+    public void setGameId(String gameId) { this.gameId = gameId; }
 
     public String getGameStatus() { return gameStatus; }
     public void setGameStatus(String gameStatus) { this.gameStatus = gameStatus; }
