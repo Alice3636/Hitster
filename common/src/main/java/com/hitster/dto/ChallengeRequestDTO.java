@@ -14,4 +14,4 @@ public class ChallengeRequestDTO {
     public void setSuggested_index(Integer suggested_index) {
         this.suggested_index = suggested_index;
     }
-}
+}   

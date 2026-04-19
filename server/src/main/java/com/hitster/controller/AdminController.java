@@ -3,14 +3,23 @@ package com.hitster.controller;
 import com.hitster.dto.AdminSongDTO;
 import com.hitster.dto.AdminUserDTO;
 import com.hitster.service.DatabaseService;
+import com.hitster.service.FileStorageService;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin")
 public class AdminController {
+
+    private final FileStorageService fileStorageService;
+
+    public AdminController(FileStorageService fileStorageService) {
+        this.fileStorageService = fileStorageService;
+    }
 
     @GetMapping("/users")
     public List<AdminUserDTO> getAllUsers(HttpServletRequest request) {
@@ -24,7 +33,7 @@ public class AdminController {
 
         boolean deleted = DatabaseService.deleteUserById(id);
         if (!deleted) {
-            throw new NotFoundException("User not found: " + id);
+            throw new IllegalArgumentException("User not found: " + id);
         }
 
         return "OK";
@@ -36,82 +45,103 @@ public class AdminController {
         return DatabaseService.getAllSongs();
     }
 
-    @PostMapping("/songs")
-    public AdminSongDTO createSong(@RequestBody AdminSongDTO request, HttpServletRequest httpRequest) {
-        requireAdmin(httpRequest);
+    @PostMapping(value = "/songs/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public String uploadSong(@RequestParam("file") MultipartFile file,
+                             @RequestParam("title") String title,
+                             @RequestParam("artist") String artist,
+                             @RequestParam("year") int year,
+                             HttpServletRequest request) throws Exception {
+        requireAdmin(request);
 
-        if (request == null ||
-                isBlank(request.getTitle()) ||
-                isBlank(request.getArtist()) ||
-                request.getReleaseYear() <= 0 ||
-                isBlank(request.getAudioUrl())) {
-            throw new IllegalArgumentException("Title, artist, releaseYear, and audioUrl are required.");
+        String audioUrl = fileStorageService.saveFile(file);
+        Long songId = DatabaseService.createSong(title, artist, year, audioUrl);
+
+        if (songId == null) {
+            fileStorageService.deleteByAudioUrl(audioUrl);
+            throw new IllegalStateException("Failed to insert song.");
         }
 
-        Long newId = DatabaseService.createSong(
-                request.getTitle(),
-                request.getArtist(),
-                request.getReleaseYear(),
-                request.getAudioUrl()
-        );
-
-        if (newId == null) {
-            throw new IllegalArgumentException("Song creation failed.");
-        }
-
-        return new AdminSongDTO(
-                newId,
-                request.getTitle(),
-                request.getArtist(),
-                request.getReleaseYear(),
-                request.getAudioUrl()
-        );
+        return audioUrl;
     }
 
     @PutMapping("/songs/{id}")
-    public AdminSongDTO updateSong(@PathVariable Long id,
-                                   @RequestBody AdminSongDTO request,
-                                   HttpServletRequest httpRequest) {
+    public String updateSong(@PathVariable Long id,
+                             @RequestBody AdminSongDTO request,
+                             HttpServletRequest httpRequest) {
         requireAdmin(httpRequest);
 
-        if (request == null ||
-                isBlank(request.getTitle()) ||
-                isBlank(request.getArtist()) ||
-                request.getReleaseYear() <= 0 ||
-                isBlank(request.getAudioUrl())) {
-            throw new IllegalArgumentException("Title, artist, releaseYear, and audioUrl are required.");
+        AdminSongDTO existing = DatabaseService.getSongById(id);
+        if (existing == null) {
+            throw new IllegalArgumentException("Song not found: " + id);
         }
 
         boolean updated = DatabaseService.updateSong(
                 id,
                 request.getTitle(),
                 request.getArtist(),
-                request.getReleaseYear(),
-                request.getAudioUrl()
+                request.getYear(),
+                existing.getAudioUrl()
         );
 
         if (!updated) {
-            throw new NotFoundException("Song not found: " + id);
+            throw new IllegalArgumentException("Song not found: " + id);
         }
 
-        return new AdminSongDTO(
-                id,
-                request.getTitle(),
-                request.getArtist(),
-                request.getReleaseYear(),
-                request.getAudioUrl()
-        );
+        return "OK";
+    }
+
+    @PutMapping(value = "/songs/{id}/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public String replaceSongFile(@PathVariable Long id,
+                                  @RequestParam("title") String title,
+                                  @RequestParam("artist") String artist,
+                                  @RequestParam("year") int year,
+                                  @RequestParam(value = "file", required = false) MultipartFile file,
+                                  HttpServletRequest request) throws Exception {
+        requireAdmin(request);
+
+        AdminSongDTO existing = DatabaseService.getSongById(id);
+        if (existing == null) {
+            throw new IllegalArgumentException("Song not found: " + id);
+        }
+
+        String oldAudioUrl = existing.getAudioUrl();
+        String newAudioUrl = oldAudioUrl;
+
+        if (file != null && !file.isEmpty()) {
+            newAudioUrl = fileStorageService.saveFile(file);
+        }
+
+        boolean updated = DatabaseService.updateSong(id, title, artist, year, newAudioUrl);
+
+        if (!updated) {
+            if (file != null && !file.isEmpty() && newAudioUrl != null && !newAudioUrl.equals(oldAudioUrl)) {
+                fileStorageService.deleteByAudioUrl(newAudioUrl);
+            }
+            throw new IllegalArgumentException("Song not found: " + id);
+        }
+
+        if (file != null && !file.isEmpty() && oldAudioUrl != null && !oldAudioUrl.equals(newAudioUrl)) {
+            fileStorageService.deleteByAudioUrl(oldAudioUrl);
+        }
+
+        return newAudioUrl;
     }
 
     @DeleteMapping("/songs/{id}")
     public String deleteSong(@PathVariable Long id, HttpServletRequest request) {
         requireAdmin(request);
 
-        boolean deleted = DatabaseService.deleteSongById(id);
-        if (!deleted) {
-            throw new NotFoundException("Song not found: " + id);
+        AdminSongDTO existing = DatabaseService.getSongById(id);
+        if (existing == null) {
+            throw new IllegalArgumentException("Song not found: " + id);
         }
 
+        boolean deleted = DatabaseService.deleteSongById(id);
+        if (!deleted) {
+            throw new IllegalArgumentException("Song not found: " + id);
+        }
+
+        fileStorageService.deleteByAudioUrl(existing.getAudioUrl());
         return "OK";
     }
 
@@ -121,9 +151,5 @@ public class AdminController {
         if (!(jwtIsAdminObj instanceof Boolean) || !((Boolean) jwtIsAdminObj)) {
             throw new SecurityException("Admin access required.");
         }
-    }
-
-    private boolean isBlank(String value) {
-        return value == null || value.trim().isEmpty();
     }
 }

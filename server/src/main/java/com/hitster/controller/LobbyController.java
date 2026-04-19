@@ -7,12 +7,12 @@ import com.hitster.model.GameSession;
 import com.hitster.model.Player;
 import com.hitster.model.Room;
 import com.hitster.model.Song;
+import com.hitster.service.DatabaseService;
 import com.hitster.service.GameManager;
 import com.hitster.service.LobbyManager;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -46,7 +46,7 @@ public class LobbyController {
         Room room = lobbyManager.matchPlayerToRoom(player);
 
         if (room.isFull() && !room.isStarted()) {
-            List<Song> songs = createSongsPool();
+            List<Song> songs = DatabaseService.getRandomSongs(20);
             GameSession session = gameManager.startGameForRoom(room, songs);
 
             return new LobbyJoinResponse(
@@ -108,17 +108,5 @@ public class LobbyController {
         }
 
         return "OK";
-    }
-
-    private List<Song> createSongsPool() {
-        List<Song> songs = new ArrayList<>();
-        songs.add(new Song("1", "Song A", "Artist A", 1990, ""));
-        songs.add(new Song("2", "Song B", "Artist B", 1995, ""));
-        songs.add(new Song("3", "Song C", "Artist C", 2000, ""));
-        songs.add(new Song("4", "Song D", "Artist D", 2010, ""));
-        songs.add(new Song("5", "Song E", "Artist E", 2020, ""));
-        songs.add(new Song("6", "Song F", "Artist F", 1980, ""));
-        songs.add(new Song("7", "Song G", "Artist G", 2005, ""));
-        return songs;
     }
 }

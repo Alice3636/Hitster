@@ -2,6 +2,7 @@ package com.hitster.mapper;
 
 import com.hitster.dto.GameStateDTO;
 import com.hitster.model.GameSession;
+import com.hitster.model.GameStatus;
 import com.hitster.model.Player;
 import com.hitster.model.Song;
 import com.hitster.model.SongCard;
@@ -20,8 +21,6 @@ public class GameStateMapper {
         dto.setGameId(session.getId());
         dto.setGameStatus(session.getStatus() != null ? session.getStatus().name() : null);
         dto.setTurnNumber(session.getTurnNumber());
-
-        // No timer implementation exists yet, so use 0 for now.
         dto.setTimeLeftSeconds(0);
 
         dto.setCurrentPlayerId(
@@ -32,7 +31,7 @@ public class GameStateMapper {
 
         dto.setCurrentSong(
                 session.getCurrentSong() != null
-                        ? toCurrentSongDTO(session.getCurrentSong())
+                        ? toCurrentSongDTO(session.getCurrentSong(), shouldHideCurrentSongDetails(session))
                         : null
         );
 
@@ -57,13 +56,25 @@ public class GameStateMapper {
         return dto;
     }
 
-    private static GameStateDTO.CurrentSongDTO toCurrentSongDTO(Song song) {
+    private static boolean shouldHideCurrentSongDetails(GameSession session) {
+        return session.getStatus() == GameStatus.IN_PROGRESS;
+    }
+
+    private static GameStateDTO.CurrentSongDTO toCurrentSongDTO(Song song, boolean hideDetails) {
         GameStateDTO.CurrentSongDTO dto = new GameStateDTO.CurrentSongDTO();
         dto.setAudioUrl(song.getAudioUrl());
-        dto.setDetailsHidden(false);
-        dto.setTitle(song.getTitle());
-        dto.setArtist(song.getArtist());
-        dto.setYear(song.getYear());
+        dto.setDetailsHidden(hideDetails);
+
+        if (hideDetails) {
+            dto.setTitle(null);
+            dto.setArtist(null);
+            dto.setYear(null);
+        } else {
+            dto.setTitle(song.getTitle());
+            dto.setArtist(song.getArtist());
+            dto.setYear(song.getYear());
+        }
+
         return dto;
     }
 

@@ -33,6 +33,10 @@ public class GameManager {
             throw new IllegalStateException("Cannot start game: room is not full.");
         }
 
+        if (songsPool == null || songsPool.size() < 3) {
+            throw new IllegalStateException("Not enough songs in database to start a game.");
+        }
+
         Player player1 = room.getPlayer1();
         Player player2 = room.getPlayer2();
 

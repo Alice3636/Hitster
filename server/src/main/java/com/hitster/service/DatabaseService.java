@@ -6,6 +6,7 @@ import com.hitster.dto.LeaderboardDTO;
 import com.hitster.dto.LeaderboardEntryDTO;
 import com.hitster.dto.UpdateMeRequestDTO;
 import com.hitster.dto.UserMeDTO;
+import com.hitster.model.Song;
 import com.hitster.repository.DBManager;
 
 import java.sql.*;
@@ -19,19 +20,29 @@ public class DatabaseService {
     // ================= USERS =================
 
     public static int registerUser(String username, String email, String passwordHash) {
-        String sql = "{CALL sp_RegisterUser(?, ?, ?, ?)}";
+        String sql = "INSERT INTO Users (username, email, password_hash, is_admin) VALUES (?, ?, ?, ?)";
 
-        try (CallableStatement cstmt = conn.prepareCall(sql)) {
-            cstmt.setString(1, username);
-            cstmt.setString(2, email);
-            cstmt.setString(3, passwordHash);
-            cstmt.registerOutParameter(4, Types.INTEGER);
-            cstmt.execute();
-            return cstmt.getInt(4);
+        try (PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setString(1, username);
+            pstmt.setString(2, email);
+            pstmt.setString(3, passwordHash);
+            pstmt.setBoolean(4, false);
+
+            int affected = pstmt.executeUpdate();
+            if (affected == 0) {
+                return -1;
+            }
+
+            try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
         } catch (SQLException e) {
             e.printStackTrace();
-            return -1;
         }
+
+        return -1;
     }
 
     public static boolean usernameExists(String username) {
@@ -294,6 +305,30 @@ public class DatabaseService {
         return songs;
     }
 
+    public static AdminSongDTO getSongById(Long songId) {
+        String sql = "SELECT song_id, title, artist, release_year, song_path FROM Songs WHERE song_id = ?";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setLong(1, songId);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return new AdminSongDTO(
+                            rs.getLong("song_id"),
+                            rs.getString("title"),
+                            rs.getString("artist"),
+                            rs.getInt("release_year"),
+                            rs.getString("song_path")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
     public static Long createSong(String title, String artist, int releaseYear, String audioUrl) {
         String sql = "INSERT INTO Songs (title, artist, release_year, song_path, cover_path) VALUES (?, ?, ?, ?, ?)";
 
@@ -348,5 +383,38 @@ public class DatabaseService {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public static List<Song> getRandomSongs(int limit) {
+        String sql = """
+                SELECT song_id, title, artist, release_year, song_path
+                FROM Songs
+                WHERE song_path IS NOT NULL
+                  AND TRIM(song_path) <> ''
+                ORDER BY RAND()
+                LIMIT ?
+                """;
+
+        List<Song> songs = new ArrayList<>();
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, limit);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    songs.add(new Song(
+                            String.valueOf(rs.getLong("song_id")),
+                            rs.getString("title"),
+                            rs.getString("artist"),
+                            rs.getInt("release_year"),
+                            rs.getString("song_path")
+                    ));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return songs;
     }
 }

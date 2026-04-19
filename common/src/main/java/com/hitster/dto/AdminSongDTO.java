@@ -5,17 +5,17 @@ public class AdminSongDTO {
     private Long songId;
     private String title;
     private String artist;
-    private int releaseYear;
+    private int year;
     private String audioUrl;
 
     public AdminSongDTO() {
     }
 
-    public AdminSongDTO(Long songId, String title, String artist, int releaseYear, String audioUrl) {
+    public AdminSongDTO(Long songId, String title, String artist, int year, String audioUrl) {
         this.songId = songId;
         this.title = title;
         this.artist = artist;
-        this.releaseYear = releaseYear;
+        this.year = year;
         this.audioUrl = audioUrl;
     }
 
@@ -43,12 +43,12 @@ public class AdminSongDTO {
         this.artist = artist;
     }
 
-    public int getReleaseYear() {
-        return releaseYear;
+    public int getYear() {
+        return year;
     }
 
-    public void setReleaseYear(int releaseYear) {
-        this.releaseYear = releaseYear;
+    public void setYear(int year) {
+        this.year = year;
     }
 
     public String getAudioUrl() {
