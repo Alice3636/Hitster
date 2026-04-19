@@ -12,7 +12,6 @@ public class WebConfig implements WebMvcConfigurer {
     @Autowired
     private AuthInterceptor authInterceptor;
 
-    @SuppressWarnings("null")
     @Override
     public void addInterceptors(@NonNull InterceptorRegistry registry) {
         registry.addInterceptor(authInterceptor)

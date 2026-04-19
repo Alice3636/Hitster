@@ -236,4 +236,22 @@ public class DatabaseService {
         }
         return -1; // Token is fake or expired
     }
+
+    /**
+     * Saves a newly generated API token to the user's database record upon login.
+     */
+    public static void updateUserToken(String email, String token) {
+        String sql = "UPDATE Users SET api_token = ? WHERE email = ?";
+
+        try (Connection conn = DBManager.connect();
+                java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, token);
+            pstmt.setString(2, email);
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            System.err.println("Error saving user token: " + e.getMessage());
+        }
+    }
 }

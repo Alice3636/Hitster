@@ -1,35 +1,33 @@
 package com.hitster.service;
 
-import java.util.UUID;
-
 public class AuthService {
 
-    // Register user and return an API token
-    public static String register(String username, String email, String password, String picturePath) {
+    // Register user and return the new user ID (int)
+    public static int register(String username, String email, String password, String picturePath) {
         String hash = PasswordUtil.hashPassword(password);
-        int userId = DatabaseService.registerUser(username, email, hash, picturePath);
 
-        if (userId > 0) {
-            // Generate a simple unique token for API communication
-            return UUID.randomUUID().toString();
-        }
-        return null; // Registration failed
+        // Calls your DB and returns the new user ID
+        return DatabaseService.registerUser(username, email, hash, picturePath);
     }
 
-    // Login validation and return an API token
-    public static String loginAndGetToken(String email, String password) {
+    // Overloaded register method in case AuthController doesn't provide a
+    // picturePath yet
+    public static int register(String username, String email, String password) {
+        return register(username, email, password, null);
+    }
+
+    // Login validation (returns true if email and password match)
+    public static boolean login(String email, String password) {
         String storedHash = DatabaseService.getUserPasswordHash(email);
 
         if (storedHash != null && PasswordUtil.verifyPassword(password, storedHash)) {
-            // Generate a simple unique token for API communication
-            return UUID.randomUUID().toString();
+            return true;
         }
-        return null; // Login failed
+        return false; // Login failed
     }
 
     // Forgot Password - Updates the hash in the database
     public static boolean resetPassword(String email, String newPassword) {
-        // In a production app, you would verify an email code first before doing this!
         String newHash = PasswordUtil.hashPassword(newPassword);
         return DatabaseService.updateUserPassword(email, newHash);
     }
