@@ -1,19 +1,20 @@
-package com.hitster.dto;
+// NOT READY
+
+package com.hitster.dto.game;
 
 import java.util.List;
 
 public class GameStateDTO {
 
-    private Long gameId;
+    private String gameId;
     private String gameStatus; 
     private int turnNumber;
     private int timeLeftSeconds; 
 
-    private Long currentPlayerId; 
-    private CurrentSongDTO currentSong; 
+    private Long currentPlayerId;
+    private SongDTO currentSong; 
 
     private String winnerName; 
-
 
     private Long player1Id;
     private String player1Name;
@@ -21,20 +22,18 @@ public class GameStateDTO {
     private int player1Tokens;
     private List<CardDTO> player1Timeline;
 
-  
+
     private Long player2Id;
     private String player2Name;
     private int player2Score;
     private int player2Tokens;
     private List<CardDTO> player2Timeline;
 
-
     public GameStateDTO() {
     }
 
-
-    public Long getGameId() { return gameId; }
-    public void setGameId(Long gameId) { this.gameId = gameId; }
+    public String getGameId() { return gameId; }
+    public void setGameId(String gameId) { this.gameId = gameId; }
 
     public String getGameStatus() { return gameStatus; }
     public void setGameStatus(String gameStatus) { this.gameStatus = gameStatus; }
@@ -48,8 +47,8 @@ public class GameStateDTO {
     public Long getCurrentPlayerId() { return currentPlayerId; }
     public void setCurrentPlayerId(Long currentPlayerId) { this.currentPlayerId = currentPlayerId; }
 
-    public CurrentSongDTO getCurrentSong() { return currentSong; }
-    public void setCurrentSong(CurrentSongDTO currentSong) { this.currentSong = currentSong; }
+    public SongDTO getCurrentSong() { return currentSong; }
+    public void setCurrentSong(SongDTO currentSong) { this.currentSong = currentSong; }
 
     public String getWinnerName() { return winnerName; }
     public void setWinnerName(String winnerName) { this.winnerName = winnerName; }
@@ -83,52 +82,4 @@ public class GameStateDTO {
 
     public List<CardDTO> getPlayer2Timeline() { return player2Timeline; }
     public void setPlayer2Timeline(List<CardDTO> player2Timeline) { this.player2Timeline = player2Timeline; }
-
-
-    public static class CurrentSongDTO {
-        private String audioUrl;
-        private boolean isDetailsHidden;
-        private String title; // Will be null or empty if hidden
-        private String artist; // Will be null or empty if hidden
-        private Integer year; // Will be null if hidden
-
-        public CurrentSongDTO() {}
-
-        public String getAudioUrl() { return audioUrl; }
-        public void setAudioUrl(String audioUrl) { this.audioUrl = audioUrl; }
-
-        public boolean isDetailsHidden() { return isDetailsHidden; }
-        public void setDetailsHidden(boolean detailsHidden) { isDetailsHidden = detailsHidden; }
-
-        public String getTitle() { return title; }
-        public void setTitle(String title) { this.title = title; }
-
-        public String getArtist() { return artist; }
-        public void setArtist(String artist) { this.artist = artist; }
-
-        public Integer getYear() { return year; }
-        public void setYear(Integer year) { this.year = year; }
-    }
-
-
-    public static class CardDTO {
-        private Long songId;
-        private int year;
-        private String artist;
-        private String title;
-
-        public CardDTO() {}
-
-        public Long getSongId() { return songId; }
-        public void setSongId(Long songId) { this.songId = songId; }
-
-        public int getYear() { return year; }
-        public void setYear(int year) { this.year = year; }
-
-        public String getArtist() { return artist; }
-        public void setArtist(String artist) { this.artist = artist; }
-
-        public String getTitle() { return title; }
-        public void setTitle(String title) { this.title = title; }
-    }
 }
