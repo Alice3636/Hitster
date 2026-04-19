@@ -10,12 +10,6 @@ public class AuthService {
         return DatabaseService.registerUser(username, email, hash, picturePath);
     }
 
-    // Overloaded register method in case AuthController doesn't provide a
-    // picturePath yet
-    public static int register(String username, String email, String password) {
-        return register(username, email, password, null);
-    }
-
     // Login validation (returns true if email and password match)
     public static boolean login(String email, String password) {
         String storedHash = DatabaseService.getUserPasswordHash(email);

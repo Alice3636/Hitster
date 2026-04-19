@@ -1,4 +1,5 @@
 package com.hitster.controllers;
+
 import com.hitster.network.AuthNetworkService;
 import com.hitster.session.UserSession;
 
@@ -130,5 +131,10 @@ public class LoginController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    @FXML
+    void goToForgotPassword(MouseEvent event) {
+        navigateToNode((Node) event.getSource(), "/views/forgotPassword.fxml");
     }
 }

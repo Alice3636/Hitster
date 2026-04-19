@@ -5,7 +5,10 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.hitster.model.Song;
 import com.hitster.repository.DBManager;
@@ -21,17 +24,19 @@ public class DatabaseService {
      * @return new user ID, or -1 if something failed
      */
     public static int registerUser(String username, String email, String passwordHash, String picturePath) {
-        String sql = "{CALL sp_RegisterUser(?, ?, ?, ?)}";
+        String sql = "{CALL sp_RegisterUser(?, ?, ?, ?, ?)}";
 
         try (CallableStatement cstmt = conn.prepareCall(sql)) {
             cstmt.setString(1, username);
             cstmt.setString(2, email);
             cstmt.setString(3, passwordHash);
             cstmt.setString(4, picturePath);
-            cstmt.registerOutParameter(4, Types.INTEGER);
+
+            cstmt.registerOutParameter(5, Types.INTEGER);
 
             cstmt.execute();
-            return cstmt.getInt(4);
+
+            return cstmt.getInt(5);
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -253,5 +258,92 @@ public class DatabaseService {
         } catch (SQLException e) {
             System.err.println("Error saving user token: " + e.getMessage());
         }
+    }
+
+    // Fetch all songs for the admin editor
+    public static List<Map<String, Object>> getAllSongs() {
+        List<Map<String, Object>> songList = new ArrayList<>();
+        // Adjust column names to match your actual database!
+        String sql = "SELECT song_id, title, artist, release_year, url FROM Songs";
+
+        try (Connection conn = DBManager.connect();
+                java.sql.Statement stmt = conn.createStatement();
+                java.sql.ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                Map<String, Object> song = new HashMap<>();
+                song.put("id", rs.getInt("song_id"));
+                song.put("title", rs.getString("title"));
+                song.put("artist", rs.getString("artist"));
+                song.put("year", rs.getInt("release_year"));
+                song.put("link", rs.getString("url"));
+                songList.add(song);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error fetching all songs: " + e.getMessage());
+        }
+        return songList;
+    }
+
+    // Delete a batch of users
+    public static boolean deleteUsers(List<Integer> userIds) {
+        // Creates a string of placeholders like "?, ?, ?"
+        String placeholders = String.join(",", java.util.Collections.nCopies(userIds.size(), "?"));
+        String sql = "DELETE FROM Users WHERE user_id IN (" + placeholders + ")";
+
+        try (Connection conn = DBManager.connect();
+                java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            for (int i = 0; i < userIds.size(); i++) {
+                pstmt.setInt(i + 1, userIds.get(i));
+            }
+            pstmt.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            System.err.println("Error deleting users: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // Delete a batch of songs
+    public static boolean deleteSongs(List<Integer> songIds) {
+        String placeholders = String.join(",", java.util.Collections.nCopies(songIds.size(), "?"));
+        String sql = "DELETE FROM Songs WHERE song_id IN (" + placeholders + ")";
+
+        try (Connection conn = DBManager.connect();
+                java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            for (int i = 0; i < songIds.size(); i++) {
+                pstmt.setInt(i + 1, songIds.get(i));
+            }
+            pstmt.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            System.err.println("Error deleting songs: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public static List<Map<String, Object>> getAllUsers() {
+        List<Map<String, Object>> userList = new ArrayList<>();
+        // Make sure "user_id", "username", and "email" match your actual MySQL column
+        // names!
+        String sql = "SELECT user_id, username, email FROM Users";
+
+        try (Connection conn = DBManager.connect();
+                java.sql.Statement stmt = conn.createStatement();
+                java.sql.ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                Map<String, Object> user = new HashMap<>();
+                user.put("id", rs.getInt("user_id"));
+                user.put("username", rs.getString("username"));
+                user.put("email", rs.getString("email"));
+                userList.add(user);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error fetching all users: " + e.getMessage());
+        }
+        return userList;
     }
 }

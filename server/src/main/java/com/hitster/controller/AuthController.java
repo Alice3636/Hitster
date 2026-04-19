@@ -34,14 +34,28 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
     }
 
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+
+        if (email == null || email.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Email is required.");
+        }
+
+        System.out.println("Password reset requested for email: " + email);
+
+        return ResponseEntity.ok("If an account exists with that email, a reset link has been sent.");
+    }
+
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody Map<String, String> request) {
         String username = request.get("username");
         String email = request.get("email");
         String password = request.get("password");
+        String picturePath = request.get("picturePath");
 
         // 1. Register the user in the database
-        int newUserId = AuthService.register(username, email, password);
+        int newUserId = AuthService.register(username, email, password, picturePath);
 
         if (newUserId > 0) {
             // 2. Generate a token for the new user

@@ -1,4 +1,4 @@
-package com.hitster.controllers;
+package com.hitster.client.controllers;
 
 import com.hitster.network.AuthNetworkService;
 import com.hitster.session.UserSession;
@@ -17,7 +17,11 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+
+import java.io.File;
 
 public class RegisterController {
 
@@ -27,6 +31,9 @@ public class RegisterController {
     private TextField usernameField;
     @FXML
     private TextField emailField;
+
+    @FXML
+    private ImageView profileImageView;
 
     @FXML
     private PasswordField passwordField;
@@ -45,6 +52,9 @@ public class RegisterController {
     @FXML
     private Button registerButton;
 
+    @FXML
+    private Text LoginHereText;
+
     private boolean isPasswordVisible = false;
     private boolean isConfirmPasswordVisible = false;
     private final AuthNetworkService authService = new AuthNetworkService();
@@ -58,6 +68,37 @@ public class RegisterController {
         if (confirmPasswordTextField != null && confirmPasswordField != null) {
             confirmPasswordTextField.textProperty().bindBidirectional(confirmPasswordField.textProperty());
         }
+
+        // Bind the text click event programmatically since it's missing from the FXML
+        if (LoginHereText != null) {
+            LoginHereText.setOnMouseClicked(this::goToLogin);
+        }
+    }
+
+    @FXML
+    void handleImageUpload(ActionEvent event) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Select Profile Picture");
+        
+        // Filter for image files only
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif")
+        );
+
+        // Get the current stage to display the file chooser dialog
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        File selectedFile = fileChooser.showOpenDialog(stage);
+
+        if (selectedFile != null) {
+            // Convert file path to URI and set the image
+            String imagePath = selectedFile.toURI().toString();
+            Image image = new Image(imagePath);
+            profileImageView.setImage(image);
+            
+            // Make the image view visible once a picture is selected
+            profileImageView.setVisible(true);
+            profileImageView.setManaged(true);
+        }
     }
 
     @FXML
@@ -66,6 +107,7 @@ public class RegisterController {
         String email = emailField.getText();
         String password = passwordField.getText();
         String confirmPassword = confirmPasswordField.getText();
+        String picturePath = profileImageView.getImage() != null ? profileImageView.getImage().getUrl() : null;
 
         if (username == null || username.isEmpty() || email == null || email.isEmpty() ||
                 password == null || password.isEmpty() || confirmPassword == null || confirmPassword.isEmpty()) {
@@ -81,10 +123,10 @@ public class RegisterController {
         registerButton.setDisable(true);
         registerButton.setText("REGISTERING...");
 
-        authService.register(username, email, password).thenAccept(response -> {
+        authService.register(username, email, password, picturePath).thenAccept(response -> {
             Platform.runLater(() -> {
                 registerButton.setDisable(false);
-                registerButton.setText("REGISTER");
+                registerButton.setText("CREATE ACCOUNT");
 
                 if (response.statusCode() == 200) {
 
@@ -98,10 +140,10 @@ public class RegisterController {
                 }
             });
         }).exceptionally(ex -> {
-            
+
             Platform.runLater(() -> {
                 registerButton.setDisable(false);
-                registerButton.setText("REGISTER");
+                registerButton.setText("CREATE ACCOUNT");
                 showAlert("Connection Error", "Could not reach the server. Is it running?\n" + ex.getMessage());
             });
             return null;

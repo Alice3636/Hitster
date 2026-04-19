@@ -1,7 +1,9 @@
 package com.hitster.controllers;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import java.util.List;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hitster.model.PlayerScore;
 import com.hitster.network.StatsNetworkService;
 
@@ -20,9 +22,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
-import java.lang.reflect.Type;
-import java.util.List;
-
 public class LeaderboardController {
 
     @FXML
@@ -39,7 +38,9 @@ public class LeaderboardController {
 
     @FXML
     private TableColumn<PlayerScore, Integer> winsColumn;
-    private final StatsNetworkService statsService = new StatsNetworkService();
+
+    // Fixed the service name here!
+    private final StatsNetworkService statsNetworkService = new StatsNetworkService();
 
     @FXML
     public void initialize() {
@@ -51,22 +52,34 @@ public class LeaderboardController {
     }
 
     void fillLeaderboard() {
-        statsService.getLeaderboard().thenAccept(response -> {
+        // Make sure your StatsNetworkService has a getLeaderboard() method!
+        statsNetworkService.getLeaderboard().thenAccept(response -> {
             if (response.statusCode() == 200) {
-                // Parse the JSON array into a List of PlayerScore objects
-                Gson gson = new Gson();
-                Type listType = new TypeToken<List<PlayerScore>>() {
-                }.getType();
-                List<PlayerScore> serverData = gson.fromJson(response.body(), listType);
+                try {
+                    String jsonBody = response.body();
 
-                // Convert to JavaFX ObservableList and update UI
-                Platform.runLater(() -> {
-                    ObservableList<PlayerScore> leaderboard = FXCollections.observableArrayList(serverData);
-                    leaderboardTable.setItems(leaderboard);
-                });
+                    // Swapped GSON for Jackson (ObjectMapper) to match your Admin screens
+                    ObjectMapper mapper = new ObjectMapper();
+                    List<PlayerScore> scoreList = mapper.readValue(
+                            jsonBody,
+                            new TypeReference<List<PlayerScore>>() {
+                            });
+
+                    ObservableList<PlayerScore> leaderboardData = FXCollections.observableArrayList(scoreList);
+
+                    Platform.runLater(() -> {
+                        leaderboardTable.setItems(leaderboardData);
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    System.out.println("Failed to parse leaderboard data.");
+                }
             } else {
-                System.err.println("Failed to load leaderboard: " + response.statusCode());
+                System.out.println("Failed to fetch leaderboard: " + response.statusCode());
             }
+        }).exceptionally(ex -> {
+            ex.printStackTrace();
+            return null;
         });
     }
 
@@ -82,6 +95,7 @@ public class LeaderboardController {
             stage.show();
         } catch (Exception e) {
             e.printStackTrace();
+            System.out.println("Error returning to lobby.");
         }
     }
 }
