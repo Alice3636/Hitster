@@ -1,9 +1,11 @@
 package com.hitster.controllers;
 
+import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import com.hitster.client.utils.SceneNavigator;
 import com.hitster.network.GameNetworkService;
 import com.hitster.session.GameManager;
 import com.hitster.session.UserSession;
@@ -166,25 +168,18 @@ public class LobbyController {
         pollingExecutor.scheduleAtFixedRate(() -> {
             networkService.checkMatchStatus().thenAccept(response -> {
                 String body = response.body();
-                
                 if (body.contains("\"FOUND\"")) {
                     stopPolling();
                     JsonObject jsonResponse = JsonParser.parseString(body).getAsJsonObject();
                     Long gameId = jsonResponse.get("game_id").getAsLong();
-                    GameManager.getInstance().startGame(gameId);
+                    
+                    com.hitster.session.GameManager.getInstance().startGame(gameId);
+                    
                     Platform.runLater(() -> {
-                         try {
-                            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/profile.fxml"));
-                            Parent root = loader.load();
-                            Scene scene = new Scene(root);
-                            Stage stage = (Stage)  statusLabel.getScene().getWindow();
-                            stage.setScene(scene);
-                            stage.setMaximized(true); 
-                            stage.show();
-                        } 
-                        catch (Exception e) {
+                        try {
+                            SceneNavigator.loadScene(SceneNavigator.GAME_VIEW_SCREEN);
+                        } catch (IOException e) {
                             e.printStackTrace();
-                            System.out.println("Error loading screen.");
                         }
                     });
                 }

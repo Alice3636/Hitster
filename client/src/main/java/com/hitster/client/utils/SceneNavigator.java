@@ -13,22 +13,20 @@ public class SceneNavigator {
     public static final String PROFILE_SCREEN = "/views/profile.fxml";
     public static final String FORGOT_PASSWORD_SCREEN = "/views/forgotPassword.fxml";
     public static final String ADMIN_EDIT_SONGS_SCREEN = "/views/AdminEditSongs.fxml";
-    public static final String ADMIN_EDIT_SONGS_USERS = "/views/AdminEditUsers.fxml";
+    public static final String ADMIN_EDIT_USERS_SCREEN = "/views/AdminEditUsers.fxml";
     public static final String GAME_VIEW_SCREEN = "/views/gameView.fxml";
     public static final String LEADERBOARD_SCREEN = "/views/leaderboard.fxml";
-    public static final String REGISTER_SCREEN = "/views/leaderboard.fxml";
-    
+    public static final String REGISTER_SCREEN = "/views/register.fxml"; 
 
     private static Stage primaryStage;
 
-    
     public static void setPrimaryStage(Stage stage) {
         primaryStage = stage;
     }
 
     public static void loadScene(String fxmlPath) throws IOException {
         if (primaryStage == null) {
-            throw new IllegalStateException("Primary Stage is not set in SceneNavigator!");
+            throw new IllegalStateException("Primary Stage is not set!");
         }
 
         FXMLLoader loader = new FXMLLoader(SceneNavigator.class.getResource(fxmlPath));
