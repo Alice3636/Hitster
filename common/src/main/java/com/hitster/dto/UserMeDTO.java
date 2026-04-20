@@ -1,5 +1,7 @@
 package com.hitster.dto;
 
+import java.util.List;
+
 public class UserMeDTO {
 
     private Long userId;
