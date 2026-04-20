@@ -1,4 +1,4 @@
-package com.hitster.client.controllers;
+package com.hitster.controllers;
 
 import com.hitster.network.AuthNetworkService;
 import com.hitster.session.UserSession;
@@ -25,35 +25,18 @@ import java.io.File;
 
 public class RegisterController {
 
-    @FXML
-    private Button backButton;
-    @FXML
-    private TextField usernameField;
-    @FXML
-    private TextField emailField;
-
-    @FXML
-    private ImageView profileImageView;
-
-    @FXML
-    private PasswordField passwordField;
-    @FXML
-    private TextField passwordTextField;
-    @FXML
-    private ImageView passwordEyeIcon;
-
-    @FXML
-    private PasswordField confirmPasswordField;
-    @FXML
-    private TextField confirmPasswordTextField;
-    @FXML
-    private ImageView confirmPasswordEyeIcon;
-
-    @FXML
-    private Button registerButton;
-
-    @FXML
-    private Text LoginHereText;
+    @FXML private Button backButton;
+    @FXML private TextField usernameField;
+    @FXML private TextField emailField;
+    @FXML private ImageView profileImageView;
+    @FXML private PasswordField passwordField;
+    @FXML private TextField passwordTextField;
+    @FXML private ImageView passwordEyeIcon;
+    @FXML private PasswordField confirmPasswordField;
+    @FXML private TextField confirmPasswordTextField;
+    @FXML private ImageView confirmPasswordEyeIcon;
+    @FXML private Button registerButton;
+    @FXML private Text LoginHereText;
 
     private boolean isPasswordVisible = false;
     private boolean isConfirmPasswordVisible = false;
@@ -61,7 +44,6 @@ public class RegisterController {
 
     @FXML
     public void initialize() {
-
         if (passwordTextField != null && passwordField != null) {
             passwordTextField.textProperty().bindBidirectional(passwordField.textProperty());
         }
@@ -69,7 +51,6 @@ public class RegisterController {
             confirmPasswordTextField.textProperty().bindBidirectional(confirmPasswordField.textProperty());
         }
 
-        // Bind the text click event programmatically since it's missing from the FXML
         if (LoginHereText != null) {
             LoginHereText.setOnMouseClicked(this::goToLogin);
         }
@@ -80,22 +61,18 @@ public class RegisterController {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Select Profile Picture");
         
-        // Filter for image files only
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif")
         );
 
-        // Get the current stage to display the file chooser dialog
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         File selectedFile = fileChooser.showOpenDialog(stage);
 
         if (selectedFile != null) {
-            // Convert file path to URI and set the image
             String imagePath = selectedFile.toURI().toString();
             Image image = new Image(imagePath);
             profileImageView.setImage(image);
             
-            // Make the image view visible once a picture is selected
             profileImageView.setVisible(true);
             profileImageView.setManaged(true);
         }
@@ -129,7 +106,6 @@ public class RegisterController {
                 registerButton.setText("CREATE ACCOUNT");
 
                 if (response.statusCode() == 200) {
-
                     String token = response.body();
                     UserSession.getInstance().setToken(token);
                     UserSession.getInstance().setUserName(username);
@@ -140,7 +116,6 @@ public class RegisterController {
                 }
             });
         }).exceptionally(ex -> {
-
             Platform.runLater(() -> {
                 registerButton.setDisable(false);
                 registerButton.setText("CREATE ACCOUNT");

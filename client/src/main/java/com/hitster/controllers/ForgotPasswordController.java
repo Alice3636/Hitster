@@ -40,7 +40,6 @@ public class ForgotPasswordController {
                 resetButton.setText("SEND RESET LINK");
 
                 if (response.statusCode() == 200) {
-                    // Show a success message and send them back to login
                     showAlert("Success", "If an account exists with that email, a reset link has been sent.", Alert.AlertType.INFORMATION);
                     navigateToNode((Node) event.getSource(), "/views/login.fxml");
                 } else {

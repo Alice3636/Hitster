@@ -26,59 +26,40 @@ import java.util.stream.Collectors;
 
 public class AdminEditSongsController {
 
-    @FXML
-    private Button navSongsButton;
-    @FXML
-    private Button navUsersButton;
-    @FXML
-    private TextField searchField;
-    @FXML
-    private Button addSongButton;
-    @FXML
-    private Button deleteSelectedButton;
-    @FXML
-    private TableView<SongRow> songsTable;
-    @FXML
-    private TableColumn<SongRow, Boolean> selectColumn;
-    @FXML
-    private TableColumn<SongRow, Integer> idColumn;
-    @FXML
-    private TableColumn<SongRow, String> titleColumn;
-    @FXML
-    private TableColumn<SongRow, String> artistColumn;
-    @FXML
-    private TableColumn<SongRow, Integer> yearColumn;
-    @FXML
-    private TableColumn<SongRow, String> linkColumn;
-    @FXML
-    private TableColumn<SongRow, Void> editColumn;
-    @FXML
-    private Button backButton;
+    @FXML private Button navSongsButton;
+    @FXML private Button navUsersButton;
+    @FXML private TextField searchField;
+    @FXML private Button addSongButton;
+    @FXML private Button deleteSelectedButton;
+    @FXML private TableView<SongRow> songsTable;
+    @FXML private TableColumn<SongRow, Boolean> selectColumn;
+    @FXML private TableColumn<SongRow, Integer> idColumn;
+    @FXML private TableColumn<SongRow, String> titleColumn;
+    @FXML private TableColumn<SongRow, String> artistColumn;
+    @FXML private TableColumn<SongRow, Integer> yearColumn;
+    @FXML private TableColumn<SongRow, String> linkColumn;
+    @FXML private TableColumn<SongRow, Void> editColumn;
+    @FXML private Button backButton;
 
     private final ObservableList<SongRow> masterSongData = FXCollections.observableArrayList();
     private FilteredList<SongRow> filteredData;
 
-    // 1. Added the Network Service!
     private final AdminNetworkService adminService = new AdminNetworkService();
 
     @FXML
     public void initialize() {
-        // Setup Standard Columns
         idColumn.setCellValueFactory(cellData -> cellData.getValue().idProperty().asObject());
         titleColumn.setCellValueFactory(cellData -> cellData.getValue().titleProperty());
         artistColumn.setCellValueFactory(cellData -> cellData.getValue().artistProperty());
         yearColumn.setCellValueFactory(cellData -> cellData.getValue().yearProperty().asObject());
         linkColumn.setCellValueFactory(cellData -> cellData.getValue().linkProperty());
 
-        // Setup Checkbox Column
         selectColumn.setCellValueFactory(cellData -> cellData.getValue().selectedProperty());
         selectColumn.setCellFactory(CheckBoxTableCell.forTableColumn(selectColumn));
         songsTable.setEditable(true);
 
-        // Setup Custom "Edit" Button Column
         setupEditColumn();
 
-        // Setup Search Filter
         filteredData = new FilteredList<>(masterSongData, p -> true);
         searchField.textProperty().addListener((observable, oldValue, newValue) -> {
             filteredData.setPredicate(song -> {
@@ -94,12 +75,10 @@ public class AdminEditSongsController {
         sortedData.comparatorProperty().bind(songsTable.comparatorProperty());
         songsTable.setItems(sortedData);
 
-        // Button Actions & Navigation
         navUsersButton.setOnAction(e -> navigateToNode((Node) e.getSource(), "/views/AdminEditAccounts.fxml"));
         addSongButton.setOnAction(this::handleAddSong);
         deleteSelectedButton.setOnAction(this::handleDeleteSelected);
 
-        // Load Initial Data from DB
         loadSongData();
     }
 
@@ -126,7 +105,6 @@ public class AdminEditSongsController {
         });
     }
 
-    // 2. Updated to fetch data from the Spring Boot Backend
     private void loadSongData() {
         adminService.getAllSongs().thenAccept(response -> {
             Platform.runLater(() -> {
@@ -154,28 +132,23 @@ public class AdminEditSongsController {
                         showAlert("Parse Error", "Failed to read song data from server.", Alert.AlertType.ERROR);
                     }
                 } else {
-                    showAlert("Server Error", "Failed to load songs. Status: " + response.statusCode(),
-                            Alert.AlertType.ERROR);
+                    showAlert("Server Error", "Failed to load songs. Status: " + response.statusCode(), Alert.AlertType.ERROR);
                 }
             });
         }).exceptionally(ex -> {
-            Platform.runLater(() -> showAlert("Connection Error", "Could not reach the server.\n" + ex.getMessage(),
-                    Alert.AlertType.ERROR));
+            Platform.runLater(() -> showAlert("Connection Error", "Could not reach the server.\n" + ex.getMessage(), Alert.AlertType.ERROR));
             return null;
         });
     }
 
     private void handleAddSong(ActionEvent event) {
-        // TODO: Open an "Add Song" pop-up dialog or navigate to a new screen
         showAlert("Add Song", "This will open the song creation form.", Alert.AlertType.INFORMATION);
     }
 
     private void handleEditSong(SongRow song) {
-        // TODO: Open an "Edit Song" pop-up pre-filled with this song's data
         showAlert("Edit Song", "Editing: " + song.getTitle(), Alert.AlertType.INFORMATION);
     }
 
-    // 3. Updated to send Delete requests to the Backend
     private void handleDeleteSelected(ActionEvent event) {
         List<SongRow> selectedSongs = masterSongData.stream()
                 .filter(SongRow::isSelected)
@@ -192,16 +165,13 @@ public class AdminEditSongsController {
 
         confirm.showAndWait().ifPresent(response -> {
             if (response == ButtonType.YES) {
-                // Extract just the IDs from the selected rows
                 List<Integer> selectedIds = selectedSongs.stream()
                         .map(SongRow::getId)
                         .collect(Collectors.toList());
 
-                // Send to backend
                 adminService.deleteSongs(selectedIds).thenAccept(apiResponse -> {
                     Platform.runLater(() -> {
                         if (apiResponse.statusCode() == 200) {
-                            // If DB deletion was successful, remove from UI table
                             masterSongData.removeAll(selectedSongs);
                             showAlert("Success", "Songs deleted successfully.", Alert.AlertType.INFORMATION);
                         } else {
@@ -209,8 +179,7 @@ public class AdminEditSongsController {
                         }
                     });
                 }).exceptionally(ex -> {
-                    Platform.runLater(() -> showAlert("Connection Error",
-                            "Could not reach the server.\n" + ex.getMessage(), Alert.AlertType.ERROR));
+                    Platform.runLater(() -> showAlert("Connection Error", "Could not reach the server.\n" + ex.getMessage(), Alert.AlertType.ERROR));
                     return null;
                 });
             }
@@ -245,7 +214,6 @@ public class AdminEditSongsController {
         alert.showAndWait();
     }
 
-    // --- INNER CLASS FOR TABLE DATA ---
     public static class SongRow {
         private final BooleanProperty selected;
         private final IntegerProperty id;

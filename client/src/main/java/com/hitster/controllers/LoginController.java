@@ -2,7 +2,7 @@ package com.hitster.controllers;
 
 import com.hitster.network.AuthNetworkService;
 import com.hitster.session.UserSession;
-
+import com.hitster.client.utils.SceneNavigator;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -97,8 +97,12 @@ public class LoginController {
 
     @FXML
     void goToRegister(MouseEvent event) {
-
-        navigateToNode((Node) event.getSource(), "/views/register.fxml");
+        try {
+            SceneNavigator.loadScene(SceneNavigator.REGISTER_SCREEN);
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+            System.err.println("Failed to load Register screen.");
+        }
     }
 
     @FXML
