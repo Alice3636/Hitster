@@ -1,8 +1,8 @@
 package com.hitster.controllers;
 
 import com.hitster.client.utils.SceneNavigator;
-import com.hitster.dto.MatchHistoryDTO;
-import com.hitster.dto.UserProfileDTO;
+import com.hitster.dto.user.MatchHistoryDTO;
+import com.hitster.dto.user.UserProfileResponseDTO;
 import com.hitster.network.UserNetworkService;
 import com.hitster.session.UserSession;
 
@@ -67,9 +67,14 @@ public class ProfileController {
 
     @FXML
     public void initialize() {
-        opponentCol.setCellValueFactory(new PropertyValueFactory<>("enemyUsername"));
-        dateCol.setCellValueFactory(new PropertyValueFactory<>("date"));
-        resultCol.setCellValueFactory(new PropertyValueFactory<>("gameStatus"));
+        opponentCol.setCellValueFactory(cellData -> 
+            new javafx.beans.property.SimpleStringProperty(cellData.getValue().enemyUsername()));
+            
+        dateCol.setCellValueFactory(cellData -> 
+            new javafx.beans.property.SimpleStringProperty(cellData.getValue().date()));
+            
+        resultCol.setCellValueFactory(cellData -> 
+            new javafx.beans.property.SimpleStringProperty(cellData.getValue().gameStatus()));
 
         loadUserProfile();
     }
@@ -80,16 +85,16 @@ public class ProfileController {
                 String jsonBody = response.body();
                 
                 Gson gson = new Gson();
-                UserProfileDTO userProfile = gson.fromJson(jsonBody, UserProfileDTO.class);
+                UserProfileResponseDTO userProfile = gson.fromJson(jsonBody, UserProfileResponseDTO.class);
                 
                 Platform.runLater(() -> {
-                    if (usernameLabel != null) usernameLabel.setText(userProfile.getUsername());
-                    if (emailLabel != null) emailLabel.setText(userProfile.getEmail());
-                    if (totalWinsLabel != null) totalWinsLabel.setText(String.valueOf(userProfile.getTotalWins()));
-                    if (winRateLabel != null) winRateLabel.setText(String.format("%.1f%%", userProfile.getWinRate()));
+                    if (usernameLabel != null) usernameLabel.setText(userProfile.username());
+                    if (emailLabel != null) emailLabel.setText(userProfile.email());
+                    if (totalWinsLabel != null) totalWinsLabel.setText(String.valueOf(userProfile.totalWins()));
+                    if (winRateLabel != null) winRateLabel.setText(String.format("%.1f%%", userProfile.winRate()));
                     
-                    if (userProfile.getMatchHistory() != null) {
-                        ObservableList<MatchHistoryDTO> tableData = FXCollections.observableArrayList(userProfile.getMatchHistory());
+                    if (userProfile.matchHistory() != null) {
+                        ObservableList<MatchHistoryDTO> tableData = FXCollections.observableArrayList(userProfile.matchHistory());
                         matchHistoryTable.setItems(tableData);
                     }
                 });
@@ -117,8 +122,6 @@ public class ProfileController {
             System.out.println("Error returning to lobby.");
         }
     }
-
-    
 
     @FXML
     void handleEditUsername(ActionEvent event) {
@@ -177,27 +180,27 @@ public class ProfileController {
 
     @FXML
     private void onDeleteAccountClick() {
-    Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
-    confirmAlert.setTitle("Delete Account");
-    confirmAlert.setHeaderText("Are you sure you want to delete your account?");
-    confirmAlert.setContentText("This action is final and your game data cannot be restored.");
+        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmAlert.setTitle("Delete Account");
+        confirmAlert.setHeaderText("Are you sure you want to delete your account?");
+        confirmAlert.setContentText("This action is final and your game data cannot be restored.");
 
-    confirmAlert.showAndWait().ifPresent(response -> {
-        if (response == ButtonType.OK) {
-            userNetworkService.deleteAccount().thenAccept(httpResponse -> {
-                Platform.runLater(() -> {
-                    if (httpResponse.statusCode() == 200) {
-                        handleDeletionSuccess();
-                    } else {
-                        showErrorAlert("Deletion Error", "The server failed to delete the account. Please try again later.");
-                    }
+        confirmAlert.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                userNetworkService.deleteAccount().thenAccept(httpResponse -> {
+                    Platform.runLater(() -> {
+                        if (httpResponse.statusCode() == 200) {
+                            handleDeletionSuccess();
+                        } else {
+                            showErrorAlert("Deletion Error", "The server failed to delete the account. Please try again later.");
+                        }
+                    });
+                }).exceptionally(ex -> {
+                    Platform.runLater(() -> showErrorAlert("Network Error", "Could not connect to the server."));
+                    return null;
                 });
-            }).exceptionally(ex -> {
-                Platform.runLater(() -> showErrorAlert("Network Error", "Could not connect to the server."));
-                return null;
-            });
-        }
-    });
+            }
+        });
     }
 
     private void handleDeletionSuccess() {
@@ -210,11 +213,11 @@ public class ProfileController {
     }
 
     private void showErrorAlert(String title, String message) {
-    Alert alert = new Alert(Alert.AlertType.ERROR);
-    alert.setTitle(title);
-    alert.setHeaderText(null);
-    alert.setContentText(message);
-    alert.showAndWait();
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     @FXML

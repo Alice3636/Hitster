@@ -2,7 +2,7 @@ package com.hitster.network;
 
 import com.google.gson.Gson;
 import com.hitster.config.AppConfig;
-import com.hitster.dto.UpdateProfileDTO;
+import com.hitster.dto.user.UpdateProfileRequestDTO;
 import com.hitster.session.UserSession;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -50,7 +50,7 @@ public class UserNetworkService {
 
     public CompletableFuture<HttpResponse<String>> updateProfileDetails(String newUsername, String newEmail) {
         String token = UserSession.getInstance().getToken();
-        UpdateProfileDTO updateRequest = new UpdateProfileDTO(newUsername, newEmail);
+        UpdateProfileRequestDTO updateRequest = new UpdateProfileRequestDTO(newUsername, newEmail, null);
         
         Gson gson = new Gson();
         String jsonPayload = gson.toJson(updateRequest);

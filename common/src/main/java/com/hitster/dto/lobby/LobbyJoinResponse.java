@@ -1,4 +1,6 @@
-package com.hitster.dto;
+// NOT READY
+
+package com.hitster.dto.lobby;
 
 public class LobbyJoinResponse {
     private String roomId;
