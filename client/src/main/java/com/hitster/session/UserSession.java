@@ -31,8 +31,6 @@ public class UserSession {
     public boolean getIsAdmin() { return isAdmin; }
     public void setIsAdmin(boolean isAdmin) { this.isAdmin = isAdmin; }
 
-
- 
     public void cleanUserSession() {
         this.userId = null;
         this.userName = null;
