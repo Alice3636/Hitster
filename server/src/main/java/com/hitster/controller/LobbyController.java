@@ -1,9 +1,6 @@
 package com.hitster.controller;
 
-import com.hitster.dto.JoinLobbyRequestDTO;
-import com.hitster.dto.LobbyJoinResponse;
-import com.hitster.dto.LobbyStatusResponse;
-import com.hitster.model.GameSession;
+import com.hitster.dto.lobby.LobbyStatusResponseDTO;
 import com.hitster.model.Player;
 import com.hitster.model.Room;
 import com.hitster.model.Song;
@@ -28,8 +25,7 @@ public class LobbyController {
     }
 
     @PostMapping("/join")
-    public LobbyJoinResponse joinLobby(@RequestBody(required = false) JoinLobbyRequestDTO request,
-                                       HttpServletRequest httpRequest) {
+    public String joinLobby(HttpServletRequest httpRequest) {
         Object jwtUserIdObj = httpRequest.getAttribute("jwtUserId");
         Object jwtUsernameObj = httpRequest.getAttribute("jwtUsername");
 
@@ -38,39 +34,22 @@ public class LobbyController {
         }
 
         String playerId = String.valueOf(jwtUserIdObj);
-        String username = (request != null && request.getUsername() != null && !request.getUsername().isBlank())
-                ? request.getUsername()
-                : String.valueOf(jwtUsernameObj);
+        String username = String.valueOf(jwtUsernameObj);
 
         Player player = new Player(playerId, username);
         Room room = lobbyManager.matchPlayerToRoom(player);
 
         if (room.isFull() && !room.isStarted()) {
             List<Song> songs = createSongsPool();
-            GameSession session = gameManager.startGameForRoom(room, songs);
-
-            return new LobbyJoinResponse(
-                    room.getId(),
-                    true,
-                    true,
-                    session.getId(),
-                    "Room is full. Game started."
-            );
+            gameManager.startGameForRoom(room, songs);
+            return "Game started";
         }
 
-        GameSession session = room.getGameSession();
-
-        return new LobbyJoinResponse(
-                room.getId(),
-                room.isFull(),
-                room.isStarted(),
-                session != null ? session.getId() : null,
-                "Joined waiting room. Waiting for another player."
-        );
+        return "Joined waiting room";
     }
 
     @GetMapping("/status")
-    public LobbyStatusResponse getLobbyStatus(HttpServletRequest request) {
+    public LobbyStatusResponseDTO getLobbyStatus(HttpServletRequest request) {
         Object jwtUserIdObj = request.getAttribute("jwtUserId");
 
         if (jwtUserIdObj == null) {
@@ -81,15 +60,15 @@ public class LobbyController {
         Room room = lobbyManager.getRoomByPlayerId(playerId);
 
         if (room == null) {
-            return new LobbyStatusResponse("NOT_FOUND", null);
+            return new LobbyStatusResponseDTO("NOT_FOUND", null);
         }
 
         if (room.isStarted() && room.getGameSession() != null) {
             String gameId = room.getGameSession().getId();
-            return new LobbyStatusResponse("FOUND", gameId);
+            return new LobbyStatusResponseDTO("FOUND", gameId);
         }
 
-        return new LobbyStatusResponse("WAITING", null);
+        return new LobbyStatusResponseDTO("WAITING", null);
     }
 
     @PostMapping("/leave")

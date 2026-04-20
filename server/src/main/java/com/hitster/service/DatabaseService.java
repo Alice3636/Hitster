@@ -1,11 +1,11 @@
 package com.hitster.service;
 
-import com.hitster.dto.AdminSongDTO;
-import com.hitster.dto.AdminUserDTO;
-import com.hitster.dto.LeaderboardDTO;
-import com.hitster.dto.LeaderboardEntryDTO;
-import com.hitster.dto.UpdateMeRequestDTO;
-import com.hitster.dto.UserMeDTO;
+import com.hitster.dto.admin.AdminUserDTO;
+import com.hitster.dto.game.SongDTO;
+import com.hitster.dto.user.LeaderboardResponseDTO;
+import com.hitster.dto.user.LeaderboardEntryDTO;
+import com.hitster.dto.user.UpdateProfileRequestDTO;
+import com.hitster.dto.user.UserProfileResponseDTO;
 import com.hitster.repository.DBManager;
 
 import java.sql.*;
@@ -202,7 +202,7 @@ public class DatabaseService {
         }
     }
 
-    public static UserMeDTO getUserMeById(Long userId) {
+    public static UserProfileResponseDTO getUserMeById(Long userId) {
         String sql = "SELECT user_id, username, email, is_admin, total_winnings, profile_picture_path " +
                 "FROM Users WHERE user_id = ?";
 
@@ -211,12 +211,12 @@ public class DatabaseService {
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    return new UserMeDTO(
-                            rs.getLong("user_id"),
+                    return new UserProfileResponseDTO(
                             rs.getString("username"),
                             rs.getString("email"),
-                            rs.getBoolean("is_admin"),
-                            rs.getObject("total_winnings") != null ? rs.getInt("total_winnings") : null,
+                            rs.getObject("total_winnings") != null ? rs.getInt("total_winnings") : 0,
+                            0.0,
+                            new ArrayList<>(),
                             rs.getString("profile_picture_path")
                     );
                 }
@@ -228,13 +228,13 @@ public class DatabaseService {
         return null;
     }
 
-    public static boolean updateCurrentUser(Long userId, UpdateMeRequestDTO request) {
+    public static boolean updateCurrentUser(Long userId, UpdateProfileRequestDTO request) {
         String sql = "UPDATE Users SET username = ?, email = ?, profile_picture_path = ? WHERE user_id = ?";
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, request.getUsername());
-            pstmt.setString(2, request.getEmail());
-            pstmt.setString(3, request.getProfilePicturePath());
+            pstmt.setString(1, request.username());
+            pstmt.setString(2, request.email());
+            pstmt.setString(3, request.profilePicturePath());
             pstmt.setLong(4, userId);
 
             return pstmt.executeUpdate() > 0;
@@ -244,10 +244,11 @@ public class DatabaseService {
         }
     }
 
-    public static LeaderboardDTO getLeaderboard() {
+    public static LeaderboardResponseDTO getLeaderboard() {
         String sql = "SELECT user_id, username, total_winnings, profile_picture_path " +
                 "FROM Users ORDER BY total_winnings DESC, user_id ASC";
         List<LeaderboardEntryDTO> entries = new ArrayList<>();
+        int rank = 1;
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
@@ -255,31 +256,31 @@ public class DatabaseService {
             while (rs.next()) {
                 Integer winnings = rs.getObject("total_winnings") != null ? rs.getInt("total_winnings") : 0;
 
-                entries.add(new LeaderboardEntryDTO(
-                        rs.getLong("user_id"),
-                        rs.getString("username"),
-                        winnings,
-                        rs.getString("profile_picture_path")
-                ));
+        entries.add(new LeaderboardEntryDTO(
+        rank++,
+        rs.getInt("user_id"),
+        rs.getString("username"),
+        winnings
+        ));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        return new LeaderboardDTO(entries);
+        return new LeaderboardResponseDTO(entries);
     }
 
     // ================= SONGS =================
 
-    public static List<AdminSongDTO> getAllSongs() {
+    public static List<SongDTO> getAllSongs() {
         String sql = "SELECT song_id, title, artist, release_year, song_path FROM Songs ORDER BY song_id";
-        List<AdminSongDTO> songs = new ArrayList<>();
+        List<SongDTO> songs = new ArrayList<>();
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
 
             while (rs.next()) {
-                songs.add(new AdminSongDTO(
+                songs.add(new SongDTO(
                         rs.getLong("song_id"),
                         rs.getString("title"),
                         rs.getString("artist"),

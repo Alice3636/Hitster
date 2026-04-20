@@ -1,6 +1,8 @@
 package com.hitster.session;
 
-import com.hitster.dto.GameStateDTO;
+import com.hitster.dto.game.CardDTO;
+import com.hitster.dto.game.GameStateDTO;
+import java.util.List;
 
 public class GameManager {
 
@@ -16,7 +18,7 @@ public class GameManager {
         return instance;
     }
 
-    public void startGame(Long newGameId) {
+    public void startGame(String newGameId) {
         this.currentGameState = new GameStateDTO();
         this.currentGameState.setGameId(newGameId); 
     }
@@ -25,7 +27,7 @@ public class GameManager {
         this.currentGameState = newState;
     }
 
-    public Long getGameId() {
+    public String getGameId() {
         return currentGameState != null ? currentGameState.getGameId() : null;
     }
 
@@ -35,14 +37,14 @@ public class GameManager {
         return myId.equals(currentGameState.getCurrentPlayerId());
     }
 
-    public java.util.List<GameStateDTO.CardDTO> getMyTimeline() {
+    public List<CardDTO> getMyTimeline() {
         if (currentGameState == null) return null;
         Long myId = UserSession.getInstance().getUserId();
         return myId.equals(currentGameState.getPlayer1Id()) ? 
                currentGameState.getPlayer1Timeline() : currentGameState.getPlayer2Timeline();
     }
 
-    public java.util.List<GameStateDTO.CardDTO> getOpponentTimeline() {
+    public List<CardDTO> getOpponentTimeline() {
         if (currentGameState == null) return null;
         Long myId = UserSession.getInstance().getUserId();
         return myId.equals(currentGameState.getPlayer1Id()) ? 

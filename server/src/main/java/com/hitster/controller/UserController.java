@@ -1,8 +1,8 @@
 package com.hitster.controller;
 
-import com.hitster.dto.LeaderboardDTO;
-import com.hitster.dto.UpdateMeRequestDTO;
-import com.hitster.dto.UserMeDTO;
+import com.hitster.dto.user.LeaderboardResponseDTO;
+import com.hitster.dto.user.UpdateProfileRequestDTO;
+import com.hitster.dto.user.UserProfileResponseDTO;
 import com.hitster.service.DatabaseService;
 import com.hitster.service.EmailValidationUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,10 +15,10 @@ import java.util.Base64;
 public class UserController {
 
     @GetMapping("/me")
-    public UserMeDTO getMe(HttpServletRequest request) {
+    public UserProfileResponseDTO getMe(HttpServletRequest request) {
         Long userId = getJwtUserId(request);
 
-        UserMeDTO user = DatabaseService.getUserMeById(userId);
+        UserProfileResponseDTO user = DatabaseService.getUserMeById(userId);
         if (user == null) {
             throw new NotFoundException("User not found: " + userId);
         }
@@ -27,32 +27,32 @@ public class UserController {
     }
 
     @GetMapping("/leaderboard")
-    public LeaderboardDTO getLeaderboard() {
+    public LeaderboardResponseDTO getLeaderboard() {
         return DatabaseService.getLeaderboard();
     }
 
     @PutMapping("/me")
-    public UserMeDTO updateMe(@RequestBody UpdateMeRequestDTO request,
+    public UserProfileResponseDTO updateMe(@RequestBody UpdateProfileRequestDTO request,
                               HttpServletRequest httpRequest) {
         Long userId = getJwtUserId(httpRequest);
 
         if (request == null ||
-                isBlank(request.getUsername()) ||
-                isBlank(request.getEmail())) {
+                isBlank(request.username()) ||
+                isBlank(request.email())) {
             throw new IllegalArgumentException("Username and email are required.");
         }
 
-        if (!EmailValidationUtil.isValidEmail(request.getEmail())) {
+        if (!EmailValidationUtil.isValidEmail(request.email())) {
             throw new InvalidEmailException("Invalid email format or domain.");
         }
 
-        validateProfileImage(request.getProfilePicturePath());
+        validateProfileImage(request.profilePicturePath());
 
-        if (DatabaseService.usernameExistsForOtherUser(userId, request.getUsername())) {
+        if (DatabaseService.usernameExistsForOtherUser(userId, request.username())) {
             throw new DuplicateFieldException("TAKEN_USERNAME_ERR", "Username is already taken.");
         }
 
-        if (DatabaseService.emailExistsForOtherUser(userId, request.getEmail())) {
+        if (DatabaseService.emailExistsForOtherUser(userId, request.email())) {
             throw new DuplicateFieldException("TAKEN_EMAIL_ERR", "Email is already taken.");
         }
 
@@ -61,7 +61,7 @@ public class UserController {
             throw new IllegalArgumentException("User update failed.");
         }
 
-        UserMeDTO user = DatabaseService.getUserMeById(userId);
+        UserProfileResponseDTO user = DatabaseService.getUserMeById(userId);
         if (user == null) {
             throw new NotFoundException("User not found: " + userId);
         }

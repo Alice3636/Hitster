@@ -1,8 +1,8 @@
 package com.hitster.service;
 
 import com.hitster.controller.NotFoundException;
-import com.hitster.dto.GuessSongRequestDTO;
-import com.hitster.dto.PlaceSongRequestDTO;
+import com.hitster.dto.game.GuessSongRequestDTO;
+import com.hitster.dto.game.PlaceSongRequestDTO;
 import com.hitster.engine.GameEngine;
 import com.hitster.model.GamePhase;
 import com.hitster.model.GameSession;
@@ -66,8 +66,8 @@ public class GameManager {
         return gameEngine.placeSong(
                 session,
                 playerId,
-                request.getIndex_position(),
-                request.getSongId()
+                request.indexPosition(),
+                request.songId()
         );
     }
 
@@ -81,8 +81,8 @@ public class GameManager {
         return gameEngine.guessSong(
                 session,
                 playerId,
-                request.getArtist(),
-                request.getSong_name()
+                request.artist(),
+                request.songName()
         );
     }
 

@@ -1,7 +1,7 @@
 package com.hitster.controller;
 
-import com.hitster.dto.AdminSongDTO;
-import com.hitster.dto.AdminUserDTO;
+import com.hitster.dto.admin.AdminUserDTO;
+import com.hitster.dto.game.SongDTO;
 import com.hitster.service.DatabaseService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.*;
@@ -31,75 +31,75 @@ public class AdminController {
     }
 
     @GetMapping("/songs")
-    public List<AdminSongDTO> getAllSongs(HttpServletRequest request) {
+    public List<SongDTO> getAllSongs(HttpServletRequest request) {
         requireAdmin(request);
         return DatabaseService.getAllSongs();
     }
 
     @PostMapping("/songs")
-    public AdminSongDTO createSong(@RequestBody AdminSongDTO request, HttpServletRequest httpRequest) {
+    public SongDTO createSong(@RequestBody SongDTO request, HttpServletRequest httpRequest) {
         requireAdmin(httpRequest);
 
         if (request == null ||
-                isBlank(request.getTitle()) ||
-                isBlank(request.getArtist()) ||
-                request.getReleaseYear() <= 0 ||
-                isBlank(request.getAudioUrl())) {
+                isBlank(request.title()) ||
+                isBlank(request.artist()) ||
+                request.releaseYear() <= 0 ||
+                isBlank(request.audioUrl())) {
             throw new IllegalArgumentException("Title, artist, releaseYear, and audioUrl are required.");
         }
 
         Long newId = DatabaseService.createSong(
-                request.getTitle(),
-                request.getArtist(),
-                request.getReleaseYear(),
-                request.getAudioUrl()
+                request.title(),
+                request.artist(),
+                request.releaseYear(),
+                request.audioUrl()
         );
 
         if (newId == null) {
             throw new IllegalArgumentException("Song creation failed.");
         }
 
-        return new AdminSongDTO(
+        return new SongDTO(
                 newId,
-                request.getTitle(),
-                request.getArtist(),
-                request.getReleaseYear(),
-                request.getAudioUrl()
+                request.title(),
+                request.artist(),
+                request.releaseYear(),
+                request.audioUrl()
         );
     }
 
     @PutMapping("/songs/{id}")
-    public AdminSongDTO updateSong(@PathVariable Long id,
-                                   @RequestBody AdminSongDTO request,
+    public SongDTO updateSong(@PathVariable Long id,
+                                   @RequestBody SongDTO request,
                                    HttpServletRequest httpRequest) {
         requireAdmin(httpRequest);
 
         if (request == null ||
-                isBlank(request.getTitle()) ||
-                isBlank(request.getArtist()) ||
-                request.getReleaseYear() <= 0 ||
-                isBlank(request.getAudioUrl())) {
+                isBlank(request.title()) ||
+                isBlank(request.artist()) ||
+                request.releaseYear() <= 0 ||
+                isBlank(request.audioUrl())) {
             throw new IllegalArgumentException("Title, artist, releaseYear, and audioUrl are required.");
         }
 
         boolean updated = DatabaseService.updateSong(
                 id,
-                request.getTitle(),
-                request.getArtist(),
-                request.getReleaseYear(),
-                request.getAudioUrl()
+                request.title(),
+                request.artist(),
+                request.releaseYear(),
+                request.audioUrl()
         );
 
         if (!updated) {
             throw new NotFoundException("Song not found: " + id);
         }
 
-        return new AdminSongDTO(
+        return new SongDTO(
                 id,
-                request.getTitle(),
-                request.getArtist(),
-                request.getReleaseYear(),
-                request.getAudioUrl()
+                request.title(),
+                request.artist(),
+                request.releaseYear(),
+                request.audioUrl()
         );
     }
 
