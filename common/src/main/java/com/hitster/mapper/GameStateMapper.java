@@ -1,6 +1,8 @@
 package com.hitster.mapper;
 
-import com.hitster.dto.GameStateDTO;
+import com.hitster.dto.game.CardDTO;
+import com.hitster.dto.game.GameStateDTO;
+import com.hitster.dto.game.SongDTO;
 import com.hitster.model.GameSession;
 import com.hitster.model.Player;
 import com.hitster.model.Song;
@@ -20,8 +22,6 @@ public class GameStateMapper {
         dto.setGameId(session.getId());
         dto.setGameStatus(session.getStatus() != null ? session.getStatus().name() : null);
         dto.setTurnNumber(session.getTurnNumber());
-
-        // No timer implementation exists yet, so use 0 for now.
         dto.setTimeLeftSeconds(0);
 
         dto.setCurrentPlayerId(
@@ -32,7 +32,7 @@ public class GameStateMapper {
 
         dto.setCurrentSong(
                 session.getCurrentSong() != null
-                        ? toCurrentSongDTO(session.getCurrentSong())
+                        ? toSongDTO(session.getCurrentSong())
                         : null
         );
 
@@ -57,31 +57,27 @@ public class GameStateMapper {
         return dto;
     }
 
-    private static GameStateDTO.CurrentSongDTO toCurrentSongDTO(Song song) {
-        GameStateDTO.CurrentSongDTO dto = new GameStateDTO.CurrentSongDTO();
-        dto.setAudioUrl(song.getAudioUrl());
-        dto.setDetailsHidden(false);
-        dto.setTitle(song.getTitle());
-        dto.setArtist(song.getArtist());
-        dto.setYear(song.getYear());
-        return dto;
+    private static SongDTO toSongDTO(Song song) {
+        return new SongDTO(
+                parseLongOrNull(song.getId()),
+                song.getTitle(),
+                song.getArtist(),
+                song.getYear(),
+                song.getAudioUrl()
+        );
     }
 
-    private static List<GameStateDTO.CardDTO> toCardDTOList(List<SongCard> timeline) {
-        List<GameStateDTO.CardDTO> result = new ArrayList<>();
-
+    private static List<CardDTO> toCardDTOList(List<SongCard> timeline) {
+        List<CardDTO> result = new ArrayList<>();
         for (SongCard card : timeline) {
             Song song = card.getSong();
-
-            GameStateDTO.CardDTO dto = new GameStateDTO.CardDTO();
-            dto.setSongId(parseLongOrNull(song.getId()));
-            dto.setYear(song.getYear());
-            dto.setArtist(song.getArtist());
-            dto.setTitle(song.getTitle());
-
-            result.add(dto);
+            result.add(new CardDTO(
+                    parseLongOrNull(song.getId()),
+                    song.getYear(),
+                    song.getArtist(),
+                    song.getTitle()
+            ));
         }
-
         return result;
     }
 

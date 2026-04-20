@@ -9,8 +9,8 @@ import java.sql.SQLException;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import com.hitster.model.MatchHistoryObj;
-import com.hitster.model.PlayerScore;
+import com.hitster.dto.user.MatchHistoryDTO;
+import com.hitster.dto.user.LeaderboardEntryDTO;
 
 public class DatabaseLogic {
 
@@ -56,9 +56,9 @@ public class DatabaseLogic {
         }
     }
 
-    public static ObservableList<PlayerScore> getLeaderboardData() {
+    public static ObservableList<LeaderboardEntryDTO> getLeaderboardData() {
         int currentRank = 1;
-        ObservableList<PlayerScore> leaderboard = FXCollections.observableArrayList();
+        ObservableList<LeaderboardEntryDTO> leaderboard = FXCollections.observableArrayList();
     
         String query = "SELECT user_id, username, total_winnings FROM Users ORDER BY total_winnings DESC LIMIT 100"; 
         
@@ -71,7 +71,7 @@ public class DatabaseLogic {
                 String player = rs.getString("username");
                 int winnings = rs.getInt("total_winnings"); 
                 
-                leaderboard.add(new PlayerScore(currentRank, id, player, winnings));
+                leaderboard.add(new LeaderboardEntryDTO(currentRank, id, player, winnings));
                 currentRank++;
             }
         } catch (Exception e) {
@@ -82,11 +82,11 @@ public class DatabaseLogic {
     }
 
     public static int getTotalWinnings(int userId) {
-    int winnings = 0;
-    String query = "SELECT total_winnings FROM Users WHERE user_id = ?";
+        int winnings = 0;
+        String query = "SELECT total_winnings FROM Users WHERE user_id = ?";
 
-    try (Connection conn = DBManager.connect();
-            PreparedStatement ps = conn.prepareStatement(query)) {
+        try (Connection conn = DBManager.connect();
+             PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setInt(1, userId);
             
             try (ResultSet rs = ps.executeQuery()) {
@@ -101,11 +101,11 @@ public class DatabaseLogic {
     }
 
     public static String getUsername(int userId) {
-    String username = "";
-    String query = "SELECT username FROM Users WHERE user_id = ?";
+        String username = "";
+        String query = "SELECT username FROM Users WHERE user_id = ?";
 
-    try (Connection conn = DBManager.connect();
-            PreparedStatement ps = conn.prepareStatement(query)) {
+        try (Connection conn = DBManager.connect();
+             PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setInt(1, userId);
             
             try (ResultSet rs = ps.executeQuery()) {
@@ -120,11 +120,11 @@ public class DatabaseLogic {
     }
 
     public static String getEmail(int userId) {
-    String email = "";
-    String query = "SELECT email FROM Users WHERE user_id = ?";
+        String email = "";
+        String query = "SELECT email FROM Users WHERE user_id = ?";
 
-    try (Connection conn = DBManager.connect();
-            PreparedStatement ps = conn.prepareStatement(query)) {
+        try (Connection conn = DBManager.connect();
+             PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setInt(1, userId);
             
             try (ResultSet rs = ps.executeQuery()) {
@@ -139,10 +139,10 @@ public class DatabaseLogic {
     }
 
     public static String getWinRate(int userId) {
-    Double winRate = 0.0;
-    String query = "SELECT COUNT(*) AS total_games, COUNT(CASE WHEN winner_id = ? THEN 1 END) AS total_wins, IFNULL((COUNT(CASE WHEN winner_id = ? THEN 1 END) * 100.0 / NULLIF(COUNT(*), 0)), 0) AS win_rate FROM Games WHERE player1_id = ? OR player2_id = ?";
-    try (Connection conn = DBManager.connect();
-        PreparedStatement pstmt = conn.prepareStatement(query)) {
+        Double winRate = 0.0;
+        String query = "SELECT COUNT(*) AS total_games, COUNT(CASE WHEN winner_id = ? THEN 1 END) AS total_wins, IFNULL((COUNT(CASE WHEN winner_id = ? THEN 1 END) * 100.0 / NULLIF(COUNT(*), 0)), 0) AS win_rate FROM Games WHERE player1_id = ? OR player2_id = ?";
+        try (Connection conn = DBManager.connect();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
             
             pstmt.setInt(1, userId);
             pstmt.setInt(2, userId);
@@ -151,13 +151,13 @@ public class DatabaseLogic {
         
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                        winRate = rs.getDouble("win_rate");
-                    }
+                    winRate = rs.getDouble("win_rate");
                 }
-            } catch (Exception e) {
-                System.err.println("Error getting email: " + e.getMessage());
             }
-            return winRate+"%";
+        } catch (Exception e) {
+            System.err.println("Error getting win rate: " + e.getMessage());
+        }
+        return winRate + "%";
     }
 
     //public static String deleteMyAccount (int userId) {
@@ -172,10 +172,10 @@ public class DatabaseLogic {
     //        return winRate+"%";
     //}
 
-    public static ObservableList<MatchHistoryObj> getMatchHistory() {
+    public static ObservableList<MatchHistoryDTO> getMatchHistory() {
         int CurrentUserId = 9;
         String result;
-        ObservableList<MatchHistoryObj> matchHistory = FXCollections.observableArrayList();
+        ObservableList<MatchHistoryDTO> matchHistory = FXCollections.observableArrayList();
         String query = "SELECT g.player1_id, g.player2_id, g.game_date, g.winner_id, u.username AS enemy_name FROM Games g JOIN Users u ON u.user_id = CASE WHEN g.player1_id = ? THEN g.player2_id ELSE g.player1_id END WHERE g.player1_id = ? OR g.player2_id = ? ORDER BY g.game_date DESC LIMIT 100";
         
         try (Connection conn = DBManager.connect();
@@ -194,7 +194,7 @@ public class DatabaseLogic {
                     } else {
                         result = "LOST";
                     }
-                    matchHistory.add(new MatchHistoryObj(enemyName, date, result));
+                    matchHistory.add(new MatchHistoryDTO(enemyName, date, result));
                 }
             }
             
@@ -204,9 +204,6 @@ public class DatabaseLogic {
     
         return matchHistory;
     }
-
-
-
 
     public static void main(String[] args) {
         System.out.println("Starting test user creation...");

@@ -1,16 +1,18 @@
 package com.hitster.controllers;
 
+import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import com.hitster.client.utils.SceneNavigator;
 import com.hitster.network.GameNetworkService;
 import com.hitster.session.GameManager;
 import com.hitster.session.UserSession;
+import com.hitster.dto.lobby.LobbyStatusResponseDTO;
 
 import javafx.application.Platform;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.Gson;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
@@ -54,6 +56,7 @@ public class LobbyController {
 
     private final GameNetworkService networkService = new GameNetworkService();
     private ScheduledExecutorService pollingExecutor;
+    private final Gson gson = new Gson();
 
     @FXML
     public void initialize() {
@@ -61,13 +64,10 @@ public class LobbyController {
         UserSession.getInstance().setIsAdmin(true);
         UserSession.getInstance().setUserId(36L);
 
-
-
         if (!UserSession.getInstance().getIsAdmin()) {
             adminModeButton.setVisible(false); 
             adminModeButton.setManaged(false); 
         }
-        
     }
 
     @FXML
@@ -123,13 +123,10 @@ public class LobbyController {
 
     @FXML
     void handleLogout(ActionEvent event) {
-        
     }
 
     @FXML
     void handlePlay(ActionEvent event) {
-        
-
         if (playButton.getText().equals("Cancel")) {
             stopPolling();
             statusLabel.setVisible(false);
@@ -140,53 +137,44 @@ public class LobbyController {
             networkService.leaveLobby();
         }
         else {
-           
             networkService.joinLobby().thenAccept(response -> {
-            if (response.statusCode() == 200) {
-                Platform.runLater(() -> {
-                    statusLabel.setText("Looking for an opponent...");
-                    playButton.setText("Cancel");
-                    statusLabel.setVisible(true);
-                    statusLabel.setManaged(true);
-                    leaderboardButton.setDisable(true);
-                    hamburgerButton.setDisable(true);
-                });
-                startMatchmakingPolling();
-            } else {
-                Platform.runLater(() ->  statusLabel.setText("Failed joining the queue!"));
-            }
-        });
-            
+                if (response.statusCode() == 200) {
+                    Platform.runLater(() -> {
+                        statusLabel.setText("Looking for an opponent...");
+                        playButton.setText("Cancel");
+                        statusLabel.setVisible(true);
+                        statusLabel.setManaged(true);
+                        leaderboardButton.setDisable(true);
+                        hamburgerButton.setDisable(true);
+                    });
+                    startMatchmakingPolling();
+                } else {
+                    Platform.runLater(() ->  statusLabel.setText("Failed joining the queue!"));
+                }
+            });
         }
-
     }
 
     private void startMatchmakingPolling() {
         pollingExecutor = Executors.newSingleThreadScheduledExecutor();
         pollingExecutor.scheduleAtFixedRate(() -> {
             networkService.checkMatchStatus().thenAccept(response -> {
-                String body = response.body();
-                
-                if (body.contains("\"FOUND\"")) {
-                    stopPolling();
-                    JsonObject jsonResponse = JsonParser.parseString(body).getAsJsonObject();
-                    Long gameId = jsonResponse.get("game_id").getAsLong();
-                    GameManager.getInstance().startGame(gameId);
-                    Platform.runLater(() -> {
-                         try {
-                            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/profile.fxml"));
-                            Parent root = loader.load();
-                            Scene scene = new Scene(root);
-                            Stage stage = (Stage)  statusLabel.getScene().getWindow();
-                            stage.setScene(scene);
-                            stage.setMaximized(true); 
-                            stage.show();
-                        } 
-                        catch (Exception e) {
-                            e.printStackTrace();
-                            System.out.println("Error loading screen.");
-                        }
-                    });
+                if (response.statusCode() == 200) {
+                    LobbyStatusResponseDTO statusResponse = gson.fromJson(response.body(), LobbyStatusResponseDTO.class);
+                    
+                    if ("FOUND".equals(statusResponse.status())) {
+                        stopPolling();
+                        
+                        GameManager.getInstance().startGame(statusResponse.gameId());
+                        
+                        Platform.runLater(() -> {
+                            try {
+                                SceneNavigator.loadScene(SceneNavigator.GAME_VIEW_SCREEN);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        });
+                    }
                 }
             });
         }, 0, 2, TimeUnit.SECONDS);

@@ -126,7 +126,7 @@
                            </children>
                         </VBox>
                         
-                        <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleDeleteAccount" prefHeight="70.0" styleClass="danger-button" text="DELETE ACCOUNT" />
+                        <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onDeleteAccountClick" prefHeight="70.0" styleClass="danger-button" text="DELETE ACCOUNT" />
                      </children>
                   </VBox>
                </children>

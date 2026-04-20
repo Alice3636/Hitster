@@ -1,0 +1,67 @@
+package com.hitster.network;
+
+import com.google.gson.Gson;
+import com.hitster.config.AppConfig;
+import com.hitster.dto.user.UpdateProfileRequestDTO;
+import com.hitster.session.UserSession;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.concurrent.CompletableFuture;
+
+public class UserNetworkService {
+    
+    private final HttpClient httpClient;
+
+    public UserNetworkService() {
+        this.httpClient = HttpClient.newHttpClient();
+    }
+
+    public CompletableFuture<HttpResponse<String>> getLeaderboard() {
+        String token = UserSession.getInstance().getToken();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(AppConfig.BASE_API_URL + "/users/leaderboard"))
+                .header("Authorization", "Bearer " + token)
+                .GET()
+                .build();
+        return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());
+    }
+
+    public CompletableFuture<HttpResponse<String>> getUserProfile() {
+        String token = UserSession.getInstance().getToken();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(AppConfig.BASE_API_URL + "/users/me"))
+                .header("Authorization", "Bearer " + token)
+                .GET()
+                .build();
+        return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());
+    }
+
+    public CompletableFuture<HttpResponse<String>> deleteAccount() {
+        String token = UserSession.getInstance().getToken();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(AppConfig.BASE_API_URL + "/users/me"))
+                .header("Authorization", "Bearer " + token)
+                .DELETE()
+                .build();
+        return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());
+    }
+
+    public CompletableFuture<HttpResponse<String>> updateProfileDetails(String newUsername, String newEmail) {
+        String token = UserSession.getInstance().getToken();
+        UpdateProfileRequestDTO updateRequest = new UpdateProfileRequestDTO(newUsername, newEmail, null);
+        
+        Gson gson = new Gson();
+        String jsonPayload = gson.toJson(updateRequest);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(AppConfig.BASE_API_URL + "/users/me"))
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + token)
+                .PUT(HttpRequest.BodyPublishers.ofString(jsonPayload))
+                .build();
+
+        return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());
+    }
+}

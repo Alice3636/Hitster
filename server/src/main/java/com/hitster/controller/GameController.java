@@ -1,10 +1,10 @@
 package com.hitster.controller;
 
-import com.hitster.dto.ChallengeRequestDTO;
-import com.hitster.dto.GameQuitResponseDTO;
-import com.hitster.dto.GameStateDTO;
-import com.hitster.dto.GuessSongRequestDTO;
-import com.hitster.dto.PlaceSongRequestDTO;
+import com.hitster.dto.game.ChallengeRequestDTO;
+import com.hitster.dto.game.GameQuitResponseDTO;
+import com.hitster.dto.game.GameStateDTO;
+import com.hitster.dto.game.GuessSongRequestDTO;
+import com.hitster.dto.game.PlaceSongRequestDTO;
 import com.hitster.mapper.GameStateMapper;
 import com.hitster.model.GameSession;
 import com.hitster.model.TurnResult;
@@ -44,6 +44,7 @@ public class GameController {
         }
 
         String playerId = String.valueOf(jwtUserIdObj);
+        // שימוש בגישה של Record: request.indexPosition() ו-request.songId()
         return gameManager.placeSong(gameId, playerId, request);
     }
 
@@ -62,21 +63,23 @@ public class GameController {
     }
 
     @PostMapping("/{gameId}/challenge")
-    public boolean challenge(@PathVariable String gameId,
-                             @RequestBody ChallengeRequestDTO request,
-                             HttpServletRequest httpRequest) {
+    public boolean challengeLastTurn(@PathVariable String gameId,
+                                     @RequestBody ChallengeRequestDTO request,
+                                     HttpServletRequest httpRequest) {
         Object jwtUserIdObj = httpRequest.getAttribute("jwtUserId");
 
         if (jwtUserIdObj == null) {
             throw new IllegalArgumentException("Missing authenticated user.");
         }
 
-        if (request == null || request.getSuggested_index() == null) {
-            throw new IllegalArgumentException("suggested_index is required.");
+        if (request == null) {
+            throw new IllegalArgumentException("Request body is required.");
         }
 
         String challengerId = String.valueOf(jwtUserIdObj);
-        return gameManager.challengeLastTurn(gameId, challengerId, request.getSuggested_index());
+        
+        // תיקון השגיאה מצילום המסך: ב-Record משתמשים ב-suggestedIndex() במקום ב-getSuggestedIndex()
+        return gameManager.challengeLastTurn(gameId, challengerId, request.suggestedIndex());
     }
 
     @PostMapping("/{gameId}/challenge/skip")

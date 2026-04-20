@@ -256,12 +256,12 @@ public class DatabaseService {
             while (rs.next()) {
                 Integer winnings = rs.getObject("total_winnings") != null ? rs.getInt("total_winnings") : 0;
 
-        entries.add(new LeaderboardEntryDTO(
-        rank++,
-        rs.getInt("user_id"),
-        rs.getString("username"),
-        winnings
-        ));
+                entries.add(new LeaderboardEntryDTO(
+                        rank++,
+                        rs.getInt("user_id"),
+                        rs.getString("username"),
+                        winnings
+                ));
             }
         } catch (SQLException e) {
             e.printStackTrace();

@@ -66,7 +66,7 @@ public class GameManager {
         return gameEngine.placeSong(
                 session,
                 playerId,
-                request.indexPosition(),
+                request.indexPosition(), // תיקון שמות השדות ב-Record
                 request.songId()
         );
     }
@@ -82,7 +82,7 @@ public class GameManager {
                 session,
                 playerId,
                 request.artist(),
-                request.songName()
+                request.songName() // תיקון שמות השדות ב-Record
         );
     }
 
