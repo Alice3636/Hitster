@@ -1,4 +1,4 @@
-package com.hitster.server;
+package com.hitster;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
