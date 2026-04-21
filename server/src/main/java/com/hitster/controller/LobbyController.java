@@ -1,20 +1,19 @@
 package com.hitster.controller;
 
-import com.hitster.dto.LobbyJoinRequest;
-import com.hitster.dto.LobbyJoinResponse;
-import com.hitster.model.GameSession;
+import com.hitster.dto.lobby.LobbyStatusResponseDTO;
 import com.hitster.model.Player;
 import com.hitster.model.Room;
 import com.hitster.model.Song;
 import com.hitster.service.GameManager;
 import com.hitster.service.LobbyManager;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping("/lobby")
+@RequestMapping("/api/lobby")
 public class LobbyController {
 
     private final LobbyManager lobbyManager;
@@ -26,50 +25,68 @@ public class LobbyController {
     }
 
     @PostMapping("/join")
-    public LobbyJoinResponse joinLobby(@RequestBody LobbyJoinRequest request) {
-        Player player = new Player(request.getPlayerId(), request.getUsername());
+    public String joinLobby(HttpServletRequest httpRequest) {
+        Object jwtUserIdObj = httpRequest.getAttribute("jwtUserId");
+        Object jwtUsernameObj = httpRequest.getAttribute("jwtUsername");
 
+        if (jwtUserIdObj == null || jwtUsernameObj == null) {
+            throw new IllegalArgumentException("Missing authenticated user.");
+        }
+
+        String playerId = String.valueOf(jwtUserIdObj);
+        String username = String.valueOf(jwtUsernameObj);
+
+        Player player = new Player(playerId, username);
         Room room = lobbyManager.matchPlayerToRoom(player);
 
         if (room.isFull() && !room.isStarted()) {
             List<Song> songs = createSongsPool();
-            GameSession session = gameManager.startGameForRoom(room, songs);
-
-            return new LobbyJoinResponse(
-                    room.getId(),
-                    true,
-                    true,
-                    session.getId(),
-                    "Room is full. Game started."
-            );
+            gameManager.startGameForRoom(room, songs);
+            return "Game started";
         }
 
-        return new LobbyJoinResponse(
-                room.getId(),
-                false,
-                false,
-                null,
-                "Joined waiting room. Waiting for another player."
-        );
+        return "Joined waiting room";
     }
 
-    @GetMapping("/room/{roomId}")
-    public LobbyJoinResponse getRoomStatus(@PathVariable String roomId) {
-        Room room = lobbyManager.getRoomById(roomId);
+    @GetMapping("/status")
+    public LobbyStatusResponseDTO getLobbyStatus(HttpServletRequest request) {
+        Object jwtUserIdObj = request.getAttribute("jwtUserId");
 
-        if (room == null) {
-            throw new IllegalArgumentException("Room not found: " + roomId);
+        if (jwtUserIdObj == null) {
+            throw new IllegalArgumentException("Missing authenticated user.");
         }
 
-        GameSession session = room.getGameSession();
+        String playerId = String.valueOf(jwtUserIdObj);
+        Room room = lobbyManager.getRoomByPlayerId(playerId);
 
-        return new LobbyJoinResponse(
-                room.getId(),
-                room.isFull(),
-                room.isStarted(),
-                session != null ? session.getId() : null,
-                room.isStarted() ? "Game started." : "Waiting for another player."
-        );
+        if (room == null) {
+            return new LobbyStatusResponseDTO("NOT_FOUND", null);
+        }
+
+        if (room.isStarted() && room.getGameSession() != null) {
+            String gameId = room.getGameSession().getId();
+            return new LobbyStatusResponseDTO("FOUND", gameId);
+        }
+
+        return new LobbyStatusResponseDTO("WAITING", null);
+    }
+
+    @PostMapping("/leave")
+    public String leaveLobby(HttpServletRequest request) {
+        Object jwtUserIdObj = request.getAttribute("jwtUserId");
+
+        if (jwtUserIdObj == null) {
+            throw new IllegalArgumentException("Missing authenticated user.");
+        }
+
+        String playerId = String.valueOf(jwtUserIdObj);
+        boolean left = lobbyManager.leaveLobby(playerId);
+
+        if (!left) {
+            throw new IllegalArgumentException("Player is not in a waiting lobby.");
+        }
+
+        return "OK";
     }
 
     private List<Song> createSongsPool() {

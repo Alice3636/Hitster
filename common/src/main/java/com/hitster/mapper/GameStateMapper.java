@@ -1,18 +1,15 @@
 package com.hitster.mapper;
 
-
-/*
-The Code here is not updated according to the new GameStateDTO
-*/
-
+import com.hitster.dto.game.CardDTO;
+import com.hitster.dto.game.GameStateDTO;
+import com.hitster.dto.game.SongDTO;
 import com.hitster.model.GameSession;
 import com.hitster.model.Player;
+import com.hitster.model.Song;
 import com.hitster.model.SongCard;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import com.hitster.dto.GameStateDTO;
 
 public class GameStateMapper {
 
@@ -20,37 +17,75 @@ public class GameStateMapper {
         Player p1 = session.getPlayer1();
         Player p2 = session.getPlayer2();
 
-        return new GameStateDTO();/*(
-                session.getId(),
-                session.getStatus() != null ? session.getStatus().name() : null,
-                session.getTurnNumber(),
-                session.getCurrentTurnPlayer() != null ? session.getCurrentTurnPlayer().getUsername() : null,
-                session.getCurrentSong() != null ? session.getCurrentSong().getTitle() : null,
-                session.getWinner() != null ? session.getWinner().getUsername() : null,
-                p1.getUsername(),
-                p2.getUsername(),
-                p1.getScore(),
-                p2.getScore(),
-                p1.getTokens(),
-                p2.getTokens(),
-                toTimelineStrings(session.getPlayer1Timeline()),
-                toTimelineStrings(session.getPlayer2Timeline())
-        );*/
+        GameStateDTO dto = new GameStateDTO();
+
+        dto.setGameId(session.getId());
+        dto.setGameStatus(session.getStatus() != null ? session.getStatus().name() : null);
+        dto.setTurnNumber(session.getTurnNumber());
+        dto.setTimeLeftSeconds(0);
+
+        dto.setCurrentPlayerId(
+                session.getCurrentTurnPlayer() != null
+                        ? parseLongOrNull(session.getCurrentTurnPlayer().getId())
+                        : null
+        );
+
+        dto.setCurrentSong(
+                session.getCurrentSong() != null
+                        ? toSongDTO(session.getCurrentSong())
+                        : null
+        );
+
+        dto.setWinnerName(
+                session.getWinner() != null
+                        ? session.getWinner().getUsername()
+                        : null
+        );
+
+        dto.setPlayer1Id(parseLongOrNull(p1.getId()));
+        dto.setPlayer1Name(p1.getUsername());
+        dto.setPlayer1Score(p1.getScore());
+        dto.setPlayer1Tokens(p1.getTokens());
+        dto.setPlayer1Timeline(toCardDTOList(session.getPlayer1Timeline()));
+
+        dto.setPlayer2Id(parseLongOrNull(p2.getId()));
+        dto.setPlayer2Name(p2.getUsername());
+        dto.setPlayer2Score(p2.getScore());
+        dto.setPlayer2Tokens(p2.getTokens());
+        dto.setPlayer2Timeline(toCardDTOList(session.getPlayer2Timeline()));
+
+        return dto;
     }
 
-    private static List<String> toTimelineStrings(List<SongCard> timeline) {
-        List<String> result = new ArrayList<>();
+    private static SongDTO toSongDTO(Song song) {
+        return new SongDTO(
+                parseLongOrNull(song.getId()),
+                song.getTitle(),
+                song.getArtist(),
+                song.getYear(),
+                song.getAudioUrl()
+        );
+    }
 
+    private static List<CardDTO> toCardDTOList(List<SongCard> timeline) {
+        List<CardDTO> result = new ArrayList<>();
         for (SongCard card : timeline) {
-            result.add(
-                    card.getSong().getYear() +
-                            " - " +
-                            card.getSong().getTitle() +
-                            " - " +
-                            card.getSong().getArtist()
-            );
+            Song song = card.getSong();
+            result.add(new CardDTO(
+                    parseLongOrNull(song.getId()),
+                    song.getYear(),
+                    song.getArtist(),
+                    song.getTitle()
+            ));
         }
-
         return result;
+    }
+
+    private static Long parseLongOrNull(String value) {
+        try {
+            return value == null ? null : Long.parseLong(value);
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 }

@@ -1,7 +1,7 @@
-// NOT READY
-
 package com.hitster.dto.game;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public record ChallengeRequestDTO(
-    int suggested_index
+    @JsonProperty("suggested_index") int suggestedIndex
 ) {}

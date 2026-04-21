@@ -1,21 +1,32 @@
 package com.hitster.controllers;
 
-//import com.fasterxml.jackson.databind.deser.DataFormatReaders.Match;
-//import com.hitster.DatabaseLogic;
-//import com.hitster.model.PlayerScore;
-import com.hitster.model.MatchHistoryObj;
-//import javafx.collections.ObservableList;
+import com.hitster.client.utils.SceneNavigator;
+import com.hitster.dto.user.MatchHistoryDTO;
+import com.hitster.dto.user.UserProfileResponseDTO;
+import com.hitster.network.UserNetworkService;
+import com.hitster.session.UserSession;
+
+import java.io.IOException;
+import java.util.Optional;
+
+import com.google.gson.Gson;
+import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-//import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
@@ -26,22 +37,22 @@ public class ProfileController {
     private Button backButton;
 
     @FXML
-    private TableColumn<MatchHistoryObj, String> dateCol;
+    private TableColumn<MatchHistoryDTO, String> dateCol;
 
     @FXML
     private Label emailLabel;
 
     @FXML
-    private TableView<MatchHistoryObj> matchHistoryTable;
+    private TableView<MatchHistoryDTO> matchHistoryTable;
 
     @FXML
-    private TableColumn<MatchHistoryObj, String> opponentCol;
+    private TableColumn<MatchHistoryDTO, String> opponentCol;
 
     @FXML
     private ImageView profileImageView;
 
     @FXML
-    private TableColumn<MatchHistoryObj, String> resultCol;
+    private TableColumn<MatchHistoryDTO, String> resultCol;
 
     @FXML
     private Label totalWinsLabel;
@@ -52,33 +63,48 @@ public class ProfileController {
     @FXML
     private Label winRateLabel;
 
+    private final UserNetworkService userNetworkService = new UserNetworkService();
+
     @FXML
     public void initialize() {
-        /*
-        int currentUserId = 9; 
-        String username = DatabaseLogic.getUsername(currentUserId);
-        String email = DatabaseLogic.getEmail(currentUserId);
-        int winnings = DatabaseLogic.getTotalWinnings(currentUserId);
-        String winRate = DatabaseLogic.getWinRate(currentUserId);
+        opponentCol.setCellValueFactory(cellData -> 
+            new javafx.beans.property.SimpleStringProperty(cellData.getValue().enemyUsername()));
+            
+        dateCol.setCellValueFactory(cellData -> 
+            new javafx.beans.property.SimpleStringProperty(cellData.getValue().date()));
+            
+        resultCol.setCellValueFactory(cellData -> 
+            new javafx.beans.property.SimpleStringProperty(cellData.getValue().gameStatus()));
 
-        fillMatchHistory();
+        loadUserProfile();
+    }
 
-        if (totalWinsLabel != null) {
-            totalWinsLabel.setText(String.valueOf(winnings));
-        }
-
-        if (usernameLabel != null) {
-            usernameLabel.setText(username);
-        }
-
-        if (emailLabel != null) {
-            emailLabel.setText(email);
-        }
-
-        if (winRateLabel != null) {
-            winRateLabel.setText(winRate);
-        }
-        */
+    private void loadUserProfile() {
+        userNetworkService.getUserProfile().thenAccept(response -> {
+            if (response.statusCode() == 200) {
+                String jsonBody = response.body();
+                
+                Gson gson = new Gson();
+                UserProfileResponseDTO userProfile = gson.fromJson(jsonBody, UserProfileResponseDTO.class);
+                
+                Platform.runLater(() -> {
+                    if (usernameLabel != null) usernameLabel.setText(userProfile.username());
+                    if (emailLabel != null) emailLabel.setText(userProfile.email());
+                    if (totalWinsLabel != null) totalWinsLabel.setText(String.valueOf(userProfile.totalWins()));
+                    if (winRateLabel != null) winRateLabel.setText(String.format("%.1f%%", userProfile.winRate()));
+                    
+                    if (userProfile.matchHistory() != null) {
+                        ObservableList<MatchHistoryDTO> tableData = FXCollections.observableArrayList(userProfile.matchHistory());
+                        matchHistoryTable.setItems(tableData);
+                    }
+                });
+            } else {
+                System.out.println("Failed to load profile. Status: " + response.statusCode());
+            }
+        }).exceptionally(ex -> {
+            ex.printStackTrace();
+            return null;
+        });
     }
 
     @FXML
@@ -98,38 +124,102 @@ public class ProfileController {
     }
 
     @FXML
-    void fillMatchHistory() {
-        /*
-        opponentCol.setCellValueFactory(new PropertyValueFactory<>("enemy_username"));
-        dateCol.setCellValueFactory(new PropertyValueFactory<>("date"));
-        resultCol.setCellValueFactory(new PropertyValueFactory<>("gameStatus"));
+    void handleEditUsername(ActionEvent event) {
+        TextInputDialog dialog = new TextInputDialog(usernameLabel.getText());
+        dialog.setTitle("Edit Username");
+        dialog.setHeaderText("Choose a new username");
+        dialog.setContentText("Username:");
+
+        Optional<String> result = dialog.showAndWait();
         
-        ObservableList<MatchHistoryObj> matchHistory = DatabaseLogic.getMatchHistory();
-        
-        matchHistoryTable.setItems(matchHistory);
-        */
-    }
-
-
-
-    @FXML
-    void handleDeleteAccount(ActionEvent event) {
-
+        result.ifPresent(newUsername -> {
+            if (!newUsername.trim().isEmpty() && !newUsername.equals(usernameLabel.getText())) {
+                sendUpdateRequest(newUsername, emailLabel.getText());
+            }
+        });
     }
 
     @FXML
     void handleEditEmail(ActionEvent event) {
+        TextInputDialog dialog = new TextInputDialog(emailLabel.getText());
+        dialog.setTitle("Edit Email");
+        dialog.setHeaderText("Enter your new email address");
+        dialog.setContentText("Email:");
 
+        Optional<String> result = dialog.showAndWait();
+        
+        result.ifPresent(newEmail -> {
+            if (!newEmail.trim().isEmpty() && !newEmail.equals(emailLabel.getText())) {
+                sendUpdateRequest(usernameLabel.getText(), newEmail);
+            }
+        });
+    }
+
+    private void sendUpdateRequest(String newUsername, String newEmail) {
+        userNetworkService.updateProfileDetails(newUsername, newEmail).thenAccept(response -> {
+            Platform.runLater(() -> {
+                if (response.statusCode() == 200) {
+                    usernameLabel.setText(newUsername);
+                    emailLabel.setText(newEmail);
+                    System.out.println("Profile updated successfully");
+                } else if (response.statusCode() == 409) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Update Failed");
+                    alert.setHeaderText("Error");
+                    alert.setContentText("This username or email is already taken!");
+                    alert.showAndWait();
+                } else {
+                    System.out.println("Failed to update. Server returned: " + response.statusCode());
+                }
+            });
+        }).exceptionally(ex -> {
+            ex.printStackTrace();
+            return null;
+        });
     }
 
     @FXML
-    void handleEditUsername(ActionEvent event) {
+    private void onDeleteAccountClick() {
+        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmAlert.setTitle("Delete Account");
+        confirmAlert.setHeaderText("Are you sure you want to delete your account?");
+        confirmAlert.setContentText("This action is final and your game data cannot be restored.");
 
+        confirmAlert.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                userNetworkService.deleteAccount().thenAccept(httpResponse -> {
+                    Platform.runLater(() -> {
+                        if (httpResponse.statusCode() == 200) {
+                            handleDeletionSuccess();
+                        } else {
+                            showErrorAlert("Deletion Error", "The server failed to delete the account. Please try again later.");
+                        }
+                    });
+                }).exceptionally(ex -> {
+                    Platform.runLater(() -> showErrorAlert("Network Error", "Could not connect to the server."));
+                    return null;
+                });
+            }
+        });
+    }
+
+    private void handleDeletionSuccess() {
+        UserSession.getInstance().cleanUserSession();
+        try {
+            SceneNavigator.loadScene(SceneNavigator.LOGIN_SCREEN);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void showErrorAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     @FXML
-    void handleUploadImage(MouseEvent event) {
-
-    }
-
+    void handleUploadImage(MouseEvent event) {}
 }

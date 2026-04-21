@@ -1,28 +1,8 @@
-// NOT READY
-
 package com.hitster.dto.game;
 
-public class GuessSongRequestDTO {
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-    private String artist;
-    private String song_name;
-
-    public GuessSongRequestDTO() {
-    }
-
-    public String getArtist() {
-        return artist;
-    }
-
-    public void setArtist(String artist) {
-        this.artist = artist;
-    }
-
-    public String getSong_name() {
-        return song_name;
-    }
-
-    public void setSong_name(String song_name) {
-        this.song_name = song_name;
-    }
-}
+public record GuessSongRequestDTO(
+    String artist,
+    @JsonProperty("song_name") String songName
+) {}
