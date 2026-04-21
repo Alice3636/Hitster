@@ -1,8 +1,6 @@
-package com.hitster.client.controllers;
+package com.hitster.controllers;
 
 import com.hitster.network.AuthNetworkService;
-import com.hitster.session.UserSession;
-
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -129,12 +127,8 @@ public class RegisterController {
                 registerButton.setText("CREATE ACCOUNT");
 
                 if (response.statusCode() == 200) {
-
-                    String token = response.body();
-                    UserSession.getInstance().setToken(token);
-                    UserSession.getInstance().setUserName(username);
-
-                    navigateToNode((Node) event.getSource(), "/views/lobby.fxml");
+                    showInformation("Success", "Your account has been created. Please log in.", Alert.AlertType.INFORMATION);
+                    navigateToNode((Node) event.getSource(), "/views/login.fxml");
                 } else {
                     showAlert("Registration Failed", response.body());
                 }
@@ -207,6 +201,14 @@ public class RegisterController {
 
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private void showInformation(String title, String message, Alert.AlertType alertType) {
+        Alert alert = new Alert(alertType);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);

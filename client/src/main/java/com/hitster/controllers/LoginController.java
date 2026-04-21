@@ -1,5 +1,7 @@
 package com.hitster.controllers;
 
+import com.google.gson.Gson;
+import com.hitster.dto.auth.LoginResponseDTO;
 import com.hitster.network.AuthNetworkService;
 import com.hitster.session.UserSession;
 
@@ -65,10 +67,13 @@ public class LoginController {
                 loginButton.setText("LOGIN");
 
                 if (response.statusCode() == 200) {
+                    Gson gson = new Gson();
+                    LoginResponseDTO loginResponse = gson.fromJson(response.body(), LoginResponseDTO.class);
 
-                    String token = response.body();
-                    UserSession.getInstance().setToken(token);
-                    UserSession.getInstance().setUserName(email);
+                    UserSession.getInstance().setToken(loginResponse.token());
+                    UserSession.getInstance().setUserName(loginResponse.username());
+                    UserSession.getInstance().setIsAdmin(loginResponse.isAdmin());
+                    UserSession.getInstance().setUserId(loginResponse.userId());
 
                     navigateTo(event, "/views/lobby.fxml");
                 } else {

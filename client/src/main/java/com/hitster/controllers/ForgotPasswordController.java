@@ -41,7 +41,7 @@ public class ForgotPasswordController {
 
                 if (response.statusCode() == 200) {
                     // Show a success message and send them back to login
-                    showAlert("Success", "If an account exists with that email, a reset link has been sent.", Alert.AlertType.INFORMATION);
+                    showAlert("Success", "A reset link has been sent.", Alert.AlertType.INFORMATION);
                     navigateToNode((Node) event.getSource(), "/views/login.fxml");
                 } else {
                     showAlert("Error", "Failed to process request. Please try again.", Alert.AlertType.ERROR);

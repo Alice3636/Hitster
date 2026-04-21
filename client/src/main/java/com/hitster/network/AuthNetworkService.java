@@ -2,12 +2,15 @@ package com.hitster.network;
 
 import com.google.gson.Gson;
 import com.hitster.config.AppConfig;
+import com.hitster.dto.auth.ForgotPasswordRequestDTO;
+import com.hitster.dto.auth.LoginRequestDTO;
+import com.hitster.dto.auth.RegisterRequestDTO;
+import com.hitster.session.UserSession;
+
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public class AuthNetworkService {
@@ -20,34 +23,34 @@ public class AuthNetworkService {
 
     public CompletableFuture<HttpResponse<String>> register(String username, String email, String password,
             String picturePath) {
+        String token = UserSession.getInstance().getToken();
+        RegisterRequestDTO registerRequest = new RegisterRequestDTO(username, email, password);
 
-        // 1. Put data into a Map
-        Map<String, String> data = new HashMap<>();
-        data.put("username", username);
-        data.put("email", email);
-        data.put("password", password);
-        if (picturePath != null) {
-            data.put("picturePath", picturePath);
-        }
-
-        String jsonPayload = new Gson().toJson(data);
+        Gson gson = new Gson();
+        String jsonPayload = gson.toJson(registerRequest);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(AppConfig.BASE_API_URL + "/auth/register"))
                 .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
+                .header("Authorization", "Bearer " + token)
+                .PUT(HttpRequest.BodyPublishers.ofString(jsonPayload))
                 .build();
 
         return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());
     }
 
     public CompletableFuture<HttpResponse<String>> forgotPassword(String email) {
-        String jsonPayload = String.format("{\"email\":\"%s\"}", email);
+        String token = UserSession.getInstance().getToken();
+        ForgotPasswordRequestDTO forgotRequest = new ForgotPasswordRequestDTO(email);
+
+        Gson gson = new Gson();
+        String jsonPayload = gson.toJson(forgotRequest);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(AppConfig.BASE_API_URL + "/auth/forgot-password"))
                 .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
+                .header("Authorization", "Bearer " + token)
+                .PUT(HttpRequest.BodyPublishers.ofString(jsonPayload))
                 .build();
 
         return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());
@@ -55,12 +58,17 @@ public class AuthNetworkService {
 
     public CompletableFuture<HttpResponse<String>> login(String email, String password) {
 
-        String jsonPayload = String.format("{\"email\":\"%s\", \"password\":\"%s\"}", email, password);
+        String token = UserSession.getInstance().getToken();
+        LoginRequestDTO loginRequest = new LoginRequestDTO(email, password);
+
+        Gson gson = new Gson();
+        String jsonPayload = gson.toJson(loginRequest);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(AppConfig.BASE_API_URL + "/auth/login"))
                 .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
+                .header("Authorization", "Bearer " + token)
+                .PUT(HttpRequest.BodyPublishers.ofString(jsonPayload))
                 .build();
 
         return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());
