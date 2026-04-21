@@ -10,7 +10,7 @@ public class ClientApp extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
        SceneNavigator.setPrimaryStage(primaryStage);
-        SceneNavigator.loadScene(SceneNavigator.LOBBY_SCREEN);
+        SceneNavigator.loadScene(SceneNavigator.LOGIN_SCREEN);
     }
     
 
