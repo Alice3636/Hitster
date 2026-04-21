@@ -1,15 +1,18 @@
 package com.hitster.controller;
 
+import com.hitster.dto.game.SongDTO;
 import com.hitster.dto.lobby.LobbyStatusResponseDTO;
 import com.hitster.model.Player;
 import com.hitster.model.Room;
 import com.hitster.model.Song;
+import com.hitster.service.DatabaseService;
 import com.hitster.service.GameManager;
 import com.hitster.service.LobbyManager;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -40,7 +43,7 @@ public class LobbyController {
         Room room = lobbyManager.matchPlayerToRoom(player);
 
         if (room.isFull() && !room.isStarted()) {
-            List<Song> songs = createSongsPool();
+            List<Song> songs = createSongsPoolFromDatabase();
             gameManager.startGameForRoom(room, songs);
             return "Game started";
         }
@@ -89,15 +92,26 @@ public class LobbyController {
         return "OK";
     }
 
-    private List<Song> createSongsPool() {
+    private List<Song> createSongsPoolFromDatabase() {
+        List<SongDTO> songDTOs = DatabaseService.getAllSongs();
+
+        if (songDTOs == null || songDTOs.size() < 3) {
+            throw new IllegalStateException("Not enough songs in database to start a game.");
+        }
+
         List<Song> songs = new ArrayList<>();
-        songs.add(new Song("1", "Song A", "Artist A", 1990, ""));
-        songs.add(new Song("2", "Song B", "Artist B", 1995, ""));
-        songs.add(new Song("3", "Song C", "Artist C", 2000, ""));
-        songs.add(new Song("4", "Song D", "Artist D", 2010, ""));
-        songs.add(new Song("5", "Song E", "Artist E", 2020, ""));
-        songs.add(new Song("6", "Song F", "Artist F", 1980, ""));
-        songs.add(new Song("7", "Song G", "Artist G", 2005, ""));
+
+        for (SongDTO dto : songDTOs) {
+            songs.add(new Song(
+                    String.valueOf(dto.songId()),
+                    dto.title(),
+                    dto.artist(),
+                    dto.releaseYear(),
+                    dto.audioUrl()
+            ));
+        }
+
+        Collections.shuffle(songs);
         return songs;
     }
 }
