@@ -33,7 +33,7 @@ public class AuthNetworkService {
                 .uri(URI.create(AppConfig.BASE_API_URL + "/auth/register"))
                 .header("Content-Type", "application/json")
                 .header("Authorization", "Bearer " + token)
-                .PUT(HttpRequest.BodyPublishers.ofString(jsonPayload))
+                .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
                 .build();
 
         return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());
@@ -50,7 +50,7 @@ public class AuthNetworkService {
                 .uri(URI.create(AppConfig.BASE_API_URL + "/auth/forgot-password"))
                 .header("Content-Type", "application/json")
                 .header("Authorization", "Bearer " + token)
-                .PUT(HttpRequest.BodyPublishers.ofString(jsonPayload))
+                .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
                 .build();
 
         return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());
@@ -68,7 +68,7 @@ public class AuthNetworkService {
                 .uri(URI.create(AppConfig.BASE_API_URL + "/auth/login"))
                 .header("Content-Type", "application/json")
                 .header("Authorization", "Bearer " + token)
-                .PUT(HttpRequest.BodyPublishers.ofString(jsonPayload))
+                .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
                 .build();
 
         return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());
