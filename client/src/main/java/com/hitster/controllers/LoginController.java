@@ -24,7 +24,6 @@ import javafx.stage.Stage;
 
 public class LoginController {
 
-
     @FXML
     private TextField emailField;
     @FXML
@@ -43,7 +42,6 @@ public class LoginController {
 
     @FXML
     public void initialize() {
-
         passwordTextField.textProperty().bindBidirectional(passwordField.textProperty());
     }
 
@@ -65,16 +63,33 @@ public class LoginController {
                 loginButton.setDisable(false);
                 loginButton.setText("LOGIN");
 
+                System.out.println("=== LOGIN RESPONSE ===");
+                System.out.println("Status Code: " + response.statusCode());
+                System.out.println("Body: " + response.body());
+
                 if (response.statusCode() == 200) {
-                    Gson gson = new Gson();
-                    LoginResponseDTO loginResponse = gson.fromJson(response.body(), LoginResponseDTO.class);
+                    try {
+                        Gson gson = new Gson();
+                        LoginResponseDTO loginResponse = gson.fromJson(response.body(), LoginResponseDTO.class);
 
-                    UserSession.getInstance().setToken(loginResponse.token());
-                    UserSession.getInstance().setUserName(loginResponse.username());
-                    UserSession.getInstance().setIsAdmin(loginResponse.isAdmin());
-                    UserSession.getInstance().setUserId(loginResponse.userId());
+                        // 🔥 DEBUG חשוב מאוד
+                        System.out.println("LOGIN OK");
+                        System.out.println("USER ID = " + loginResponse.userId());
+                        System.out.println("USERNAME = " + loginResponse.username());
+                        System.out.println("TOKEN = " + loginResponse.token());
+                        System.out.println("======================");
 
-                    navigateTo(event, "/views/lobby.fxml");
+                        UserSession.getInstance().setToken(loginResponse.token());
+                        UserSession.getInstance().setUserName(loginResponse.username());
+                        UserSession.getInstance().setIsAdmin(loginResponse.isAdmin());
+                        UserSession.getInstance().setUserId(loginResponse.userId());
+
+                        navigateTo(event, "/views/lobby.fxml");
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        showAlert("Error", "Failed to parse login response.");
+                    }
                 } else {
                     showAlert("Login Failed", "Invalid email or password.");
                 }
@@ -89,23 +104,19 @@ public class LoginController {
         if (isPasswordVisible) {
             passwordTextField.setVisible(true);
             passwordField.setVisible(false);
-
             passwordEyeIcon.setImage(new Image(getClass().getResourceAsStream("/images/eyepurpleopen.png")));
         } else {
             passwordTextField.setVisible(false);
             passwordField.setVisible(true);
-
             passwordEyeIcon.setImage(new Image(getClass().getResourceAsStream("/images/eyepurpleclosed.png")));
         }
     }
 
     @FXML
     void goToRegister(MouseEvent event) {
-
         navigateToNode((Node) event.getSource(), "/views/register.fxml");
     }
 
-    
     private void navigateTo(ActionEvent event, String fxmlPath) {
         navigateToNode((Node) event.getSource(), fxmlPath);
     }

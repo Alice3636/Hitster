@@ -60,9 +60,7 @@ public class LobbyController {
 
     @FXML
     public void initialize() {
-        UserSession.getInstance().setUserName("Alice");
-        UserSession.getInstance().setIsAdmin(true);
-        UserSession.getInstance().setUserId(36L);
+
 
         if (!UserSession.getInstance().getIsAdmin()) {
             adminModeButton.setVisible(false); 

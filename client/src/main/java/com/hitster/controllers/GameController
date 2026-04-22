@@ -1,4 +1,4 @@
-package com.hitster.controllers;
+package com.hitster.client.controllers;
 
 import com.google.gson.Gson;
 import com.hitster.config.AppConfig;
