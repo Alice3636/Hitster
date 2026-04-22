@@ -29,27 +29,22 @@ public class RegisterController {
     private TextField usernameField;
     @FXML
     private TextField emailField;
-
     @FXML
     private ImageView profileImageView;
-
     @FXML
     private PasswordField passwordField;
     @FXML
     private TextField passwordTextField;
     @FXML
     private ImageView passwordEyeIcon;
-
     @FXML
     private PasswordField confirmPasswordField;
     @FXML
     private TextField confirmPasswordTextField;
     @FXML
     private ImageView confirmPasswordEyeIcon;
-
     @FXML
     private Button registerButton;
-
     @FXML
     private Text LoginHereText;
 
@@ -59,7 +54,6 @@ public class RegisterController {
 
     @FXML
     public void initialize() {
-
         if (passwordTextField != null && passwordField != null) {
             passwordTextField.textProperty().bindBidirectional(passwordField.textProperty());
         }
@@ -67,7 +61,6 @@ public class RegisterController {
             confirmPasswordTextField.textProperty().bindBidirectional(confirmPasswordField.textProperty());
         }
 
-        // Bind the text click event programmatically since it's missing from the FXML
         if (LoginHereText != null) {
             LoginHereText.setOnMouseClicked(this::goToLogin);
         }
@@ -77,23 +70,17 @@ public class RegisterController {
     void handleImageUpload(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Select Profile Picture");
-        
-        // Filter for image files only
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif")
         );
 
-        // Get the current stage to display the file chooser dialog
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         File selectedFile = fileChooser.showOpenDialog(stage);
 
         if (selectedFile != null) {
-            // Convert file path to URI and set the image
             String imagePath = selectedFile.toURI().toString();
             Image image = new Image(imagePath);
             profileImageView.setImage(image);
-            
-            // Make the image view visible once a picture is selected
             profileImageView.setVisible(true);
             profileImageView.setManaged(true);
         }
@@ -134,7 +121,6 @@ public class RegisterController {
                 }
             });
         }).exceptionally(ex -> {
-
             Platform.runLater(() -> {
                 registerButton.setDisable(false);
                 registerButton.setText("CREATE ACCOUNT");
@@ -147,7 +133,6 @@ public class RegisterController {
     @FXML
     void togglePasswordVisibility(MouseEvent event) {
         isPasswordVisible = !isPasswordVisible;
-
         if (isPasswordVisible) {
             passwordTextField.setVisible(true);
             passwordField.setVisible(false);
@@ -162,7 +147,6 @@ public class RegisterController {
     @FXML
     void toggleConfirmPasswordVisibility(MouseEvent event) {
         isConfirmPasswordVisible = !isConfirmPasswordVisible;
-
         if (isConfirmPasswordVisible) {
             confirmPasswordTextField.setVisible(true);
             confirmPasswordField.setVisible(false);
@@ -181,18 +165,30 @@ public class RegisterController {
 
     @FXML
     void handleBack(ActionEvent event) {
+        System.out.println("Back button clicked!"); // If this prints, the FXML is connected correctly
         navigateToNode((Node) event.getSource(), "/views/login.fxml");
     }
 
+    /**
+     * FIXED: Swaps the Root of the current Scene instead of creating a new Scene.
+     * This keeps the stage maximized and prevents the "half-screen" glitch.
+     */
     private void navigateToNode(Node sourceNode, String fxmlPath) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
-            Scene scene = new Scene(root);
-            Stage stage = (Stage) sourceNode.getScene().getWindow();
-            stage.setScene(scene);
-            stage.setMaximized(true);
-            stage.show();
+            
+            // Get current scene and window
+            Scene scene = sourceNode.getScene();
+            Stage stage = (Stage) scene.getWindow();
+            
+            // Swap content
+            scene.setRoot(root);
+            
+            // Maintain maximized state
+            if (!stage.isMaximized()) {
+                stage.setMaximized(true);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println("Failed to load screen: " + fxmlPath);

@@ -14,82 +14,67 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1080.0" prefWidth="1920.0" stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hitster.client.controllers.RegisterController">
+<AnchorPane stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hitster.controllers.RegisterController">
    <children>
-      <Button fx:id="backButton" layoutX="50.0" layoutY="50.0" mnemonicParsing="false" onAction="#handleBack" style="-fx-padding: 0;" styleClass="back-button" text="←" AnchorPane.leftAnchor="50.0" AnchorPane.topAnchor="50.0">
-         <font>
-            <Font size="42.0" />
-         </font>
-      </Button>
-
-      <StackPane layoutX="-40.0" layoutY="20.0" prefHeight="1020.0" prefWidth="1920.0" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="-40.0" AnchorPane.rightAnchor="40.0" AnchorPane.topAnchor="20.0">
+      <StackPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
-            <VBox alignment="CENTER" maxWidth="1000.0" prefWidth="998.0" spacing="15.0" styleClass="login-box">
+            <VBox alignment="CENTER" maxWidth="900.0" spacing="20.0" styleClass="login-box">
                <children>
    
-                  <VBox alignment="CENTER" spacing="0.0">
+                  <VBox alignment="CENTER" spacing="5.0">
                      <children>
-                        <Label prefHeight="139.0" prefWidth="401.0" styleClass="login-title" text="REGISTER" textAlignment="CENTER">
+                        <Label styleClass="login-title" text="REGISTER" textAlignment="CENTER">
                            <font>
-                              <Font size="95.0" />
+                              <Font size="72.0" />
                            </font>
                         </Label>
-                       
                         <Label styleClass="subtitle" text="Create an account to play">
                            <font>
-                              <Font size="30.0" />
+                              <Font size="24.0" />
                            </font>
                         </Label>
                      </children>
-                     <VBox.margin>
-                        <Insets bottom="5.0" />
-                     </VBox.margin>
                   </VBox>
 
                   <VBox alignment="CENTER" spacing="10.0">
                      <children>
                         <Label styleClass="field-label" text="PROFILE PICTURE">
                            <font>
-                              <Font size="26.0" />
+                              <Font size="22.0" />
                            </font>
                         </Label>
-                        
-                        <ImageView fx:id="profileImageView" fitHeight="100.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="false" styleClass="avatar-circle" visible="false" managed="false" />
-                        
-                        <Button mnemonicParsing="false" onAction="#handleImageUpload" styleClass="token-btn" style="-fx-font-size: 18px;" text="UPLOAD IMAGE" />
+                        <ImageView fx:id="profileImageView" fitHeight="100.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true" styleClass="avatar-circle" visible="false" managed="false" />
+                        <Button mnemonicParsing="false" onAction="#handleImageUpload" styleClass="token-btn" style="-fx-font-size: 16px;" text="UPLOAD IMAGE" />
                      </children>
-                     <VBox.margin>
-                        <Insets bottom="5.0" />
-                     </VBox.margin>
                   </VBox>
 
-                  <HBox spacing="40.0">
+                  <HBox spacing="30.0">
                      <children>
-                        <VBox prefWidth="440.0" spacing="10.0" HBox.hgrow="ALWAYS">
+                        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
                            <children>
                               <Label styleClass="field-label" text="EMAIL ADDRESS">
                                  <font>
-                                    <Font size="26.0" />
+                                    <Font size="22.0" />
                                  </font>
                               </Label>
-                              <TextField fx:id="emailField" prefHeight="60.0" styleClass="text-field">
+                              <TextField fx:id="emailField" prefHeight="50.0" styleClass="text-field">
                                  <font>
-                                    <Font size="26.0" />
+                                    <Font size="20.0" />
                                  </font>
                               </TextField>
                            </children>
                         </VBox>
                         
-                        <VBox prefWidth="440.0" spacing="10.0" HBox.hgrow="ALWAYS">
+                        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
                            <children>
                               <Label styleClass="field-label" text="USERNAME">
                                  <font>
-                                    <Font size="26.0" />
+                                    <Font size="22.0" />
                                  </font>
                               </Label>
-                              <TextField fx:id="usernameField" prefHeight="60.0" styleClass="text-field">
+                              <TextField fx:id="usernameField" prefHeight="50.0" styleClass="text-field">
                                  <font>
-                                    <Font size="26.0" />
+                                    <Font size="20.0" />
                                  </font>
                               </TextField>
                            </children>
@@ -97,29 +82,29 @@
                      </children>
                   </HBox>
 
-                  <HBox spacing="40.0">
+                  <HBox spacing="30.0">
                      <children>
-                        <VBox prefWidth="440.0" spacing="10.0" HBox.hgrow="ALWAYS">
+                        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
                            <children>
                               <Label styleClass="field-label" text="PASSWORD">
                                  <font>
-                                    <Font size="26.0" />
+                                    <Font size="22.0" />
                                  </font>
                               </Label>
                               <StackPane alignment="CENTER_RIGHT">
                                  <children>
-                                    <TextField fx:id="passwordTextField" prefHeight="60.0" promptText="Enter password" styleClass="text-field" visible="false" />
-                                    <PasswordField fx:id="passwordField" prefHeight="60.0" styleClass="text-field">
+                                    <TextField fx:id="passwordTextField" prefHeight="50.0" promptText="Enter password" styleClass="text-field" visible="false" />
+                                    <PasswordField fx:id="passwordField" prefHeight="50.0" styleClass="text-field">
                                        <font>
-                                          <Font size="26.0" />
+                                          <Font size="20.0" />
                                        </font>
                                     </PasswordField>
-                                    <ImageView fx:id="passwordEyeIcon" fitHeight="37.0" fitWidth="54.0" onMouseClicked="#togglePasswordVisibility" pickOnBounds="true" preserveRatio="true" styleClass="eye-icon">
+                                    <ImageView fx:id="passwordEyeIcon" fitHeight="30.0" fitWidth="40.0" onMouseClicked="#togglePasswordVisibility" pickOnBounds="true" preserveRatio="true" styleClass="eye-icon">
                                        <image>
                                           <Image url="@eyepurpleclosed.png" />
                                        </image>
                                        <StackPane.margin>
-                                          <Insets right="15.0" />
+                                          <Insets right="10.0" />
                                        </StackPane.margin>
                                     </ImageView>
                                  </children>
@@ -127,27 +112,27 @@
                            </children>
                         </VBox>
                         
-                        <VBox prefWidth="440.0" spacing="10.0" HBox.hgrow="ALWAYS">
+                        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
                            <children>
                               <Label styleClass="field-label" text="CONFIRM PASSWORD">
                                  <font>
-                                    <Font size="26.0" />
+                                    <Font size="22.0" />
                                  </font>
                               </Label>
                               <StackPane alignment="CENTER_RIGHT">
                                  <children>
-                                    <TextField fx:id="confirmPasswordTextField" prefHeight="60.0" promptText="Repeat password" styleClass="text-field" visible="false" />
-                                    <PasswordField fx:id="confirmPasswordField" prefHeight="60.0" styleClass="text-field">
+                                    <TextField fx:id="confirmPasswordTextField" prefHeight="50.0" promptText="Repeat password" styleClass="text-field" visible="false" />
+                                    <PasswordField fx:id="confirmPasswordField" prefHeight="50.0" styleClass="text-field">
                                        <font>
-                                          <Font size="26.0" />
+                                          <Font size="20.0" />
                                        </font>
                                     </PasswordField>
-                                    <ImageView fx:id="confirmPasswordEyeIcon" fitHeight="37.0" fitWidth="54.0" onMouseClicked="#toggleConfirmPasswordVisibility" pickOnBounds="true" preserveRatio="true" styleClass="eye-icon">
+                                    <ImageView fx:id="confirmPasswordEyeIcon" fitHeight="30.0" fitWidth="40.0" onMouseClicked="#toggleConfirmPasswordVisibility" pickOnBounds="true" preserveRatio="true" styleClass="eye-icon">
                                        <image>
                                           <Image url="@eyepurpleclosed.png" />
                                        </image>
                                        <StackPane.margin>
-                                          <Insets right="15.0" />
+                                          <Insets right="10.0" />
                                        </StackPane.margin>
                                     </ImageView>
                                  </children>
@@ -157,27 +142,27 @@
                      </children>
                   </HBox>
 
-                  <VBox alignment="CENTER" spacing="20.0">
+                  <VBox alignment="CENTER" spacing="15.0">
                      <VBox.margin>
-                        <Insets top="20.0" />
+                        <Insets top="10.0" />
                      </VBox.margin>
                      <children>
-                        <Button fx:id="registerButton" defaultButton="true" minHeight="-Infinity" mnemonicParsing="false" onAction="#handleRegister" prefHeight="70.0" prefWidth="394.0" style="-fx-font-weight: bold;" styleClass="login-button" text="CREATE ACCOUNT">
+                        <Button fx:id="registerButton" defaultButton="true" mnemonicParsing="false" onAction="#handleRegister" prefHeight="60.0" prefWidth="350.0" style="-fx-font-weight: bold;" styleClass="login-button" text="CREATE ACCOUNT">
                            <font>
-                              <Font size="29.0" />
+                              <Font size="24.0" />
                            </font>
                         </Button>
                         
-                        <HBox alignment="CENTER" prefHeight="52.0" prefWidth="1024.0" spacing="15.0">
+                        <HBox alignment="CENTER" spacing="10.0">
                            <children>
-                              <Label prefHeight="40.0" prefWidth="304.0" styleClass="normal-text" text="Already have an account?" textFill="#949494">
+                              <Label styleClass="normal-text" text="Already have an account?" textFill="#949494">
                                  <font>
-                                    <Font size="26.0" />
+                                    <Font size="20.0" />
                                  </font>
                               </Label>
                               <Text fx:id="LoginHereText" fill="#1ab8fc" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-weight: bold;" styleClass="login-here-text" text="Login here">
                                  <font>
-                                    <Font size="27.0" />
+                                    <Font size="20.0" />
                                  </font>
                               </Text>
                            </children>
@@ -185,11 +170,16 @@
                      </children>
                   </VBox>
                </children>
-               <StackPane.margin>
-                  <Insets />
-               </StackPane.margin>
+               <padding>
+                  <Insets bottom="30.0" left="50.0" right="50.0" top="30.0" />
+               </padding>
             </VBox>
          </children>
       </StackPane>
+      <Button fx:id="backButton" mnemonicParsing="false" onAction="#handleBack" style="-fx-padding: 0;" styleClass="back-button" text="←" AnchorPane.leftAnchor="30.0" AnchorPane.topAnchor="30.0">
+         <font>
+            <Font size="36.0" />
+         </font>
+      </Button>
    </children>
 </AnchorPane>

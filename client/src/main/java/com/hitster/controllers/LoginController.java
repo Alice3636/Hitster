@@ -119,11 +119,16 @@ public class LoginController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
-            Scene scene = new Scene(root);
-            Stage stage = (Stage) sourceNode.getScene().getWindow();
-            stage.setScene(scene);
-            stage.setMaximized(true);
-            stage.show();
+
+            Scene currentScene = sourceNode.getScene();
+            Stage stage = (Stage) currentScene.getWindow();
+
+            currentScene.setRoot(root);
+
+            if (!stage.isMaximized()) {
+                stage.setMaximized(true);
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println("Failed to load screen: " + fxmlPath);

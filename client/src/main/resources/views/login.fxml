@@ -14,82 +14,62 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-   prefHeight="1080.0" prefWidth="1920.0" stylesheets="@../css/styles.css"
-   xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1"
-   fx:controller="com.hitster.controllers.LoginController">
+<AnchorPane stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hitster.controllers.LoginController">
    <children>
-      <Button fx:id="backButton" layoutX="50.0" layoutY="50.0" mnemonicParsing="false"
-         onAction="#handleBack" style="-fx-padding: 0;" styleClass="back-button" text="←"
-         AnchorPane.leftAnchor="50.0" AnchorPane.topAnchor="50.0">
+      <Button fx:id="backButton" mnemonicParsing="false" onAction="#handleBack" style="-fx-padding: 0;" styleClass="back-button" text="←" AnchorPane.leftAnchor="30.0" AnchorPane.topAnchor="30.0">
          <font>
-            <Font size="42.0" />
+            <Font size="36.0" />
          </font>
       </Button>
 
-      <StackPane layoutX="-40.0" layoutY="174.0" prefHeight="754.0" prefWidth="1920.0"
-         AnchorPane.bottomAnchor="152.0" AnchorPane.leftAnchor="-40.0" AnchorPane.rightAnchor="40.0"
-         AnchorPane.topAnchor="174.0">
+      <StackPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
-            <VBox alignment="CENTER" maxWidth="700.0" prefHeight="922.0" prefWidth="700.0"
-               spacing="40.0" styleClass="login-box">
+            <VBox alignment="CENTER" maxWidth="650.0" spacing="30.0" styleClass="login-box">
                <children>
                   <VBox alignment="CENTER" spacing="5.0">
                      <children>
-                        <Label prefHeight="139.0" prefWidth="288.0" styleClass="login-title"
-                           text="LOGIN" textAlignment="CENTER">
+                        <Label styleClass="login-title" text="LOGIN" textAlignment="CENTER">
                            <font>
-                              <Font size="95.0" />
+                              <Font size="72.0" />
                            </font>
                         </Label>
                      </children>
                      <VBox.margin>
-                        <Insets bottom="20.0" />
+                        <Insets bottom="10.0" />
                      </VBox.margin>
                   </VBox>
 
-                  <VBox prefWidth="440.0" spacing="10.0">
+                  <VBox spacing="10.0">
                      <children>
                         <Label styleClass="field-label" text="EMAIL ADDRESS">
                            <font>
-                              <Font size="26.0" />
+                              <Font size="22.0" />
                            </font>
                         </Label>
-                        <TextField fx:id="emailField" prefHeight="60.0" styleClass="text-field">
+                        <TextField fx:id="emailField" prefHeight="55.0" styleClass="text-field">
                            <font>
-                              <Font size="26.0" />
+                              <Font size="20.0" />
                            </font>
                         </TextField>
                      </children>
                   </VBox>
 
-                  <VBox prefWidth="440.0" spacing="10.0">
+                  <VBox spacing="10.0">
                      <children>
                         <Label styleClass="field-label" text="PASSWORD">
                            <font>
-                              <Font size="26.0" />
+                              <Font size="22.0" />
                            </font>
                         </Label>
                         <StackPane alignment="CENTER_RIGHT">
                            <children>
-                              <TextField fx:id="passwordTextField" prefHeight="60.0"
-                                 promptText="Enter password" styleClass="text-field" visible="false">
-                                 <padding>
-                                    <Insets bottom="15.0" left="25.0" right="65.0" top="15.0" />
-                                 </padding>
-                              </TextField>
-                              <PasswordField fx:id="passwordField" prefHeight="60.0"
-                                 styleClass="text-field">
+                              <TextField fx:id="passwordTextField" prefHeight="55.0" promptText="Enter password" styleClass="text-field" visible="false" />
+                              <PasswordField fx:id="passwordField" prefHeight="55.0" styleClass="text-field">
                                  <font>
-                                    <Font size="26.0" />
+                                    <Font size="20.0" />
                                  </font>
-                                 <padding>
-                                    <Insets bottom="15.0" left="25.0" right="65.0" top="15.0" />
-                                 </padding>
                               </PasswordField>
-                              <ImageView fx:id="passwordEyeIcon" fitHeight="37.0" fitWidth="54.0"
-                                 onMouseClicked="#togglePasswordVisibility" pickOnBounds="true"
-                                 preserveRatio="true" styleClass="eye-icon">
+                              <ImageView fx:id="passwordEyeIcon" fitHeight="30.0" fitWidth="45.0" onMouseClicked="#togglePasswordVisibility" pickOnBounds="true" preserveRatio="true" styleClass="eye-icon">
                                  <image>
                                     <Image url="@eyepurpleclosed.png" />
                                  </image>
@@ -102,11 +82,9 @@
 
                         <HBox alignment="CENTER_RIGHT">
                            <children>
-                              <Text fill="#1ab8fc" onMouseClicked="#goToForgotPassword"
-                                 strokeType="OUTSIDE" strokeWidth="0.0" styleClass="login-here-text"
-                                 text="Forgot Password?">
+                              <Text fill="#1ab8fc" onMouseClicked="#goToForgotPassword" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="login-here-text" text="Forgot Password?">
                                  <font>
-                                    <Font name="System Bold" size="20.0" />
+                                    <Font name="System Bold" size="18.0" />
                                  </font>
                                  <HBox.margin>
                                     <Insets top="5.0" />
@@ -117,33 +95,27 @@
                      </children>
                   </VBox>
 
-                  <VBox alignment="CENTER" spacing="60.0">
+                  <VBox alignment="CENTER" spacing="25.0">
                      <VBox.margin>
-                        <Insets top="40.0" />
+                        <Insets top="20.0" />
                      </VBox.margin>
                      <children>
-                        <Button fx:id="loginButton" defaultButton="true" minHeight="-Infinity"
-                           mnemonicParsing="false" onAction="#handleLogin" prefHeight="70.0"
-                           prefWidth="394.0" style="-fx-font-weight: bold;"
-                           styleClass="login-button" text="LOGIN">
+                        <Button fx:id="loginButton" defaultButton="true" mnemonicParsing="false" onAction="#handleLogin" prefHeight="65.0" prefWidth="350.0" style="-fx-font-weight: bold;" styleClass="login-button" text="LOGIN">
                            <font>
-                              <Font size="29.0" />
+                              <Font size="24.0" />
                            </font>
                         </Button>
 
-                        <HBox alignment="CENTER" prefHeight="52.0" prefWidth="1024.0" spacing="15.0">
+                        <HBox alignment="CENTER" spacing="10.0">
                            <children>
-                              <Label prefHeight="40.0" prefWidth="315.0" styleClass="normal-text"
-                                 text="Don't have an account?" textFill="#949494">
+                              <Label styleClass="normal-text" text="Don't have an account?" textFill="#949494">
                                  <font>
-                                    <Font size="26.0" />
+                                    <Font size="20.0" />
                                  </font>
                               </Label>
-                              <Text fx:id="RegisterHereText" fill="#1ab8fc"
-                                 onMouseClicked="#goToRegister" strokeType="OUTSIDE"
-                                 strokeWidth="0.0" styleClass="login-here-text" text="Register here">
+                              <Text fx:id="RegisterHereText" fill="#1ab8fc" onMouseClicked="#goToRegister" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="login-here-text" text="Register here">
                                  <font>
-                                    <Font name="System Bold" size="27.0" />
+                                    <Font name="System Bold" size="20.0" />
                                  </font>
                               </Text>
                            </children>
@@ -151,9 +123,9 @@
                      </children>
                   </VBox>
                </children>
-               <StackPane.margin>
-                  <Insets />
-               </StackPane.margin>
+               <padding>
+                  <Insets bottom="40.0" left="60.0" right="60.0" top="40.0" />
+               </padding>
             </VBox>
          </children>
       </StackPane>
