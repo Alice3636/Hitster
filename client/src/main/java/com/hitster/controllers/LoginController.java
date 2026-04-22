@@ -24,8 +24,7 @@ import javafx.stage.Stage;
 
 public class LoginController {
 
-    @FXML
-    private Button backButton;
+
     @FXML
     private TextField emailField;
     @FXML
@@ -106,11 +105,7 @@ public class LoginController {
         navigateToNode((Node) event.getSource(), "/views/register.fxml");
     }
 
-    @FXML
-    void handleBack(ActionEvent event) {
-
-    }
-
+    
     private void navigateTo(ActionEvent event, String fxmlPath) {
         navigateToNode((Node) event.getSource(), fxmlPath);
     }

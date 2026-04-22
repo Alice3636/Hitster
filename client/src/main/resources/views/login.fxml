@@ -16,11 +16,6 @@
 
 <AnchorPane stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hitster.controllers.LoginController">
    <children>
-      <Button fx:id="backButton" mnemonicParsing="false" onAction="#handleBack" style="-fx-padding: 0;" styleClass="back-button" text="←" AnchorPane.leftAnchor="30.0" AnchorPane.topAnchor="30.0">
-         <font>
-            <Font size="36.0" />
-         </font>
-      </Button>
 
       <StackPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
