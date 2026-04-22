@@ -23,12 +23,11 @@ public class SceneNavigator {
     public static void setPrimaryStage(Stage stage) {
         primaryStage = stage;
     }
-
+    
     public static void loadScene(String fxmlPath) throws IOException {
         if (primaryStage == null) {
             throw new IllegalStateException("Primary Stage is not set!");
         }
-
         FXMLLoader loader = new FXMLLoader(SceneNavigator.class.getResource(fxmlPath));
         Parent root = loader.load();
         Scene scene = new Scene(root);

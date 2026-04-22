@@ -1,6 +1,7 @@
 package com.hitster.controllers;
 
 import java.io.IOException;
+import java.util.Base64;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -13,6 +14,8 @@ import com.hitster.dto.lobby.LobbyStatusResponseDTO;
 
 import javafx.application.Platform;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
@@ -60,13 +63,42 @@ public class LobbyController {
 
     @FXML
     public void initialize() {
-        UserSession.getInstance().setUserName("Alice");
-        UserSession.getInstance().setIsAdmin(true);
-        UserSession.getInstance().setUserId(36L);
+        // מפענח את הטוקן ומושך את הנתונים האמיתיים של המשתמש שהתחבר
+        decodeTokenAndSetSession();
 
+        // מסתיר את כפתור האדמין אם המשתמש הוא לא אדמין
         if (!UserSession.getInstance().getIsAdmin()) {
             adminModeButton.setVisible(false); 
             adminModeButton.setManaged(false); 
+        }
+    }
+
+    private void decodeTokenAndSetSession() {
+        String token = UserSession.getInstance().getToken();
+        if (token != null && !token.isEmpty()) {
+            try {
+                // JWT בנוי מ-3 חלקים מופרדים בנקודה. החלק האמצעי (אינדקס 1) הוא ה-Payload
+                String[] chunks = token.split("\\.");
+                if (chunks.length > 1) {
+                    Base64.Decoder decoder = Base64.getUrlDecoder();
+                    String payload = new String(decoder.decode(chunks[1]));
+                    
+                    JsonObject jsonObject = JsonParser.parseString(payload).getAsJsonObject();
+                    
+                    // חילוץ הנתונים בדיוק לפי איך שמוגדר ב-JwtUtil.java בשרת שלכם
+                    if (jsonObject.has("userId")) {
+                        UserSession.getInstance().setUserId(jsonObject.get("userId").getAsLong());
+                    }
+                    if (jsonObject.has("username")) {
+                        UserSession.getInstance().setUserName(jsonObject.get("username").getAsString());
+                    }
+                    if (jsonObject.has("isAdmin")) {
+                        UserSession.getInstance().setIsAdmin(jsonObject.get("isAdmin").getAsBoolean());
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("Failed to decode JWT: " + e.getMessage());
+            }
         }
     }
 
