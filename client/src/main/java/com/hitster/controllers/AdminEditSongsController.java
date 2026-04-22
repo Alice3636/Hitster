@@ -226,14 +226,18 @@ public class AdminEditSongsController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
-            Scene scene = new Scene(root);
-            Stage stage = (Stage) sourceNode.getScene().getWindow();
-            stage.setScene(scene);
-            stage.setMaximized(true);
-            stage.show();
+            
+            Scene scene = sourceNode.getScene();
+            Stage stage = (Stage) scene.getWindow();
+            
+            scene.setRoot(root);
+            
+            if (!stage.isMaximized()) {
+                stage.setMaximized(true);
+            }
         } catch (Exception e) {
             e.printStackTrace();
-            System.err.println("Failed to load screen: " + fxmlPath);
+            System.err.println("Error loading: " + fxmlPath);
         }
     }
 

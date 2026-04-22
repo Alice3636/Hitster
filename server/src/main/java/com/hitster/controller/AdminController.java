@@ -1,6 +1,7 @@
 package com.hitster.controller;
 
-import com.hitster.dto.admin.AdminUserDTO;
+import com.hitster.dto.admin.DeleteUsersRequestDTO;
+import com.hitster.dto.admin.UsersResponseDTO;
 import com.hitster.dto.game.SongDTO;
 import com.hitster.service.DatabaseService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,9 +20,24 @@ import java.util.UUID;
 public class AdminController {
 
     @GetMapping("/users")
-    public List<AdminUserDTO> getAllUsers(HttpServletRequest request) {
+    public UsersResponseDTO getAllUsers(HttpServletRequest request) {
         requireAdmin(request);
-        return DatabaseService.getAllUsers();
+
+        return new UsersResponseDTO(
+                DatabaseService.getAllUsers()
+        );
+    }
+
+    @DeleteMapping("/users")
+    public String deleteUsers(@RequestBody DeleteUsersRequestDTO request,
+                            HttpServletRequest httpRequest) {
+        requireAdmin(httpRequest);
+
+        for (Long id : request.userIds()) {
+            DatabaseService.deleteUserById(id);
+        }
+
+        return "OK";
     }
 
     @DeleteMapping("/users/{id}")

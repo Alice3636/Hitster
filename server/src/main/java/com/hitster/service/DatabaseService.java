@@ -1,6 +1,6 @@
 package com.hitster.service;
 
-import com.hitster.dto.admin.AdminUserDTO;
+import com.hitster.dto.admin.UserEntryDTO;
 import com.hitster.dto.game.SongDTO;
 import com.hitster.dto.user.LeaderboardResponseDTO;
 import com.hitster.dto.user.LeaderboardEntryDTO;
@@ -168,19 +168,18 @@ public class DatabaseService {
         return false;
     }
 
-    public static List<AdminUserDTO> getAllUsers() {
+    public static List<UserEntryDTO> getAllUsers() {
         String sql = "SELECT user_id, username, email, is_admin FROM Users ORDER BY user_id";
-        List<AdminUserDTO> users = new ArrayList<>();
+        List<UserEntryDTO> users = new ArrayList<>();
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
 
             while (rs.next()) {
-                users.add(new AdminUserDTO(
+                users.add(new UserEntryDTO(
                         rs.getLong("user_id"),
                         rs.getString("username"),
-                        rs.getString("email"),
-                        rs.getBoolean("is_admin")
+                        rs.getString("email")
                 ));
             }
         } catch (SQLException e) {
