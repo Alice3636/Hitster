@@ -68,59 +68,44 @@ public class LobbyController {
         }
     }
 
+    private void navigateToNode(Node sourceNode, String fxmlPath) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent root = loader.load();
+            
+            Scene scene = sourceNode.getScene();
+            Stage stage = (Stage) scene.getWindow();
+            
+            scene.setRoot(root);
+            
+            if (!stage.isMaximized()) {
+                stage.setMaximized(true);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Error loading: " + fxmlPath);
+        }
+    }
+
     @FXML
     void goToAdminMode(ActionEvent event) {
-         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/AdminEditSongs.fxml"));
-            Parent root = loader.load();
-            Scene scene = new Scene(root);
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(scene);
-            stage.setMaximized(true); 
-            stage.show();
-        } 
-        catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Error loading screen.");
-        }
+        navigateToNode((Node) event.getSource(), "/views/AdminEditSongs.fxml");
     }
 
     @FXML
     void goToLeaderboard(ActionEvent event) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/leaderboard.fxml"));
-            Parent root = loader.load();
-            Scene scene = new Scene(root);
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(scene);
-            stage.setMaximized(true); 
-            stage.show();
-        } 
-        catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Error loading screen.");
-        }
+        navigateToNode((Node) event.getSource(), "/views/leaderboard.fxml");
     }
 
     @FXML
     void goToProfile(ActionEvent event) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/profile.fxml"));
-            Parent root = loader.load();
-            Scene scene = new Scene(root);
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(scene);
-            stage.setMaximized(true); 
-            stage.show();
-        } 
-        catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Error loading screen.");
-        }
+        navigateToNode((Node) event.getSource(), "/views/profile.fxml");
     }
 
     @FXML
     void handleLogout(ActionEvent event) {
+        UserSession.getInstance().cleanUserSession();
+        navigateToNode((Node) event.getSource(), "/views/login.fxml");
     }
 
     @FXML

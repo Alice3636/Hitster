@@ -24,7 +24,7 @@ public class AuthNetworkService {
     public CompletableFuture<HttpResponse<String>> register(String username, String email, String password,
             String picturePath) {
         String token = UserSession.getInstance().getToken();
-        RegisterRequestDTO registerRequest = new RegisterRequestDTO(username, email, password);
+        RegisterRequestDTO registerRequest = new RegisterRequestDTO(username, email, password, picturePath);
 
         Gson gson = new Gson();
         String jsonPayload = gson.toJson(registerRequest);

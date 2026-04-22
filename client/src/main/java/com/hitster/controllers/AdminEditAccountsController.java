@@ -17,11 +17,11 @@ import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.stage.Stage;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.hitster.dto.admin.UserEntryDTO;
+import com.hitster.dto.admin.UsersResponseDTO;
 import com.hitster.network.AdminNetworkService;
 
 public class AdminEditAccountsController {
@@ -99,43 +99,42 @@ public class AdminEditAccountsController {
             Platform.runLater(() -> {
                 if (response.statusCode() == 200) {
                     try {
-                        ObjectMapper mapper = new ObjectMapper();
+                        Gson gson = new Gson();
 
-                        // Parse the JSON array into a List of Maps
-                        List<Map<String, Object>> users = mapper.readValue(
-                                response.body(),
-                                new TypeReference<List<Map<String, Object>>>() {
-                                });
-
+                        UsersResponseDTO usersResponse = gson.fromJson(response.body(), UsersResponseDTO.class);
                         masterUserData.clear();
 
-                        // Loop through the data and add it to the JavaFX Table
-                        for (Map<String, Object> u : users) {
-                            // Using Number to safely parse both Integer and Double from JSON
-                            int id = ((Number) u.get("id")).intValue();
-                            String username = (String) u.get("username");
-                            String email = (String) u.get("email");
-
-                            masterUserData.add(new UserRow(id, username, email));
+                        for (UserEntryDTO user : usersResponse.users()) {
+                            masterUserData.add(
+                                    new UserRow(
+                                            (int) user.id(), // your UI still uses int
+                                            user.username(),
+                                            user.email()
+                                    )
+                            );
                         }
+
                     } catch (Exception e) {
                         e.printStackTrace();
                         showAlert("Parse Error", "Failed to read user data from server.", Alert.AlertType.ERROR);
                     }
                 } else {
-                    showAlert("Server Error", "Failed to load users. Status: " + response.statusCode(),
+                    showAlert("Server Error",
+                            "Failed to load users. Status: " + response.statusCode(),
                             Alert.AlertType.ERROR);
                 }
             });
         }).exceptionally(ex -> {
-            Platform.runLater(() -> showAlert("Connection Error", "Could not reach the server.\n" + ex.getMessage(),
-                    Alert.AlertType.ERROR));
+            Platform.runLater(() ->
+                    showAlert("Connection Error",
+                            "Could not reach the server.\n" + ex.getMessage(),
+                            Alert.AlertType.ERROR)
+            );
             return null;
         });
     }
 
     private void handleDeleteSelected(ActionEvent event) {
-        // Find all users where the checkbox is ticked
         List<UserRow> selectedUsers = masterUserData.stream()
                 .filter(UserRow::isSelected)
                 .collect(Collectors.toList());
@@ -145,19 +144,41 @@ public class AdminEditAccountsController {
             return;
         }
 
-        // Confirm deletion
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
                 "Are you sure you want to delete " + selectedUsers.size() + " user(s)? This cannot be undone.",
                 ButtonType.YES, ButtonType.NO);
 
         confirm.showAndWait().ifPresent(response -> {
             if (response == ButtonType.YES) {
-                // TODO: Send delete request to backend using selectedUsers IDs
-                // adminService.deleteUsers(selectedIds).thenAccept(...)
 
-                // Remove them from the UI list
-                masterUserData.removeAll(selectedUsers);
-                showAlert("Success", "Users deleted successfully.", Alert.AlertType.INFORMATION);
+                List<Long> userIds = selectedUsers.stream()
+                        .map(user -> (long) user.getId()) // convert int → long
+                        .collect(Collectors.toList());
+                
+                deleteSelectedButton.setDisable(true);
+                adminService.deleteUsers(userIds)
+                        .thenAccept(res -> {
+                            Platform.runLater(() -> {
+                                deleteSelectedButton.setDisable(false);
+                                if (res.statusCode() == 200) {
+                                    masterUserData.removeAll(selectedUsers);
+
+                                    showAlert("Success", "Users deleted successfully.", Alert.AlertType.INFORMATION);
+                                } else {
+                                    showAlert("Error",
+                                            "Failed to delete users. Status: " + res.statusCode(),
+                                            Alert.AlertType.ERROR);
+                                }
+                            });
+                        })
+                        .exceptionally(ex -> {
+                            Platform.runLater(() ->
+                                    showAlert("Connection Error",
+                                            "Could not reach the server.\n" + ex.getMessage(),
+                                            Alert.AlertType.ERROR)
+                            );
+                            return null;
+                        });
             }
         });
     }
@@ -171,14 +192,18 @@ public class AdminEditAccountsController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
-            Scene scene = new Scene(root);
-            Stage stage = (Stage) sourceNode.getScene().getWindow();
-            stage.setScene(scene);
-            stage.setMaximized(true);
-            stage.show();
+            
+            Scene scene = sourceNode.getScene();
+            Stage stage = (Stage) scene.getWindow();
+            
+            scene.setRoot(root);
+            
+            if (!stage.isMaximized()) {
+                stage.setMaximized(true);
+            }
         } catch (Exception e) {
             e.printStackTrace();
-            System.err.println("Failed to load screen: " + fxmlPath);
+            System.err.println("Error loading: " + fxmlPath);
         }
     }
 

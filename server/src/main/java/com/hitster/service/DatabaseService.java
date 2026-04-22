@@ -1,6 +1,6 @@
 package com.hitster.service;
 
-import com.hitster.dto.admin.AdminUserDTO;
+import com.hitster.dto.admin.UserEntryDTO;
 import com.hitster.dto.game.SongDTO;
 import com.hitster.dto.user.LeaderboardResponseDTO;
 import com.hitster.dto.user.LeaderboardEntryDTO;
@@ -16,18 +16,26 @@ public class DatabaseService {
 
     static Connection conn = DBManager.connect();
 
-    // ================= USERS =================
-
-    public static int registerUser(String username, String email, String passwordHash) {
-        String sql = "{CALL sp_RegisterUser(?, ?, ?, ?)}";
+    /**
+     * Registers a new user in the system
+     *
+     * @return new user ID, or -1 if something failed
+     */
+    public static int registerUser(String username, String email, String passwordHash, String picturePath) {
+        String sql = "{CALL sp_RegisterUser(?, ?, ?, ?, ?)}";
 
         try (CallableStatement cstmt = conn.prepareCall(sql)) {
             cstmt.setString(1, username);
             cstmt.setString(2, email);
             cstmt.setString(3, passwordHash);
-            cstmt.registerOutParameter(4, Types.INTEGER);
+            cstmt.setString(4, picturePath);
+
+            cstmt.registerOutParameter(5, Types.INTEGER);
+
             cstmt.execute();
-            return cstmt.getInt(4);
+
+            return cstmt.getInt(5);
+
         } catch (SQLException e) {
             e.printStackTrace();
             return -1;
@@ -168,19 +176,18 @@ public class DatabaseService {
         return false;
     }
 
-    public static List<AdminUserDTO> getAllUsers() {
+    public static List<UserEntryDTO> getAllUsers() {
         String sql = "SELECT user_id, username, email, is_admin FROM Users ORDER BY user_id";
-        List<AdminUserDTO> users = new ArrayList<>();
+        List<UserEntryDTO> users = new ArrayList<>();
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
 
             while (rs.next()) {
-                users.add(new AdminUserDTO(
+                users.add(new UserEntryDTO(
                         rs.getLong("user_id"),
                         rs.getString("username"),
-                        rs.getString("email"),
-                        rs.getBoolean("is_admin")
+                        rs.getString("email")
                 ));
             }
         } catch (SQLException e) {
