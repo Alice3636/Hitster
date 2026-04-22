@@ -2,9 +2,9 @@ package com.hitster.service;
 
 public class AuthService {
 
-    public static int register(String username, String email, String password) {
+    public static int register(String username, String email, String password, String picturePath) {
         String hash = PasswordUtil.hashPassword(password);
-        return DatabaseService.registerUser(username, email, hash);
+        return DatabaseService.registerUser(username, email, hash, picturePath);
     }
 
     public static boolean login(String email, String password) {

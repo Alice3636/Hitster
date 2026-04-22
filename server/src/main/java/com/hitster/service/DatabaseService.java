@@ -16,18 +16,26 @@ public class DatabaseService {
 
     static Connection conn = DBManager.connect();
 
-    // ================= USERS =================
-
-    public static int registerUser(String username, String email, String passwordHash) {
-        String sql = "{CALL sp_RegisterUser(?, ?, ?, ?)}";
+    /**
+     * Registers a new user in the system
+     *
+     * @return new user ID, or -1 if something failed
+     */
+    public static int registerUser(String username, String email, String passwordHash, String picturePath) {
+        String sql = "{CALL sp_RegisterUser(?, ?, ?, ?, ?)}";
 
         try (CallableStatement cstmt = conn.prepareCall(sql)) {
             cstmt.setString(1, username);
             cstmt.setString(2, email);
             cstmt.setString(3, passwordHash);
-            cstmt.registerOutParameter(4, Types.INTEGER);
+            cstmt.setString(4, picturePath);
+
+            cstmt.registerOutParameter(5, Types.INTEGER);
+
             cstmt.execute();
-            return cstmt.getInt(4);
+
+            return cstmt.getInt(5);
+
         } catch (SQLException e) {
             e.printStackTrace();
             return -1;

@@ -38,7 +38,8 @@ public class AuthController {
         int newUserId = AuthService.register(
                 request.username(),
                 request.email(),
-                request.password()
+                request.password(),
+                request.picturePath()
         );
 
         if (newUserId <= 0) {
