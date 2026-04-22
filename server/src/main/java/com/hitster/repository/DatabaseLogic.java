@@ -204,49 +204,4 @@ public class DatabaseLogic {
     
         return matchHistory;
     }
-
-    public static void main(String[] args) {
-        System.out.println("Starting test user creation...");
-
-        AuthService.register("alice", "alice@test.com", "123456");
-        AuthService.register("maayan", "maayan@test.com", "123456");
-        System.out.println("Users registered.");
-
-        String updateSql = "UPDATE Users SET is_admin = true WHERE username = 'alice'";
-        try (Connection conn = DBManager.connect();
-             PreparedStatement pstmt = conn.prepareStatement(updateSql)) {
-            pstmt.executeUpdate();
-            System.out.println("Admin permissions granted to alice.");
-        } catch (SQLException e) {
-            System.out.println("Error updating permissions:");
-            e.printStackTrace();
-        }
-
-        Connection conn = DBManager.connect();
-        if (conn != null) {
-            String sql = "SELECT user_id, username, email, is_admin FROM Users";
-
-            try (PreparedStatement pstmt = conn.prepareStatement(sql);
-                 ResultSet rs = pstmt.executeQuery()) {
-
-                System.out.println("--- System Users ---");
-
-                while (rs.next()) {
-                    int id = rs.getInt("user_id");
-                    String username = rs.getString("username");
-                    String email = rs.getString("email");
-                    boolean isAdmin = rs.getBoolean("is_admin");
-
-                    System.out.println("ID: " + id +
-                            " | Username: " + username +
-                            " | Email: " + email +
-                            " | Admin? " + isAdmin);
-                }
-
-            } catch (SQLException e) {
-                System.err.println("Error executing SELECT query.");
-                e.printStackTrace();
-            }
-        }
-    }
 }
