@@ -1,9 +1,9 @@
 package com.hitster.network;
 
 import com.hitster.config.AppConfig;
+import com.hitster.dto.admin.DeleteSongsRequestDTO;
 import com.hitster.dto.admin.DeleteUsersRequestDTO;
 import com.hitster.session.UserSession;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
 import java.net.URI;
@@ -15,11 +15,9 @@ import java.util.concurrent.CompletableFuture;
 
 public class AdminNetworkService {
     private final HttpClient httpClient;
-    private final ObjectMapper mapper; 
 
     public AdminNetworkService() {
         this.httpClient = HttpClient.newHttpClient();
-        this.mapper = new ObjectMapper(); 
     }
     
     public CompletableFuture<HttpResponse<String>> getAllUsers() {
@@ -57,18 +55,21 @@ public class AdminNetworkService {
         return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());
     }
 
-    public CompletableFuture<HttpResponse<String>> deleteSongs(List<Integer> songIds) {
-        try {
-            String jsonPayload = mapper.writeValueAsString(songIds);
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(AppConfig.BASE_API_URL + "/admin/songs"))
-                    .header("Authorization", "Bearer " + UserSession.getInstance().getToken())
-                    .header("Content-Type", "application/json")
-                    .method("DELETE", HttpRequest.BodyPublishers.ofString(jsonPayload))
-                    .build();
-            return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());
-        } catch (Exception e) {
-            return CompletableFuture.failedFuture(e);
-        }
+    public CompletableFuture<HttpResponse<String>> deleteSongs(List<Long> songIds) {
+        
+        String token = UserSession.getInstance().getToken();
+        DeleteSongsRequestDTO deleteSongsRequest = new DeleteSongsRequestDTO(songIds);
+
+        Gson gson = new Gson();
+        String jsonPayload = gson.toJson(deleteSongsRequest);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(AppConfig.BASE_API_URL + "/admin/songs"))
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + token)
+                .method("DELETE", HttpRequest.BodyPublishers.ofString(jsonPayload))
+                .build();
+
+        return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());
     }
 }

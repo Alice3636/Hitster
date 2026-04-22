@@ -1,9 +1,12 @@
 package com.hitster.controllers;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.hitster.dto.admin.UsersResponseDTO;
 import com.hitster.network.AdminNetworkService;
-
+import com.hitster.controllers.AdminEditAccountsController.UserRow;
+import com.hitster.dto.admin.SongsResponseDTO;
+import com.hitster.dto.admin.UserEntryDTO;
+import com.hitster.dto.game.SongDTO;
 import javafx.application.Platform;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
@@ -41,7 +44,7 @@ public class AdminEditSongsController {
     @FXML
     private TableColumn<SongRow, Boolean> selectColumn;
     @FXML
-    private TableColumn<SongRow, Integer> idColumn;
+    private TableColumn<SongRow, Long> idColumn;
     @FXML
     private TableColumn<SongRow, String> titleColumn;
     @FXML
@@ -64,8 +67,7 @@ public class AdminEditSongsController {
     @FXML
     public void initialize() {
         // Setup Standard Columns
-        idColumn.setCellValueFactory(cellData -> cellData.getValue().idProperty().asObject());
-        titleColumn.setCellValueFactory(cellData -> cellData.getValue().titleProperty());
+        idColumn.setCellValueFactory(cellData -> cellData.getValue().idProperty().asObject());        titleColumn.setCellValueFactory(cellData -> cellData.getValue().titleProperty());
         artistColumn.setCellValueFactory(cellData -> cellData.getValue().artistProperty());
         yearColumn.setCellValueFactory(cellData -> cellData.getValue().yearProperty().asObject());
         linkColumn.setCellValueFactory(cellData -> cellData.getValue().linkProperty());
@@ -132,22 +134,21 @@ public class AdminEditSongsController {
             Platform.runLater(() -> {
                 if (response.statusCode() == 200) {
                     try {
-                        ObjectMapper mapper = new ObjectMapper();
-                        List<Map<String, Object>> songs = mapper.readValue(
-                                response.body(),
-                                new TypeReference<List<Map<String, Object>>>() {
-                                });
+                        Gson gson = new Gson();
 
+                        SongsResponseDTO songsResponse = gson.fromJson(response.body(), SongsResponseDTO.class);
                         masterSongData.clear();
 
-                        for (Map<String, Object> s : songs) {
-                            int id = ((Number) s.get("id")).intValue();
-                            String title = (String) s.get("title");
-                            String artist = (String) s.get("artist");
-                            int year = ((Number) s.get("year")).intValue();
-                            String link = (String) s.get("link");
-
-                            masterSongData.add(new SongRow(id, title, artist, year, link));
+                        for (SongDTO song : songsResponse.songs()) {
+                            masterSongData.add(
+                                    new SongRow(
+                                            song.songId(),
+                                            song.title(),
+                                            song.artist(),
+                                            song.releaseYear(),
+                                            song.audioUrl()
+                                    )
+                            );
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -193,7 +194,8 @@ public class AdminEditSongsController {
         confirm.showAndWait().ifPresent(response -> {
             if (response == ButtonType.YES) {
                 // Extract just the IDs from the selected rows
-                List<Integer> selectedIds = selectedSongs.stream()
+                // Change the list type to Long
+                List<Long> selectedIds = selectedSongs.stream()
                         .map(SongRow::getId)
                         .collect(Collectors.toList());
 
@@ -252,71 +254,38 @@ public class AdminEditSongsController {
     // --- INNER CLASS FOR TABLE DATA ---
     public static class SongRow {
         private final BooleanProperty selected;
-        private final IntegerProperty id;
+        private final LongProperty id; // Changed from IntegerProperty
         private final StringProperty title;
         private final StringProperty artist;
         private final IntegerProperty year;
         private final StringProperty link;
 
-        public SongRow(int id, String title, String artist, int year, String link) {
+        public SongRow(long id, String title, String artist, int year, String link) {
             this.selected = new SimpleBooleanProperty(false);
-            this.id = new SimpleIntegerProperty(id);
+            this.id = new SimpleLongProperty(id);
             this.title = new SimpleStringProperty(title);
             this.artist = new SimpleStringProperty(artist);
             this.year = new SimpleIntegerProperty(year);
             this.link = new SimpleStringProperty(link);
         }
 
-        public boolean isSelected() {
-            return selected.get();
-        }
+        public boolean isSelected() { return selected.get(); }
+        public void setSelected(boolean value) { selected.set(value); }
+        public BooleanProperty selectedProperty() { return selected; }
 
-        public void setSelected(boolean value) {
-            selected.set(value);
-        }
+        public long getId() { return id.get(); }
+        public LongProperty idProperty() { return id; }
 
-        public BooleanProperty selectedProperty() {
-            return selected;
-        }
+        public String getTitle() { return title.get(); }
+        public StringProperty titleProperty() { return title; }
 
-        public int getId() {
-            return id.get();
-        }
+        public String getArtist() { return artist.get(); }
+        public StringProperty artistProperty() { return artist; }
 
-        public IntegerProperty idProperty() {
-            return id;
-        }
+        public int getYear() { return year.get(); }
+        public IntegerProperty yearProperty() { return year; }
 
-        public String getTitle() {
-            return title.get();
-        }
-
-        public StringProperty titleProperty() {
-            return title;
-        }
-
-        public String getArtist() {
-            return artist.get();
-        }
-
-        public StringProperty artistProperty() {
-            return artist;
-        }
-
-        public int getYear() {
-            return year.get();
-        }
-
-        public IntegerProperty yearProperty() {
-            return year;
-        }
-
-        public String getLink() {
-            return link.get();
-        }
-
-        public StringProperty linkProperty() {
-            return link;
-        }
+        public String getLink() { return link.get(); }
+        public StringProperty linkProperty() { return link; }
     }
 }

@@ -1,6 +1,8 @@
 package com.hitster.controller;
 
+import com.hitster.dto.admin.DeleteSongsRequestDTO;
 import com.hitster.dto.admin.DeleteUsersRequestDTO;
+import com.hitster.dto.admin.SongsResponseDTO;
 import com.hitster.dto.admin.UsersResponseDTO;
 import com.hitster.dto.game.SongDTO;
 import com.hitster.service.DatabaseService;
@@ -53,9 +55,9 @@ public class AdminController {
     }
 
     @GetMapping("/songs")
-    public List<SongDTO> getAllSongs(HttpServletRequest request) {
+    public SongsResponseDTO getAllSongs(HttpServletRequest request) {
         requireAdmin(request);
-        return DatabaseService.getAllSongs();
+        return new SongsResponseDTO(DatabaseService.getAllSongs());
     }
 
     @PostMapping(value = "/songs", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -159,6 +161,18 @@ public class AdminController {
         } catch (IOException e) {
             throw new RuntimeException("Failed to store audio file.");
         }
+    }
+
+    @DeleteMapping("/songs")
+    public String deleteSongs(@RequestBody DeleteSongsRequestDTO request,
+                            HttpServletRequest httpRequest) {
+        requireAdmin(httpRequest);
+
+        for (Long id : request.songIds()) {
+            DatabaseService.deleteSongById(id);
+        }
+
+        return "OK";
     }
 
     @PutMapping("/songs/{id}")
