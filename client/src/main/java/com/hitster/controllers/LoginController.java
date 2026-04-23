@@ -1,6 +1,7 @@
 package com.hitster.controllers;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.hitster.dto.auth.LoginResponseDTO;
 import com.hitster.network.AuthNetworkService;
 import com.hitster.session.UserSession;
@@ -21,6 +22,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+
+import java.util.Map;
 
 public class LoginController {
 
@@ -50,8 +53,9 @@ public class LoginController {
         String email = emailField.getText();
         String password = passwordField.getText();
 
+        // Client-side validation mirroring the server's IllegalArgumentException
         if (email == null || email.trim().isEmpty() || password == null || password.trim().isEmpty()) {
-            showAlert("Error", "Please enter both email and password.");
+            showAlert("Validation Error", "Email and password are required.");
             return;
         }
 
@@ -63,21 +67,10 @@ public class LoginController {
                 loginButton.setDisable(false);
                 loginButton.setText("LOGIN");
 
-                System.out.println("=== LOGIN RESPONSE ===");
-                System.out.println("Status Code: " + response.statusCode());
-                System.out.println("Body: " + response.body());
-
                 if (response.statusCode() == 200) {
                     try {
                         Gson gson = new Gson();
                         LoginResponseDTO loginResponse = gson.fromJson(response.body(), LoginResponseDTO.class);
-
-                        // 🔥 DEBUG חשוב מאוד
-                        System.out.println("LOGIN OK");
-                        System.out.println("USER ID = " + loginResponse.userId());
-                        System.out.println("USERNAME = " + loginResponse.username());
-                        System.out.println("TOKEN = " + loginResponse.token());
-                        System.out.println("======================");
 
                         UserSession.getInstance().setToken(loginResponse.token());
                         UserSession.getInstance().setUserName(loginResponse.username());
@@ -91,7 +84,31 @@ public class LoginController {
                         showAlert("Error", "Failed to parse login response.");
                     }
                 } else {
-                    showAlert("Login Failed", "Invalid email or password.");
+
+                    String errorMessage = "An unexpected error occurred.";
+                    try {
+                        Gson gson = new Gson();
+
+                        Map<String, Object> errorMap = gson.fromJson(response.body(),
+                                new TypeToken<Map<String, Object>>() {
+                                }.getType());
+
+                        if (errorMap != null && errorMap.containsKey("message")) {
+                            errorMessage = (String) errorMap.get("message");
+                        } else if (response.body() != null && !response.body().isEmpty()) {
+
+                            errorMessage = response.body();
+                        }
+                    } catch (Exception e) {
+
+                        if (response.statusCode() == 401) {
+                            errorMessage = "Invalid email or password.";
+                        } else if (response.statusCode() == 400) {
+                            errorMessage = "Email and password are required.";
+                        }
+                    }
+
+                    showAlert("Login Failed", errorMessage);
                 }
             });
         });
