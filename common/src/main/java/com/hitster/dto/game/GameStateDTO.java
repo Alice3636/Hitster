@@ -12,7 +12,7 @@ public record GameStateDTO(
     Long winnerPlayerId,
     String winnerName,
 
-    SongDTO currentSong,
+    CurrentSongDTO currentSong,
 
     List<PlayerGameStateDTO> players,
 
