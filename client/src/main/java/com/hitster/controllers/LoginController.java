@@ -1,6 +1,7 @@
 package com.hitster.controllers;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.hitster.dto.auth.LoginResponseDTO;
 import com.hitster.network.AuthNetworkService;
 import com.hitster.session.UserSession;
@@ -22,8 +23,9 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
-public class LoginController {
+import java.util.Map;
 
+public class LoginController {
 
     @FXML
     private TextField emailField;
@@ -43,7 +45,6 @@ public class LoginController {
 
     @FXML
     public void initialize() {
-
         passwordTextField.textProperty().bindBidirectional(passwordField.textProperty());
     }
 
@@ -52,8 +53,9 @@ public class LoginController {
         String email = emailField.getText();
         String password = passwordField.getText();
 
+        // Client-side validation mirroring the server's IllegalArgumentException
         if (email == null || email.trim().isEmpty() || password == null || password.trim().isEmpty()) {
-            showAlert("Error", "Please enter both email and password.");
+            showAlert("Validation Error", "Email and password are required.");
             return;
         }
 
@@ -66,17 +68,47 @@ public class LoginController {
                 loginButton.setText("LOGIN");
 
                 if (response.statusCode() == 200) {
-                    Gson gson = new Gson();
-                    LoginResponseDTO loginResponse = gson.fromJson(response.body(), LoginResponseDTO.class);
+                    try {
+                        Gson gson = new Gson();
+                        LoginResponseDTO loginResponse = gson.fromJson(response.body(), LoginResponseDTO.class);
 
-                    UserSession.getInstance().setToken(loginResponse.token());
-                    UserSession.getInstance().setUserName(loginResponse.username());
-                    UserSession.getInstance().setIsAdmin(loginResponse.isAdmin());
-                    UserSession.getInstance().setUserId(loginResponse.userId());
+                        UserSession.getInstance().setToken(loginResponse.token());
+                        UserSession.getInstance().setUserName(loginResponse.username());
+                        UserSession.getInstance().setIsAdmin(loginResponse.isAdmin());
+                        UserSession.getInstance().setUserId(loginResponse.userId());
 
-                    navigateTo(event, "/views/lobby.fxml");
+                        navigateTo(event, "/views/lobby.fxml");
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        showAlert("Error", "Failed to parse login response.");
+                    }
                 } else {
-                    showAlert("Login Failed", "Invalid email or password.");
+
+                    String errorMessage = "An unexpected error occurred.";
+                    try {
+                        Gson gson = new Gson();
+
+                        Map<String, Object> errorMap = gson.fromJson(response.body(),
+                                new TypeToken<Map<String, Object>>() {
+                                }.getType());
+
+                        if (errorMap != null && errorMap.containsKey("message")) {
+                            errorMessage = (String) errorMap.get("message");
+                        } else if (response.body() != null && !response.body().isEmpty()) {
+
+                            errorMessage = response.body();
+                        }
+                    } catch (Exception e) {
+
+                        if (response.statusCode() == 401) {
+                            errorMessage = "Invalid email or password.";
+                        } else if (response.statusCode() == 400) {
+                            errorMessage = "Email and password are required.";
+                        }
+                    }
+
+                    showAlert("Login Failed", errorMessage);
                 }
             });
         });
@@ -89,23 +121,19 @@ public class LoginController {
         if (isPasswordVisible) {
             passwordTextField.setVisible(true);
             passwordField.setVisible(false);
-
             passwordEyeIcon.setImage(new Image(getClass().getResourceAsStream("/images/eyepurpleopen.png")));
         } else {
             passwordTextField.setVisible(false);
             passwordField.setVisible(true);
-
             passwordEyeIcon.setImage(new Image(getClass().getResourceAsStream("/images/eyepurpleclosed.png")));
         }
     }
 
     @FXML
     void goToRegister(MouseEvent event) {
-
         navigateToNode((Node) event.getSource(), "/views/register.fxml");
     }
 
-    
     private void navigateTo(ActionEvent event, String fxmlPath) {
         navigateToNode((Node) event.getSource(), fxmlPath);
     }
