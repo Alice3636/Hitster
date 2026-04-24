@@ -13,7 +13,6 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         Path audioDir = Paths.get(
-                "Hitster-Yoni-dev-alice-merged",
                 "server",
                 "uploads",
                 "audio"
