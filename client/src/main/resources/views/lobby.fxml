@@ -6,66 +6,47 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
 
 <AnchorPane stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hitster.controllers.LobbyController">
    <children>
       <StackPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
-            <VBox alignment="CENTER" maxHeight="800.0" maxWidth="900.0" spacing="50.0" styleClass="lobby-glass-panel">
+            <VBox alignment="CENTER" spacing="3em" styleClass="lobby-glass-panel" style="-fx-max-width: 55em; -fx-padding: 3em;">
                <children>
-                  <Label styleClass="hitster-title" text="HITSTER" textAlignment="CENTER">
-                     <VBox.margin>
-                        <Insets bottom="10.0" top="20.0" />
-                     </VBox.margin>
+                  <Label styleClass="hitster-title" text="HITSTER" textAlignment="CENTER" style="-fx-font-size: 6em;">
+                     <VBox.margin><Insets bottom="10.0" top="20.0" /></VBox.margin>
                   </Label>
                   
-                  <Button fx:id="playButton" mnemonicParsing="false" onAction="#handlePlay" prefHeight="100.0" prefWidth="500.0" styleClass="play-button" text="LETS ROLL!" />
+                  <Button fx:id="playButton" mnemonicParsing="false" onAction="#handlePlay" styleClass="play-button" text="LETS ROLL!" style="-fx-pref-height: 5em; -fx-pref-width: 30em; -fx-font-size: 2em;" />
                   
-                  <Label fx:id="statusLabel" text="Searching for an opponent..." textFill="#3bc6f8" visible="false">
-                     <font>
-                        <Font name="System Bold Italic" size="32.0" />
-                     </font>
-                  </Label>
+                  <Label fx:id="statusLabel" text="Searching for an opponent..." textFill="#3bc6f8" visible="false" style="-fx-font-size: 2em; -fx-font-weight: bold; -fx-font-style: italic;" />
                   
-                  <Button fx:id="leaderboardButton" mnemonicParsing="false" onAction="#goToLeaderboard" prefHeight="70.0" prefWidth="380.0" styleClass="leaderboard-btn" text="LEADERBOARD">
-                     <VBox.margin>
-                        <Insets bottom="20.0" top="10.0" />
-                     </VBox.margin>
+                  <Button fx:id="leaderboardButton" mnemonicParsing="false" onAction="#goToLeaderboard" styleClass="leaderboard-btn" text="LEADERBOARD" style="-fx-pref-height: 4.5em; -fx-pref-width: 25em; -fx-font-size: 1.5em;">
+                     <VBox.margin><Insets bottom="20.0" top="10.0" /></VBox.margin>
                   </Button>
                </children>
-               <padding>
-                  <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
-               </padding>
             </VBox>
          </children>
       </StackPane>
       
-      <Button fx:id="hamburgerButton" mnemonicParsing="false" onAction="#toggleSideMenu" styleClass="hamburger-icon" text="☰" AnchorPane.rightAnchor="40.0" AnchorPane.topAnchor="40.0" />
+      <Button fx:id="hamburgerButton" mnemonicParsing="false" onAction="#toggleSideMenu" styleClass="hamburger-icon" text="☰" AnchorPane.rightAnchor="2em" AnchorPane.topAnchor="2em" style="-fx-font-size: 2.5em;" />
 
-      <VBox fx:id="sideMenuPanel" prefWidth="350.0" styleClass="sidebar-panel" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <VBox fx:id="sideMenuPanel" styleClass="sidebar-panel" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" style="-fx-pref-width: 22em;">
          <children>
-            <VBox alignment="CENTER_RIGHT" prefHeight="120.0">
+            <VBox alignment="CENTER_RIGHT" style="-fx-pref-height: 8em;">
                <children>
-                  <Button mnemonicParsing="false" onAction="#closeSideMenu" styleClass="hamburger-icon" text="✕">
-                     <font>
-                        <Font name="System Bold" size="36.0" />
-                     </font>
-                     <VBox.margin>
-                        <Insets right="40.0" />
-                     </VBox.margin>
+                  <Button mnemonicParsing="false" onAction="#closeSideMenu" styleClass="hamburger-icon" text="✕" style="-fx-font-size: 2.5em; -fx-font-weight: bold;">
+                     <VBox.margin><Insets right="2em" /></VBox.margin>
                   </Button>
                </children>
             </VBox>
             <VBox id="sideMenu" spacing="10.0">
                <children>
-                  <Button fx:id="profileButton" alignment="CENTER_LEFT" maxWidth="Infinity" mnemonicParsing="false" onAction="#goToProfile" prefHeight="80.0" style="-fx-padding: 15 0 15 40;" styleClass="sidebar-btn" text="My Profile" />
-                  <Button fx:id="adminModeButton" alignment="CENTER_LEFT" maxWidth="Infinity" mnemonicParsing="false" onAction="#goToAdminMode" prefHeight="80.0" style="-fx-padding: 15 0 15 40;" styleClass="sidebar-btn" text="Admin Mode" />
-                  <Button fx:id="logoutButton" alignment="CENTER_LEFT" maxWidth="Infinity" mnemonicParsing="false" onAction="#handleLogout" prefHeight="80.0" style="-fx-padding: 15 0 15 40;" styleClass="sidebar-btn" text="Logout" />
+                  <Button fx:id="profileButton" alignment="CENTER_LEFT" maxWidth="Infinity" mnemonicParsing="false" onAction="#goToProfile" styleClass="sidebar-btn" text="My Profile" style="-fx-pref-height: 5em; -fx-padding: 1em 0 1em 2.5em;" />
+                  <Button fx:id="adminModeButton" alignment="CENTER_LEFT" maxWidth="Infinity" mnemonicParsing="false" onAction="#goToAdminMode" styleClass="sidebar-btn" text="Admin Mode" style="-fx-pref-height: 5em; -fx-padding: 1em 0 1em 2.5em;" />
+                  <Button fx:id="logoutButton" alignment="CENTER_LEFT" maxWidth="Infinity" mnemonicParsing="false" onAction="#handleLogout" styleClass="sidebar-btn" text="Logout" style="-fx-pref-height: 5em; -fx-padding: 1em 0 1em 2.5em;" />
                </children>
-               <VBox.margin>
-                  <Insets top="20.0" />
-               </VBox.margin>
+               <VBox.margin><Insets top="20.0" /></VBox.margin>
             </VBox>
          </children>
       </VBox>
