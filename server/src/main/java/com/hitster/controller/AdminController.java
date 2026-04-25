@@ -1,8 +1,10 @@
 package com.hitster.controller;
 
+import com.hitster.dto.admin.CreateSongRequestDTO;
 import com.hitster.dto.admin.DeleteSongsRequestDTO;
 import com.hitster.dto.admin.DeleteUsersRequestDTO;
 import com.hitster.dto.admin.SongsResponseDTO;
+import com.hitster.dto.admin.UpdateSongRequestDTO;
 import com.hitster.dto.admin.UsersResponseDTO;
 import com.hitster.dto.game.SongDTO;
 import com.hitster.service.DatabaseService;
@@ -10,7 +12,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.*;
@@ -24,15 +25,12 @@ public class AdminController {
     @GetMapping("/users")
     public UsersResponseDTO getAllUsers(HttpServletRequest request) {
         requireAdmin(request);
-
-        return new UsersResponseDTO(
-                DatabaseService.getAllUsers()
-        );
+        return new UsersResponseDTO(DatabaseService.getAllUsers());
     }
 
     @DeleteMapping("/users")
     public String deleteUsers(@RequestBody DeleteUsersRequestDTO request,
-                            HttpServletRequest httpRequest) {
+                              HttpServletRequest httpRequest) {
         requireAdmin(httpRequest);
 
         for (Long id : request.userIds()) {
@@ -60,55 +58,28 @@ public class AdminController {
         return new SongsResponseDTO(DatabaseService.getAllSongs());
     }
 
-    @PostMapping(value = "/songs", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public SongDTO createSongJson(@RequestBody SongDTO request, HttpServletRequest httpRequest) {
+    @PostMapping(value = "/songs", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public SongDTO uploadSong(@ModelAttribute CreateSongRequestDTO request,
+                              HttpServletRequest httpRequest) {
         requireAdmin(httpRequest);
 
         if (request == null ||
-                isBlank(request.title()) ||
-                isBlank(request.artist()) ||
-                request.releaseYear() <= 0 ||
-                isBlank(request.audioUrl())) {
-            throw new IllegalArgumentException("Title, artist, releaseYear, and audioUrl are required.");
-        }
-
-        Long newId = DatabaseService.createSong(
-                request.title(),
-                request.artist(),
-                request.releaseYear(),
-                request.audioUrl()
-        );
-
-        if (newId == null) {
-            throw new IllegalArgumentException("Song creation failed.");
-        }
-
-        return new SongDTO(
-                newId,
-                request.title(),
-                request.artist(),
-                request.releaseYear(),
-                request.audioUrl()
-        );
-    }
-
-    @PostMapping(value = "/songs", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public SongDTO uploadSong(@RequestParam("title") String title,
-                              @RequestParam("artist") String artist,
-                              @RequestParam("releaseYear") int releaseYear,
-                              @RequestParam("file") MultipartFile file,
-                              HttpServletRequest request) {
-        requireAdmin(request);
-
-        if (isBlank(title) || isBlank(artist) || releaseYear <= 0) {
+                isBlank(request.getTitle()) ||
+                isBlank(request.getArtist()) ||
+                request.getReleaseYear() <= 0) {
             throw new IllegalArgumentException("Title, artist, and releaseYear are required.");
         }
 
-        if (file == null || file.isEmpty()) {
+        if (request.getFile() == null || request.getFile().isEmpty()) {
             throw new IllegalArgumentException("Audio file is required.");
         }
 
-        String originalFilename = StringUtils.cleanPath(file.getOriginalFilename() == null ? "" : file.getOriginalFilename());
+        String originalFilename = StringUtils.cleanPath(
+                request.getFile().getOriginalFilename() == null
+                        ? ""
+                        : request.getFile().getOriginalFilename()
+        );
+
         if (originalFilename.isEmpty()) {
             throw new IllegalArgumentException("Invalid file name.");
         }
@@ -128,17 +99,18 @@ public class AdminController {
         try {
             Files.createDirectories(audioDir);
 
-            String storedFilename = UUID.randomUUID() + "_" + originalFilename;
+            String cleanOriginalFilename = originalFilename.replaceAll("\\s+", "_");
+            String storedFilename = UUID.randomUUID() + "_" + cleanOriginalFilename;
             Path targetFile = audioDir.resolve(storedFilename).normalize();
 
-            Files.copy(file.getInputStream(), targetFile, StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(request.getFile().getInputStream(), targetFile, StandardCopyOption.REPLACE_EXISTING);
 
             String audioUrl = "/audio/" + storedFilename;
 
             Long newId = DatabaseService.createSong(
-                    title.trim(),
-                    artist.trim(),
-                    releaseYear,
+                    request.getTitle().trim(),
+                    request.getArtist().trim(),
+                    request.getReleaseYear(),
                     audioUrl
             );
 
@@ -152,9 +124,9 @@ public class AdminController {
 
             return new SongDTO(
                     newId,
-                    title.trim(),
-                    artist.trim(),
-                    releaseYear,
+                    request.getTitle().trim(),
+                    request.getArtist().trim(),
+                    request.getReleaseYear(),
                     audioUrl
             );
 
@@ -163,38 +135,26 @@ public class AdminController {
         }
     }
 
-    @DeleteMapping("/songs")
-    public String deleteSongs(@RequestBody DeleteSongsRequestDTO request,
-                            HttpServletRequest httpRequest) {
-        requireAdmin(httpRequest);
-
-        for (Long id : request.songIds()) {
-            DatabaseService.deleteSongById(id);
-        }
-
-        return "OK";
-    }
-
-    @PutMapping("/songs/{id}")
+    @PutMapping(value = "/songs/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public SongDTO updateSong(@PathVariable Long id,
-                              @RequestBody SongDTO request,
+                              @ModelAttribute UpdateSongRequestDTO request,
                               HttpServletRequest httpRequest) {
         requireAdmin(httpRequest);
 
         if (request == null ||
-                isBlank(request.title()) ||
-                isBlank(request.artist()) ||
-                request.releaseYear() <= 0 ||
-                isBlank(request.audioUrl())) {
+                isBlank(request.getTitle()) ||
+                isBlank(request.getArtist()) ||
+                request.getReleaseYear() <= 0 ||
+                isBlank(request.getAudioUrl())) {
             throw new IllegalArgumentException("Title, artist, releaseYear, and audioUrl are required.");
         }
 
         boolean updated = DatabaseService.updateSong(
                 id,
-                request.title(),
-                request.artist(),
-                request.releaseYear(),
-                request.audioUrl()
+                request.getTitle().trim(),
+                request.getArtist().trim(),
+                request.getReleaseYear(),
+                request.getAudioUrl().trim()
         );
 
         if (!updated) {
@@ -203,11 +163,23 @@ public class AdminController {
 
         return new SongDTO(
                 id,
-                request.title(),
-                request.artist(),
-                request.releaseYear(),
-                request.audioUrl()
+                request.getTitle().trim(),
+                request.getArtist().trim(),
+                request.getReleaseYear(),
+                request.getAudioUrl().trim()
         );
+    }
+
+    @DeleteMapping("/songs")
+    public String deleteSongs(@RequestBody DeleteSongsRequestDTO request,
+                              HttpServletRequest httpRequest) {
+        requireAdmin(httpRequest);
+
+        for (Long id : request.songIds()) {
+            DatabaseService.deleteSongById(id);
+        }
+
+        return "OK";
     }
 
     @DeleteMapping("/songs/{id}")
