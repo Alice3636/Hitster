@@ -4,13 +4,11 @@ import com.hitster.controller.NotFoundException;
 import com.hitster.dto.game.GuessSongRequestDTO;
 import com.hitster.dto.game.PlaceSongRequestDTO;
 import com.hitster.engine.GameEngine;
-import com.hitster.model.GamePhase;
 import com.hitster.model.GameSession;
 import com.hitster.model.GameStatus;
 import com.hitster.model.Player;
 import com.hitster.model.Room;
 import com.hitster.model.Song;
-import com.hitster.model.TurnResult;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -53,45 +51,51 @@ public class GameManager {
     }
 
     public GameSession getGameById(String gameId) {
-        return activeGames.get(gameId);
-    }
-
-    public TurnResult placeSong(String gameId, String playerId, PlaceSongRequestDTO request) {
         GameSession session = activeGames.get(gameId);
 
-        if (session == null) {
-            throw new NotFoundException("Game not found: " + gameId);
+        if (session != null) {
+            gameEngine.advanceIfNeeded(session);
         }
 
-        return gameEngine.placeSong(
+        return session;
+    }
+
+    public GameSession placeSong(String gameId, String playerId, PlaceSongRequestDTO request) {
+        GameSession session = getRequiredGame(gameId);
+
+        if (request == null) {
+            throw new IllegalArgumentException("Request body is required.");
+        }
+
+        gameEngine.placeSong(
                 session,
                 playerId,
-                request.indexPosition(), // תיקון שמות השדות ב-Record
+                request.indexPosition(),
                 request.songId()
         );
+
+        return session;
     }
 
-    public TurnResult guessSong(String gameId, String playerId, GuessSongRequestDTO request) {
-        GameSession session = activeGames.get(gameId);
+    public GameSession guessSong(String gameId, String playerId, GuessSongRequestDTO request) {
+        GameSession session = getRequiredGame(gameId);
 
-        if (session == null) {
-            throw new NotFoundException("Game not found: " + gameId);
+        if (request == null) {
+            throw new IllegalArgumentException("Request body is required.");
         }
 
-        return gameEngine.guessSong(
+        gameEngine.submitGuess(
                 session,
                 playerId,
                 request.artist(),
-                request.songName() // תיקון שמות השדות ב-Record
+                request.title()
         );
+
+        return session;
     }
 
-    public boolean challengeLastTurn(String gameId, String challengerId, Integer suggestedIndex) {
-        GameSession session = activeGames.get(gameId);
-
-        if (session == null) {
-            throw new NotFoundException("Game not found: " + gameId);
-        }
+    public GameSession challengeLastTurn(String gameId, String challengerId, Integer suggestedIndex) {
+        GameSession session = getRequiredGame(gameId);
 
         Player challenger = session.getPlayerById(challengerId);
 
@@ -99,25 +103,21 @@ public class GameManager {
             throw new NotFoundException("Player not found: " + challengerId);
         }
 
-        return gameEngine.challengeLastTurn(session, challenger, suggestedIndex);
+        gameEngine.challengeLastTurn(session, challenger, suggestedIndex);
+
+        return session;
     }
 
-    public void skipChallengeWindow(String gameId) {
-        GameSession session = activeGames.get(gameId);
-
-        if (session == null) {
-            throw new NotFoundException("Game not found: " + gameId);
-        }
+    public GameSession skipChallengeWindow(String gameId) {
+        GameSession session = getRequiredGame(gameId);
 
         gameEngine.skipChallengeWindow(session);
+
+        return session;
     }
 
     public GameSession quitGame(String gameId, String playerId) {
-        GameSession session = activeGames.get(gameId);
-
-        if (session == null) {
-            throw new NotFoundException("Game not found: " + gameId);
-        }
+        GameSession session = getRequiredGame(gameId);
 
         Player quitter = session.getPlayerById(playerId);
 
@@ -128,7 +128,19 @@ public class GameManager {
         Player winner = session.getOpponent(quitter);
         session.setWinner(winner);
         session.setStatus(GameStatus.FINISHED);
-        session.setPhase(GamePhase.GAME_FINISHED);
+        session.startPhase(com.hitster.dto.game.GamePhase.FINISHED, 0);
+
+        return session;
+    }
+
+    private GameSession getRequiredGame(String gameId) {
+        GameSession session = activeGames.get(gameId);
+
+        if (session == null) {
+            throw new NotFoundException("Game not found: " + gameId);
+        }
+
+        gameEngine.advanceIfNeeded(session);
 
         return session;
     }

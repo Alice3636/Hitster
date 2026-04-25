@@ -1,8 +1,9 @@
 package com.hitster.mapper;
 
 import com.hitster.dto.game.CardDTO;
+import com.hitster.dto.game.CurrentSongDTO;
 import com.hitster.dto.game.GameStateDTO;
-import com.hitster.dto.game.SongDTO;
+import com.hitster.dto.game.PlayerGameStateDTO;
 import com.hitster.model.GameSession;
 import com.hitster.model.Player;
 import com.hitster.model.Song;
@@ -17,60 +18,65 @@ public class GameStateMapper {
         Player p1 = session.getPlayer1();
         Player p2 = session.getPlayer2();
 
-        GameStateDTO dto = new GameStateDTO();
+        Long winnerPlayerId = session.getWinner() != null
+                ? parseLongOrNull(session.getWinner().getId())
+                : null;
 
-        dto.setGameId(session.getId());
-        dto.setGameStatus(session.getStatus() != null ? session.getStatus().name() : null);
-        dto.setTurnNumber(session.getTurnNumber());
-        dto.setTimeLeftSeconds(0);
+        String winnerName = session.getWinner() != null
+                ? session.getWinner().getUsername()
+                : null;
 
-        dto.setCurrentPlayerId(
-                session.getCurrentTurnPlayer() != null
-                        ? parseLongOrNull(session.getCurrentTurnPlayer().getId())
-                        : null
+        Long activePlayerId = session.getCurrentTurnPlayer() != null
+                ? parseLongOrNull(session.getCurrentTurnPlayer().getId())
+                : null;
+
+        List<PlayerGameStateDTO> players = List.of(
+                toPlayerStateDTO(p1, session.getPlayer1Timeline()),
+                toPlayerStateDTO(p2, session.getPlayer2Timeline())
         );
 
-        dto.setCurrentSong(
-                session.getCurrentSong() != null
-                        ? toSongDTO(session.getCurrentSong())
-                        : null
+        return new GameStateDTO(
+                session.getPhase(),
+                session.getTurnNumber(),
+                session.getTimeLeftSeconds(),
+                activePlayerId,
+                winnerPlayerId,
+                winnerName,
+                toCurrentSongDTO(session.getCurrentSong()),
+                players,
+                session.getLastTurnResult(),
+                session.getChallengeState(),
+                session.getLastChallengeResult()
         );
-
-        dto.setWinnerName(
-                session.getWinner() != null
-                        ? session.getWinner().getUsername()
-                        : null
-        );
-
-        dto.setPlayer1Id(parseLongOrNull(p1.getId()));
-        dto.setPlayer1Name(p1.getUsername());
-        dto.setPlayer1Score(p1.getScore());
-        dto.setPlayer1Tokens(p1.getTokens());
-        dto.setPlayer1Timeline(toCardDTOList(session.getPlayer1Timeline()));
-
-        dto.setPlayer2Id(parseLongOrNull(p2.getId()));
-        dto.setPlayer2Name(p2.getUsername());
-        dto.setPlayer2Score(p2.getScore());
-        dto.setPlayer2Tokens(p2.getTokens());
-        dto.setPlayer2Timeline(toCardDTOList(session.getPlayer2Timeline()));
-
-        return dto;
     }
 
-    private static SongDTO toSongDTO(Song song) {
-        return new SongDTO(
+    private static PlayerGameStateDTO toPlayerStateDTO(Player player, List<SongCard> timeline) {
+        return new PlayerGameStateDTO(
+                parseLongOrNull(player.getId()),
+                player.getUsername(),
+                player.getScore(),
+                player.getTokens(),
+                toCardDTOList(timeline)
+        );
+    }
+
+    private static CurrentSongDTO toCurrentSongDTO(Song song) {
+        if (song == null) {
+            return null;
+        }
+
+        return new CurrentSongDTO(
                 parseLongOrNull(song.getId()),
-                song.getTitle(),
-                song.getArtist(),
-                song.getYear(),
                 song.getAudioUrl()
         );
     }
 
     private static List<CardDTO> toCardDTOList(List<SongCard> timeline) {
         List<CardDTO> result = new ArrayList<>();
+
         for (SongCard card : timeline) {
             Song song = card.getSong();
+
             result.add(new CardDTO(
                     parseLongOrNull(song.getId()),
                     song.getYear(),
@@ -78,6 +84,7 @@ public class GameStateMapper {
                     song.getTitle()
             ));
         }
+
         return result;
     }
 

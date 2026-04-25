@@ -7,7 +7,6 @@ import com.hitster.dto.game.GuessSongRequestDTO;
 import com.hitster.dto.game.PlaceSongRequestDTO;
 import com.hitster.mapper.GameStateMapper;
 import com.hitster.model.GameSession;
-import com.hitster.model.TurnResult;
 import com.hitster.service.GameManager;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.*;
@@ -34,69 +33,58 @@ public class GameController {
     }
 
     @PostMapping("/{gameId}/place")
-    public TurnResult placeSong(@PathVariable String gameId,
-                                @RequestBody PlaceSongRequestDTO request,
-                                HttpServletRequest httpRequest) {
-        Object jwtUserIdObj = httpRequest.getAttribute("jwtUserId");
+    public GameStateDTO placeSong(@PathVariable String gameId,
+                                  @RequestBody PlaceSongRequestDTO request,
+                                  HttpServletRequest httpRequest) {
+        String playerId = getAuthenticatedPlayerId(httpRequest);
 
-        if (jwtUserIdObj == null) {
-            throw new IllegalArgumentException("Missing authenticated user.");
-        }
+        GameSession session = gameManager.placeSong(gameId, playerId, request);
 
-        String playerId = String.valueOf(jwtUserIdObj);
-        // שימוש בגישה של Record: request.indexPosition() ו-request.songId()
-        return gameManager.placeSong(gameId, playerId, request);
+        return GameStateMapper.toDTO(session);
     }
 
     @PostMapping("/{gameId}/guess")
-    public TurnResult guessSong(@PathVariable String gameId,
-                                @RequestBody GuessSongRequestDTO request,
-                                HttpServletRequest httpRequest) {
-        Object jwtUserIdObj = httpRequest.getAttribute("jwtUserId");
+    public GameStateDTO guessSong(@PathVariable String gameId,
+                                  @RequestBody GuessSongRequestDTO request,
+                                  HttpServletRequest httpRequest) {
+        String playerId = getAuthenticatedPlayerId(httpRequest);
 
-        if (jwtUserIdObj == null) {
-            throw new IllegalArgumentException("Missing authenticated user.");
-        }
+        GameSession session = gameManager.guessSong(gameId, playerId, request);
 
-        String playerId = String.valueOf(jwtUserIdObj);
-        return gameManager.guessSong(gameId, playerId, request);
+        return GameStateMapper.toDTO(session);
     }
 
     @PostMapping("/{gameId}/challenge")
-    public boolean challengeLastTurn(@PathVariable String gameId,
-                                     @RequestBody ChallengeRequestDTO request,
-                                     HttpServletRequest httpRequest) {
-        Object jwtUserIdObj = httpRequest.getAttribute("jwtUserId");
-
-        if (jwtUserIdObj == null) {
-            throw new IllegalArgumentException("Missing authenticated user.");
-        }
+    public GameStateDTO challengeLastTurn(@PathVariable String gameId,
+                                          @RequestBody ChallengeRequestDTO request,
+                                          HttpServletRequest httpRequest) {
+        String challengerId = getAuthenticatedPlayerId(httpRequest);
 
         if (request == null) {
             throw new IllegalArgumentException("Request body is required.");
         }
 
-        String challengerId = String.valueOf(jwtUserIdObj);
-        
-        // תיקון השגיאה מצילום המסך: ב-Record משתמשים ב-suggestedIndex() במקום ב-getSuggestedIndex()
-        return gameManager.challengeLastTurn(gameId, challengerId, request.suggestedIndex());
+        GameSession session = gameManager.challengeLastTurn(
+                gameId,
+                challengerId,
+                request.suggestedIndex()
+        );
+
+        return GameStateMapper.toDTO(session);
     }
 
     @PostMapping("/{gameId}/challenge/skip")
-    public void skipChallengeWindow(@PathVariable String gameId) {
-        gameManager.skipChallengeWindow(gameId);
+    public GameStateDTO skipChallengeWindow(@PathVariable String gameId) {
+        GameSession session = gameManager.skipChallengeWindow(gameId);
+
+        return GameStateMapper.toDTO(session);
     }
 
     @PostMapping("/{gameId}/quit")
     public GameQuitResponseDTO quitGame(@PathVariable String gameId,
                                         HttpServletRequest httpRequest) {
-        Object jwtUserIdObj = httpRequest.getAttribute("jwtUserId");
+        String playerId = getAuthenticatedPlayerId(httpRequest);
 
-        if (jwtUserIdObj == null) {
-            throw new IllegalArgumentException("Missing authenticated user.");
-        }
-
-        String playerId = String.valueOf(jwtUserIdObj);
         GameSession session = gameManager.quitGame(gameId, playerId);
 
         return new GameQuitResponseDTO(
@@ -105,5 +93,15 @@ public class GameController {
                 session.getWinner() != null ? session.getWinner().getUsername() : null,
                 "Player forfeited the match."
         );
+    }
+
+    private String getAuthenticatedPlayerId(HttpServletRequest request) {
+        Object jwtUserIdObj = request.getAttribute("jwtUserId");
+
+        if (jwtUserIdObj == null) {
+            throw new IllegalArgumentException("Missing authenticated user.");
+        }
+
+        return String.valueOf(jwtUserIdObj);
     }
 }
