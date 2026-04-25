@@ -2,6 +2,7 @@ package com.hitster.mapper;
 
 import com.hitster.dto.game.CardDTO;
 import com.hitster.dto.game.CurrentSongDTO;
+import com.hitster.dto.game.GamePhase;
 import com.hitster.dto.game.GameStateDTO;
 import com.hitster.dto.game.PlayerGameStateDTO;
 import com.hitster.model.GameSession;
@@ -26,7 +27,9 @@ public class GameStateMapper {
                 ? session.getWinner().getUsername()
                 : null;
 
-        Long activePlayerId = session.getCurrentTurnPlayer() != null
+        Long activePlayerId = session.getPhase() == GamePhase.FINISHED
+                ? null
+                : session.getCurrentTurnPlayer() != null
                 ? parseLongOrNull(session.getCurrentTurnPlayer().getId())
                 : null;
 
