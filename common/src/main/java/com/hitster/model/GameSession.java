@@ -1,5 +1,10 @@
 package com.hitster.model;
 
+import com.hitster.dto.game.ChallengeResultDTO;
+import com.hitster.dto.game.ChallengeStateDTO;
+import com.hitster.dto.game.GamePhase;
+import com.hitster.dto.game.TurnResultDTO;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,8 +24,21 @@ public class GameSession {
     private GameStatus status;
     private GamePhase phase;
     private Player winner;
-    private LastTurnData lastTurnData;
     private int turnNumber;
+
+    private LastTurnData lastTurnData;
+    private TurnResultDTO lastTurnResult;
+    private ChallengeStateDTO challengeState;
+    private ChallengeResultDTO lastChallengeResult;
+
+    private String pendingGuessedArtist;
+    private String pendingGuessedTitle;
+    private Integer pendingInsertPosition;
+    private Song pendingPlacedSong;
+    private Player pendingActingPlayer;
+    private boolean pendingPlacementCorrect;
+
+    private long phaseEndsAtMillis;
 
     public GameSession(String id, Player player1, Player player2, List<Song> songsPool) {
         this.id = id;
@@ -32,6 +50,7 @@ public class GameSession {
         this.status = GameStatus.WAITING_FOR_PLAYERS;
         this.phase = GamePhase.WAITING_FOR_PLAYERS;
         this.turnNumber = 0;
+        this.phaseEndsAtMillis = 0;
     }
 
     public String getId() {
@@ -90,6 +109,29 @@ public class GameSession {
         this.phase = phase;
     }
 
+    public void startPhase(GamePhase newPhase, int durationSeconds) {
+        this.phase = newPhase;
+
+        if (durationSeconds > 0) {
+            this.phaseEndsAtMillis = System.currentTimeMillis() + durationSeconds * 1000L;
+        } else {
+            this.phaseEndsAtMillis = 0;
+        }
+    }
+
+    public boolean isPhaseExpired() {
+        return phaseEndsAtMillis > 0 && System.currentTimeMillis() >= phaseEndsAtMillis;
+    }
+
+    public int getTimeLeftSeconds() {
+        if (phaseEndsAtMillis <= 0) {
+            return 0;
+        }
+
+        long leftMillis = phaseEndsAtMillis - System.currentTimeMillis();
+        return Math.max(0, (int) Math.ceil(leftMillis / 1000.0));
+    }
+
     public Player getWinner() {
         return winner;
     }
@@ -104,6 +146,87 @@ public class GameSession {
 
     public void setLastTurnData(LastTurnData lastTurnData) {
         this.lastTurnData = lastTurnData;
+    }
+
+    public TurnResultDTO getLastTurnResult() {
+        return lastTurnResult;
+    }
+
+    public void setLastTurnResult(TurnResultDTO lastTurnResult) {
+        this.lastTurnResult = lastTurnResult;
+    }
+
+    public ChallengeStateDTO getChallengeState() {
+        return challengeState;
+    }
+
+    public void setChallengeState(ChallengeStateDTO challengeState) {
+        this.challengeState = challengeState;
+    }
+
+    public ChallengeResultDTO getLastChallengeResult() {
+        return lastChallengeResult;
+    }
+
+    public void setLastChallengeResult(ChallengeResultDTO lastChallengeResult) {
+        this.lastChallengeResult = lastChallengeResult;
+    }
+
+    public String getPendingGuessedArtist() {
+        return pendingGuessedArtist;
+    }
+
+    public void setPendingGuessedArtist(String pendingGuessedArtist) {
+        this.pendingGuessedArtist = pendingGuessedArtist;
+    }
+
+    public String getPendingGuessedTitle() {
+        return pendingGuessedTitle;
+    }
+
+    public void setPendingGuessedTitle(String pendingGuessedTitle) {
+        this.pendingGuessedTitle = pendingGuessedTitle;
+    }
+
+    public Integer getPendingInsertPosition() {
+        return pendingInsertPosition;
+    }
+
+    public void setPendingInsertPosition(Integer pendingInsertPosition) {
+        this.pendingInsertPosition = pendingInsertPosition;
+    }
+
+    public Song getPendingPlacedSong() {
+        return pendingPlacedSong;
+    }
+
+    public void setPendingPlacedSong(Song pendingPlacedSong) {
+        this.pendingPlacedSong = pendingPlacedSong;
+    }
+
+    public Player getPendingActingPlayer() {
+        return pendingActingPlayer;
+    }
+
+    public void setPendingActingPlayer(Player pendingActingPlayer) {
+        this.pendingActingPlayer = pendingActingPlayer;
+    }
+
+    public boolean isPendingPlacementCorrect() {
+        return pendingPlacementCorrect;
+    }
+
+    public void setPendingPlacementCorrect(boolean pendingPlacementCorrect) {
+        this.pendingPlacementCorrect = pendingPlacementCorrect;
+    }
+
+    public void clearPendingTurnInput() {
+        this.pendingGuessedArtist = null;
+        this.pendingGuessedTitle = null;
+        this.pendingInsertPosition = null;
+        this.pendingPlacedSong = null;
+        this.pendingActingPlayer = null;
+        this.pendingPlacementCorrect = false;
     }
 
     public int getTurnNumber() {
@@ -139,6 +262,6 @@ public class GameSession {
     }
 
     public boolean isFinished() {
-        return status == GameStatus.FINISHED;
+        return status == GameStatus.FINISHED || phase == GamePhase.FINISHED;
     }
 }
