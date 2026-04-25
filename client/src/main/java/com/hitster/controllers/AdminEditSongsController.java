@@ -1,11 +1,8 @@
 package com.hitster.controllers;
 
 import com.google.gson.Gson;
-import com.hitster.dto.admin.UsersResponseDTO;
 import com.hitster.network.AdminNetworkService;
-import com.hitster.controllers.AdminEditAccountsController.UserRow;
 import com.hitster.dto.admin.SongsResponseDTO;
-import com.hitster.dto.admin.UserEntryDTO;
 import com.hitster.dto.game.SongDTO;
 import javafx.application.Platform;
 import javafx.beans.property.*;
@@ -24,7 +21,6 @@ import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.stage.Stage;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class AdminEditSongsController {

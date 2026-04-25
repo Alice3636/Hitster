@@ -271,19 +271,35 @@ public class GameController {
 
         boolean showSlots = showPlacementSlots || showChallengeSlots;
 
-        if (showSlots) {
+        Integer blockedChallengeIndex = null;
+        if (showChallengeSlots && gameState.challengeState() != null) {
+            blockedChallengeIndex = gameState.challengeState().originalPlacedIndex();
+        }
+
+        if (showSlots && !isBlockedChallengeSlot(0, showChallengeSlots, blockedChallengeIndex)) {
             timelineBox.getChildren().add(createPlacementSlot(0, showChallengeSlots));
         }
 
         for (int i = 0; i < cards.size(); i++) {
             timelineBox.getChildren().add(createCardUI(cards.get(i)));
 
-            if (showSlots) {
-                timelineBox.getChildren().add(createPlacementSlot(i + 1, showChallengeSlots));
+            int slotIndex = i + 1;
+
+            if (showSlots && !isBlockedChallengeSlot(slotIndex, showChallengeSlots, blockedChallengeIndex)) {
+                timelineBox.getChildren().add(createPlacementSlot(slotIndex, showChallengeSlots));
             }
         }
     }
 
+    private boolean isBlockedChallengeSlot(
+            int slotIndex,
+            boolean showChallengeSlots,
+            Integer blockedChallengeIndex
+    ) {
+        return showChallengeSlots &&
+                blockedChallengeIndex != null &&
+                blockedChallengeIndex == slotIndex;
+    }
     private Button createPlacementSlot(int index, boolean isChallengeSlot) {
         Button slotBtn = new Button("+");
         slotBtn.setStyle("-fx-background-color: rgba(255, 255, 255, 0.15); -fx-text-fill: #00ffff; -fx-font-size: 24px; -fx-cursor: hand; -fx-border-color: #00ffff; -fx-border-radius: 10; -fx-background-radius: 10;");
