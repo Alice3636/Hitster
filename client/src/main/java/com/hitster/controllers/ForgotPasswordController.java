@@ -1,18 +1,14 @@
 package com.hitster.controllers;
 
+import com.hitster.client.utils.SceneNavigator;
 import com.hitster.network.AuthNetworkService;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
-import javafx.stage.Stage;
 
 public class ForgotPasswordController {
 
@@ -42,7 +38,7 @@ public class ForgotPasswordController {
                 if (response.statusCode() == 200) {
                     // Show a success message and send them back to login
                     showAlert("Success", "A reset link has been sent.", Alert.AlertType.INFORMATION);
-                    navigateToNode((Node) event.getSource(), "/views/login.fxml");
+                    SceneNavigator.loadScene(SceneNavigator.LOGIN_SCREEN);
                 } else {
                     showAlert("Error", "Failed to process request. Please try again.", Alert.AlertType.ERROR);
                 }
@@ -59,27 +55,7 @@ public class ForgotPasswordController {
 
     @FXML
     void handleBack(ActionEvent event) {
-        navigateToNode((Node) event.getSource(), "/views/login.fxml");
-    }
-
-    private void navigateToNode(Node sourceNode, String fxmlPath) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Parent root = loader.load();
-            
-            Scene currentScene = sourceNode.getScene();
-            Stage stage = (Stage) currentScene.getWindow();
-            
-            currentScene.setRoot(root);
-            
-            if (!stage.isMaximized()) {
-                stage.setMaximized(true);
-            }
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("Failed to load screen: " + fxmlPath);
-        }
+        SceneNavigator.loadScene(SceneNavigator.LOGIN_SCREEN);
     }
 
     private void showAlert(String title, String message, Alert.AlertType alertType) {

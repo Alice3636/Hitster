@@ -1,6 +1,5 @@
 package com.hitster.controllers;
 
-import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -15,11 +14,6 @@ import javafx.application.Platform;
 import com.google.gson.Gson;
 
 import javafx.event.ActionEvent;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -68,44 +62,25 @@ public class LobbyController {
         }
     }
 
-    private void navigateToNode(Node sourceNode, String fxmlPath) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Parent root = loader.load();
-            
-            Scene scene = sourceNode.getScene();
-            Stage stage = (Stage) scene.getWindow();
-            
-            scene.setRoot(root);
-            
-            if (!stage.isMaximized()) {
-                stage.setMaximized(true);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("Error loading: " + fxmlPath);
-        }
-    }
-
     @FXML
     void goToAdminMode(ActionEvent event) {
-        navigateToNode((Node) event.getSource(), "/views/AdminEditSongs.fxml");
+        SceneNavigator.loadScene(SceneNavigator.ADMIN_EDIT_SONGS_SCREEN);
     }
 
     @FXML
     void goToLeaderboard(ActionEvent event) {
-        navigateToNode((Node) event.getSource(), "/views/leaderboard.fxml");
+        SceneNavigator.loadScene(SceneNavigator.LEADERBOARD_SCREEN);
     }
 
     @FXML
     void goToProfile(ActionEvent event) {
-        navigateToNode((Node) event.getSource(), "/views/profile.fxml");
+        SceneNavigator.loadScene(SceneNavigator.PROFILE_SCREEN);
     }
 
     @FXML
     void handleLogout(ActionEvent event) {
         UserSession.getInstance().cleanUserSession();
-        navigateToNode((Node) event.getSource(), "/views/login.fxml");
+        SceneNavigator.loadScene(SceneNavigator.LOGIN_SCREEN);
     }
 
     @FXML
@@ -151,11 +126,7 @@ public class LobbyController {
                         GameManager.getInstance().startGame(statusResponse.gameId());
                         
                         Platform.runLater(() -> {
-                            try {
-                                SceneNavigator.loadScene(SceneNavigator.GAME_VIEW_SCREEN);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
+                            SceneNavigator.loadScene(SceneNavigator.GAME_VIEW_SCREEN);
                         });
                     }
                 }

@@ -8,13 +8,9 @@ import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
-import javafx.stage.Stage;
+import com.hitster.client.utils.SceneNavigator;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -85,7 +81,7 @@ public class AdminEditAccountsController {
         usersTable.setItems(sortedData);
 
         // 3. Navigation Bindings
-        navSongsButton.setOnAction(e -> navigateToNode((Node) e.getSource(), "/views/AdminEditSongs.fxml"));
+        navSongsButton.setOnAction(e -> SceneNavigator.loadScene(SceneNavigator.ADMIN_EDIT_SONGS_SCREEN));
 
         // 4. Delete Action
         deleteSelectedButton.setOnAction(this::handleDeleteSelected);
@@ -185,26 +181,7 @@ public class AdminEditAccountsController {
 
     @FXML
     void handleBack(ActionEvent event) {
-        navigateToNode((Node) event.getSource(), "/views/lobby.fxml");
-    }
-
-    private void navigateToNode(Node sourceNode, String fxmlPath) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Parent root = loader.load();
-            
-            Scene scene = sourceNode.getScene();
-            Stage stage = (Stage) scene.getWindow();
-            
-            scene.setRoot(root);
-            
-            if (!stage.isMaximized()) {
-                stage.setMaximized(true);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("Error loading: " + fxmlPath);
-        }
+        SceneNavigator.loadScene(SceneNavigator.LOBBY_SCREEN);
     }
 
     private void showAlert(String title, String message, Alert.AlertType alertType) {

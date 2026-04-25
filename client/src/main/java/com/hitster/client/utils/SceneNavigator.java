@@ -24,16 +24,22 @@ public class SceneNavigator {
         primaryStage = stage;
     }
 
-    public static void loadScene(String fxmlPath) throws IOException {
-        if (primaryStage == null) {
-            throw new IllegalStateException("Primary Stage is not set!");
-        }
+    public static void loadScene(String fxmlPath) {
+        try {
+            if (primaryStage == null) {
+                throw new IllegalStateException("Primary Stage is not set!");
+            }
 
-        FXMLLoader loader = new FXMLLoader(SceneNavigator.class.getResource(fxmlPath));
-        Parent root = loader.load();
-        Scene scene = new Scene(root);
-        primaryStage.setScene(scene);
-        primaryStage.setMaximized(true); 
-        primaryStage.show();
+            FXMLLoader loader = new FXMLLoader(SceneNavigator.class.getResource(fxmlPath));
+            Parent root = loader.load();
+
+            primaryStage.setScene(new Scene(root));
+            primaryStage.setMaximized(true);
+            primaryStage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to load scene: " + fxmlPath);
+        }
     }
 }

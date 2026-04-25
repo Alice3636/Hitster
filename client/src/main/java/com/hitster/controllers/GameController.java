@@ -42,7 +42,6 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -689,12 +688,7 @@ public class GameController {
             if (response == ButtonType.YES) {
                 stopPolling();
                 networkService.quitGame(currentGameId);
-
-                try {
-                    SceneNavigator.loadScene(SceneNavigator.LOBBY_SCREEN);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                SceneNavigator.loadScene(SceneNavigator.LOBBY_SCREEN);
             }
         });
     }
@@ -711,12 +705,7 @@ public class GameController {
         alert.setContentText(message);
         alert.setOnHidden(e -> {
             GameManager.getInstance().endGame();
-
-            try {
-                SceneNavigator.loadScene(SceneNavigator.LOBBY_SCREEN);
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
+            SceneNavigator.loadScene(SceneNavigator.LOBBY_SCREEN);
         });
 
         alert.show();

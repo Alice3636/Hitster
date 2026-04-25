@@ -1,13 +1,11 @@
 package com.hitster.controllers;
 
+import com.hitster.client.utils.SceneNavigator;
 import com.hitster.network.AuthNetworkService;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
@@ -115,7 +113,7 @@ public class RegisterController {
 
                 if (response.statusCode() == 200) {
                     showInformation("Success", "Your account has been created. Please log in.", Alert.AlertType.INFORMATION);
-                    navigateToNode((Node) event.getSource(), "/views/login.fxml");
+                    SceneNavigator.loadScene(SceneNavigator.LOGIN_SCREEN);
                 } else {
                     showAlert("Registration Failed", response.body());
                 }
@@ -160,39 +158,12 @@ public class RegisterController {
 
     @FXML
     void goToLogin(MouseEvent event) {
-        navigateToNode((Node) event.getSource(), "/views/login.fxml");
+        SceneNavigator.loadScene(SceneNavigator.LOGIN_SCREEN);
     }
 
     @FXML
     void handleBack(ActionEvent event) {
-        System.out.println("Back button clicked!"); // If this prints, the FXML is connected correctly
-        navigateToNode((Node) event.getSource(), "/views/login.fxml");
-    }
-
-    /**
-     * FIXED: Swaps the Root of the current Scene instead of creating a new Scene.
-     * This keeps the stage maximized and prevents the "half-screen" glitch.
-     */
-    private void navigateToNode(Node sourceNode, String fxmlPath) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Parent root = loader.load();
-            
-            // Get current scene and window
-            Scene scene = sourceNode.getScene();
-            Stage stage = (Stage) scene.getWindow();
-            
-            // Swap content
-            scene.setRoot(root);
-            
-            // Maintain maximized state
-            if (!stage.isMaximized()) {
-                stage.setMaximized(true);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("Failed to load screen: " + fxmlPath);
-        }
+        SceneNavigator.loadScene(SceneNavigator.LOGIN_SCREEN);
     }
 
     private void showAlert(String title, String message) {

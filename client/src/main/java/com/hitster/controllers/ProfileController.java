@@ -6,7 +6,6 @@ import com.hitster.dto.user.UserProfileResponseDTO;
 import com.hitster.network.UserNetworkService;
 import com.hitster.session.UserSession;
 
-import java.io.IOException;
 import java.util.Optional;
 
 import com.google.gson.Gson;
@@ -15,10 +14,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -28,7 +23,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.stage.Stage;
 
 public class ProfileController {
 
@@ -108,18 +102,7 @@ public class ProfileController {
 
     @FXML
     void handleBack(ActionEvent event) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/lobby.fxml"));
-            Parent root = loader.load();
-            Scene scene = new Scene(root);
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(scene);
-            stage.setMaximized(true);
-            stage.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Error returning to lobby.");
-        }
+        SceneNavigator.loadScene(SceneNavigator.LOBBY_SCREEN);
     }
 
     @FXML
@@ -204,11 +187,7 @@ public class ProfileController {
 
     private void handleDeletionSuccess() {
         UserSession.getInstance().cleanUserSession();
-        try {
-            SceneNavigator.loadScene(SceneNavigator.LOGIN_SCREEN);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        SceneNavigator.loadScene(SceneNavigator.LOGIN_SCREEN);
     }
 
     private void showErrorAlert(String title, String message) {
