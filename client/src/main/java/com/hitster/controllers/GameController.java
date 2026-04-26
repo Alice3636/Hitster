@@ -300,9 +300,27 @@ public class GameController {
                 blockedChallengeIndex == slotIndex;
     }
     private Button createPlacementSlot(int index, boolean isChallengeSlot) {
+        final double SLOT_WIDTH = 90;
+        final double SLOT_HEIGHT = 120;
+
         Button slotBtn = new Button("+");
-        slotBtn.setStyle("-fx-background-color: rgba(255, 255, 255, 0.15); -fx-text-fill: #00ffff; -fx-font-size: 24px; -fx-cursor: hand; -fx-border-color: #00ffff; -fx-border-radius: 10; -fx-background-radius: 10;");
-        slotBtn.setPrefSize(80, 160);
+
+        slotBtn.setMinSize(SLOT_WIDTH, SLOT_HEIGHT);
+        slotBtn.setPrefSize(SLOT_WIDTH, SLOT_HEIGHT);
+        slotBtn.setMaxSize(SLOT_WIDTH, SLOT_HEIGHT);
+
+        slotBtn.setStyle(
+                "-fx-background-color: rgba(255, 255, 255, 0.08);" +
+                "-fx-text-fill: #00ffff;" +
+                "-fx-font-size: 28px;" +
+                "-fx-font-weight: bold;" +
+                "-fx-cursor: hand;" +
+                "-fx-border-color: #00ffff;" +
+                "-fx-border-width: 2;" +
+                "-fx-border-radius: 14;" +
+                "-fx-background-radius: 14;" +
+                "-fx-effect: dropshadow(gaussian, rgba(0,255,255,0.55), 14, 0.35, 0, 0);"
+        );
 
         slotBtn.setOnAction(e -> {
             if (isChallengeSlot) {
@@ -478,8 +496,8 @@ public class GameController {
     }
 
     private StackPane createCardUI(CardDTO card) {
-        final double CARD_WIDTH = 140;
-        final double CARD_HEIGHT = 180;
+        final double CARD_WIDTH = 90;
+        final double CARD_HEIGHT = 120;
 
         StackPane cardPane = new StackPane();
 
@@ -489,11 +507,11 @@ public class GameController {
 
         cardPane.setStyle(
                 "-fx-background-color: linear-gradient(to bottom, #24114d, #080014);" +
-                "-fx-background-radius: 16;" +
+                "-fx-background-radius: 14;" +
                 "-fx-border-color: #b388ff;" +
                 "-fx-border-width: 2;" +
-                "-fx-border-radius: 16;" +
-                "-fx-effect: dropshadow(gaussian, rgba(179,136,255,0.65), 18, 0.4, 0, 0);"
+                "-fx-border-radius: 14;" +
+                "-fx-effect: dropshadow(gaussian, rgba(179,136,255,0.65), 14, 0.35, 0, 0);"
         );
 
         try {
@@ -504,45 +522,45 @@ public class GameController {
             bgImage.setFitWidth(CARD_WIDTH);
             bgImage.setFitHeight(CARD_HEIGHT);
             bgImage.setPreserveRatio(false);
-            bgImage.setOpacity(0.45);
+            bgImage.setOpacity(0.35);
 
             cardPane.getChildren().add(bgImage);
         } catch (Exception ignored) {
         }
 
-        VBox textBox = new VBox(8);
+        VBox textBox = new VBox(5);
         textBox.setAlignment(Pos.CENTER);
-        textBox.setMaxWidth(CARD_WIDTH - 20);
-        textBox.setStyle("-fx-padding: 12;");
+        textBox.setMaxWidth(CARD_WIDTH - 12);
+        textBox.setStyle("-fx-padding: 8;");
 
         Label yearLabel = new Label(card.year() > 0 ? String.valueOf(card.year()) : "????");
         yearLabel.setStyle(
-                "-fx-font-size: 26px;" +
+                "-fx-font-size: 18px;" +
                 "-fx-text-fill: white;" +
                 "-fx-font-weight: bold;" +
-                "-fx-effect: dropshadow(gaussian, #00ffff, 10, 0.5, 0, 0);"
+                "-fx-effect: dropshadow(gaussian, #00ffff, 8, 0.45, 0, 0);"
         );
 
         Label titleLabel = new Label(card.title() != null ? card.title() : "???");
         titleLabel.setStyle(
-                "-fx-font-size: 14px;" +
+                "-fx-font-size: 10px;" +
                 "-fx-text-fill: white;" +
                 "-fx-font-weight: bold;"
         );
         titleLabel.setTextAlignment(TextAlignment.CENTER);
         titleLabel.setAlignment(Pos.CENTER);
         titleLabel.setWrapText(true);
-        titleLabel.setMaxWidth(CARD_WIDTH - 24);
+        titleLabel.setMaxWidth(CARD_WIDTH - 14);
 
         Label artistLabel = new Label(card.artist() != null ? card.artist() : "???");
         artistLabel.setStyle(
-                "-fx-font-size: 12px;" +
+                "-fx-font-size: 9px;" +
                 "-fx-text-fill: #d8c8ff;"
         );
         artistLabel.setTextAlignment(TextAlignment.CENTER);
         artistLabel.setAlignment(Pos.CENTER);
         artistLabel.setWrapText(true);
-        artistLabel.setMaxWidth(CARD_WIDTH - 24);
+        artistLabel.setMaxWidth(CARD_WIDTH - 14);
 
         textBox.getChildren().addAll(yearLabel, titleLabel, artistLabel);
         cardPane.getChildren().add(textBox);

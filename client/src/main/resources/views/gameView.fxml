@@ -19,43 +19,52 @@
          <children>
             <VBox maxWidth="1200.0" spacing="10.0">
                <children>
-                  <HBox alignment="BOTTOM_LEFT" prefHeight="65.0" prefWidth="1304.0">
+                  <HBox alignment="CENTER"
+                        fillHeight="true"
+                        prefHeight="220.0"
+                        prefWidth="1304.0"
+                        spacing="15.0"
+                        style="-fx-padding: 10px;"
+                        styleClass="timeline-container">
+
                      <children>
-                        <Label styleClass="player-name-text" text="OPPONENT'S TIMELINE" />
-                        <Region HBox.hgrow="ALWAYS" />
-                        <HBox alignment="BOTTOM_RIGHT" spacing="30.0">
-                           <children>
-                              <Label styleClass="stats-text" text="Cards: 0" />
-                              <Label styleClass="stats-text" text="Tokens: 0" />
-                           </children>
-                        </HBox>
-                     </children>
-                     <padding>
-                        <Insets left="15.0" right="15.0" />
-                     </padding>
-                  </HBox>
-                  <HBox alignment="CENTER" prefHeight="220.0" prefWidth="1304.0" spacing="15.0" style="-fx-padding: 10px;" styleClass="timeline-container">
-                     <children>
-                        <Button minWidth="60.0" mnemonicParsing="false" style="-fx-padding: 0;" styleClass="scroll-arrow-btn" text="◄" />
+                        <Button minWidth="60.0"
+                                 mnemonicParsing="false"
+                                 style="-fx-padding: 0;"
+                                 styleClass="scroll-arrow-btn"
+                                 text="◄" />
+
                         <ScrollPane hbarPolicy="AS_NEEDED"
                                     vbarPolicy="NEVER"
                                     fitToHeight="true"
-                                    VBox.vgrow="ALWAYS"
+                                    HBox.hgrow="ALWAYS"
+                                    maxWidth="Infinity"
+                                    minHeight="160.0"
+                                    prefHeight="180.0"
+                                    maxHeight="Infinity"
                                     styleClass="timeline-scroll">
 
-                           <content>
-                              <HBox fx:id="opponentTimelineHBox"
-                                    alignment="CENTER_LEFT"
-                                    spacing="20.0">
+                              <content>
+                                 <HBox fx:id="opponentTimelineHBox"
+                                       alignment="CENTER_LEFT"
+                                       minHeight="150.0"
+                                       prefHeight="160.0"
+                                       maxHeight="Infinity"
+                                       spacing="12.0">
 
                                     <padding>
-                                       <Insets left="10.0" right="10.0"/>
+                                          <Insets left="10.0" right="10.0"/>
                                     </padding>
 
-                              </HBox>
-                           </content>
+                                 </HBox>
+                              </content>
                         </ScrollPane>
-                        <Button minWidth="60.0" mnemonicParsing="false" style="-fx-padding: 0;" styleClass="scroll-arrow-btn" text="►" />
+
+                        <Button minWidth="60.0"
+                                 mnemonicParsing="false"
+                                 style="-fx-padding: 0;"
+                                 styleClass="scroll-arrow-btn"
+                                 text="►" />
                      </children>
                   </HBox>
                </children>
@@ -115,28 +124,52 @@
                         <Insets left="15.0" right="15.0" />
                      </padding>
                   </HBox>
-                  <HBox alignment="CENTER" prefHeight="250.0" prefWidth="1294.0" spacing="15.0" style="-fx-padding: 10px;" styleClass="timeline-container">
+                  <HBox alignment="CENTER"
+                        fillHeight="true"
+                        prefHeight="220.0"
+                        prefWidth="1304.0"
+                        spacing="15.0"
+                        style="-fx-padding: 10px;"
+                        styleClass="timeline-container">
+
                      <children>
-                        <Button minWidth="60.0" mnemonicParsing="false" prefHeight="84.0" prefWidth="158.0" style="-fx-padding: 0;" styleClass="scroll-arrow-btn" text="◄" />
+                        <Button minWidth="60.0"
+                              mnemonicParsing="false"
+                              style="-fx-padding: 0;"
+                              styleClass="scroll-arrow-btn"
+                              text="◄" />
+
                         <ScrollPane hbarPolicy="AS_NEEDED"
                                     vbarPolicy="NEVER"
                                     fitToHeight="true"
-                                    VBox.vgrow="ALWAYS"
+                                    HBox.hgrow="ALWAYS"
+                                    maxWidth="Infinity"
+                                    minHeight="160.0"
+                                    prefHeight="180.0"
+                                    maxHeight="Infinity"
                                     styleClass="timeline-scroll">
 
                            <content>
                               <HBox fx:id="playerTimelineHBox"
                                     alignment="CENTER_LEFT"
-                                    spacing="20.0">
+                                    minHeight="150.0"
+                                    prefHeight="160.0"
+                                    maxHeight="Infinity"
+                                    spacing="12.0">
 
-                                    <padding>
-                                       <Insets left="10.0" right="10.0"/>
-                                    </padding>
+                                 <padding>
+                                    <Insets left="10.0" right="10.0"/>
+                                 </padding>
 
                               </HBox>
                            </content>
                         </ScrollPane>
-                        <Button minWidth="60.0" mnemonicParsing="false" prefHeight="84.0" prefWidth="144.0" style="-fx-padding: 0;" styleClass="scroll-arrow-btn" text="►" />
+
+                        <Button minWidth="60.0"
+                              mnemonicParsing="false"
+                              style="-fx-padding: 0;"
+                              styleClass="scroll-arrow-btn"
+                              text="►" />
                      </children>
                   </HBox>
                </children>
