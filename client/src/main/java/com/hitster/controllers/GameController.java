@@ -44,6 +44,7 @@ import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -55,7 +56,6 @@ public class GameController {
     @FXML private HBox playerTimelineHBox;
     @FXML private TextField guessArtistField;
     @FXML private TextField guessSongField;
-    @FXML private Button submitGuessButton;
     @FXML private Button useTokenButton;
     @FXML private Button backButton;
     @FXML private Label timerLabel;
@@ -72,6 +72,7 @@ public class GameController {
 
     private boolean isMyTurn = false;
     private boolean canChallenge = false;
+    private boolean isSubmittingTurn = false;
 
     private Timeline localTimer;
     private int localSecondsLeft = 0;
@@ -79,7 +80,7 @@ public class GameController {
     private MediaPlayer mediaPlayer;
 
     private HBox challengePanel;
-    private Timeline challengeTimer;
+    private Label challengeTimerLabel;
 
     private Integer lastFeedbackTurnNumber = null;
 
@@ -87,7 +88,6 @@ public class GameController {
         ResponsiveScaler.bindToWidth(rootPane);
         currentGameId = GameManager.getInstance().getGameId();
 
-        submitGuessButton.setOnAction(e -> handleGuessSubmit());
         useTokenButton.setOnAction(e -> handleChallengeButtonClick());
 
         setupDragAndDropSource();
@@ -226,9 +226,8 @@ public class GameController {
                 gameState.phase() == GamePhase.PLAYER_TURN &&
                 isMyTurn;
 
-        submitGuessButton.setDisable(!canPlayTurn);
-        guessArtistField.setDisable(!canPlayTurn);
-        guessSongField.setDisable(!canPlayTurn);
+        guessArtistField.setDisable(!canPlayTurn || isSubmittingTurn);
+        guessSongField.setDisable(!canPlayTurn || isSubmittingTurn);
 
         boolean canUseChallenge =
                 gameState.phase() == GamePhase.CHALLENGE_WINDOW &&
@@ -301,9 +300,27 @@ public class GameController {
                 blockedChallengeIndex == slotIndex;
     }
     private Button createPlacementSlot(int index, boolean isChallengeSlot) {
+        final double SLOT_WIDTH = 115;
+        final double SLOT_HEIGHT = 85;
+
         Button slotBtn = new Button("+");
-        slotBtn.setStyle("-fx-background-color: rgba(255, 255, 255, 0.15); -fx-text-fill: #00ffff; -fx-font-size: 24px; -fx-cursor: hand; -fx-border-color: #00ffff; -fx-border-radius: 10; -fx-background-radius: 10;");
-        slotBtn.setPrefSize(80, 160);
+
+        slotBtn.setMinSize(SLOT_WIDTH, SLOT_HEIGHT);
+        slotBtn.setPrefSize(SLOT_WIDTH, SLOT_HEIGHT);
+        slotBtn.setMaxSize(SLOT_WIDTH, SLOT_HEIGHT);
+
+        slotBtn.setStyle(
+                "-fx-background-color: rgba(255, 255, 255, 0.08);" +
+                "-fx-text-fill: #00ffff;" +
+                "-fx-font-size: 24px;" +
+                "-fx-font-weight: bold;" +
+                "-fx-cursor: hand;" +
+                "-fx-border-color: #00ffff;" +
+                "-fx-border-width: 2;" +
+                "-fx-border-radius: 14;" +
+                "-fx-background-radius: 14;" +
+                "-fx-effect: dropshadow(gaussian, rgba(0,255,255,0.55), 14, 0.35, 0, 0);"
+        );
 
         slotBtn.setOnAction(e -> {
             if (isChallengeSlot) {
@@ -355,9 +372,9 @@ public class GameController {
         AnchorPane.setLeftAnchor(challengePanel, 700.0);
         AnchorPane.setRightAnchor(challengePanel, 700.0);
 
-        Label chalTimerLabel = new Label(localSecondsLeft + "s");
-        chalTimerLabel.setFont(Font.font("System", FontWeight.BOLD, 24));
-        chalTimerLabel.setTextFill(Color.web("#ff9900"));
+        challengeTimerLabel = new Label();
+        challengeTimerLabel.setFont(Font.font("System", FontWeight.BOLD, 24));
+        challengeTimerLabel.setTextFill(Color.web("#ff9900"));
 
         Button challengeInfoBtn = new Button("Choose a slot to challenge");
         challengeInfoBtn.setDisable(true);
@@ -382,49 +399,23 @@ public class GameController {
         skipBtn.setStyle("-fx-background-color: #333333; -fx-text-fill: white; -fx-font-size: 16px; -fx-padding: 10 20; -fx-background-radius: 20; -fx-cursor: hand;");
         skipBtn.setOnAction(e -> handleSkipChallenge());
 
-        challengePanel.getChildren().addAll(chalTimerLabel, challengeInfoBtn, skipBtn);
+        challengePanel.getChildren().addAll(challengeTimerLabel, challengeInfoBtn, skipBtn);
         rootPane.getChildren().add(challengePanel);
+        updateTimerDisplay();
 
         FadeTransition fadeIn = new FadeTransition(Duration.millis(300), challengePanel);
         fadeIn.setFromValue(0.0);
         fadeIn.setToValue(1.0);
         fadeIn.play();
-
-        if (challengeTimer != null) {
-            challengeTimer.stop();
-        }
-
-        challengeTimer = new Timeline(new KeyFrame(Duration.seconds(1), e -> {
-            if (localSecondsLeft > 0) {
-                localSecondsLeft--;
-                chalTimerLabel.setText(localSecondsLeft + "s");
-                updateTimerDisplay();
-
-                if (localSecondsLeft <= 3) {
-                    chalTimerLabel.setTextFill(Color.RED);
-                }
-            }
-
-            if (localSecondsLeft <= 0) {
-                handleSkipChallenge();
-            }
-        }));
-
-        challengeTimer.setCycleCount(Timeline.INDEFINITE);
-        challengeTimer.play();
     }
 
     private void cleanupChallengePanel() {
-        if (challengeTimer != null) {
-            challengeTimer.stop();
-            challengeTimer = null;
-        }
-
         if (challengePanel != null && rootPane.getChildren().contains(challengePanel)) {
             rootPane.getChildren().remove(challengePanel);
         }
 
         challengePanel = null;
+        challengeTimerLabel = null;
     }
 
     private void startLocalTimer() {
@@ -436,11 +427,17 @@ public class GameController {
             GameStateDTO state = GameManager.getInstance().getCurrentGameState();
 
             if (state == null) return;
-            if (state.phase() == GamePhase.CHALLENGE_WINDOW) return;
 
             if (localSecondsLeft > 0) {
                 localSecondsLeft--;
                 updateTimerDisplay();
+            }
+
+            if (localSecondsLeft <= 0 &&
+                    state.phase() == GamePhase.CHALLENGE_WINDOW &&
+                    canChallenge &&
+                    challengePanel != null) {
+                handleSkipChallenge();
             }
         }));
 
@@ -451,12 +448,21 @@ public class GameController {
     private void updateTimerDisplay() {
         if (timerLabel == null) return;
 
-        timerLabel.setText(String.format("00:%02d", Math.max(localSecondsLeft, 0)));
+        int secondsLeft = Math.max(localSecondsLeft, 0);
+        int minutes = secondsLeft / 60;
+        int seconds = secondsLeft % 60;
+
+        timerLabel.setText(String.format("%02d:%02d", minutes, seconds));
 
         if (localSecondsLeft <= 10) {
             timerLabel.setTextFill(Color.RED);
         } else {
             timerLabel.setTextFill(Color.WHITE);
+        }
+
+        if (challengeTimerLabel != null) {
+            challengeTimerLabel.setText(secondsLeft + "s");
+            challengeTimerLabel.setTextFill(secondsLeft <= 3 ? Color.RED : Color.web("#ff9900"));
         }
     }
 
@@ -490,33 +496,71 @@ public class GameController {
     }
 
     private StackPane createCardUI(CardDTO card) {
+        final double CARD_WIDTH = 115;
+        final double CARD_HEIGHT = 85;
+
         StackPane cardPane = new StackPane();
-        cardPane.setPrefSize(140, 180);
+
+        cardPane.setMinSize(CARD_WIDTH, CARD_HEIGHT);
+        cardPane.setPrefSize(CARD_WIDTH, CARD_HEIGHT);
+        cardPane.setMaxSize(CARD_WIDTH, CARD_HEIGHT);
+
+        cardPane.setStyle(
+                "-fx-background-color: linear-gradient(to bottom, #24114d, #080014);" +
+                "-fx-background-radius: 14;" +
+                "-fx-border-color: #b388ff;" +
+                "-fx-border-width: 2;" +
+                "-fx-border-radius: 14;" +
+                "-fx-effect: dropshadow(gaussian, rgba(179,136,255,0.65), 14, 0.35, 0, 0);"
+        );
 
         try {
-            ImageView bgImage = new ImageView(new Image(getClass().getResourceAsStream("/images/cardfortimeline.jpg")));
-            bgImage.setFitWidth(140);
-            bgImage.setFitHeight(180);
+            ImageView bgImage = new ImageView(
+                    new Image(getClass().getResourceAsStream("/images/cardfortimeline.jpg"))
+            );
+
+            bgImage.setFitWidth(CARD_WIDTH);
+            bgImage.setFitHeight(CARD_HEIGHT);
+            bgImage.setPreserveRatio(false);
+            bgImage.setOpacity(0.35);
+
             cardPane.getChildren().add(bgImage);
         } catch (Exception ignored) {
         }
 
         VBox textBox = new VBox(5);
         textBox.setAlignment(Pos.CENTER);
-        textBox.setStyle("-fx-padding: 10;");
+        textBox.setMaxWidth(CARD_WIDTH - 12);
+        textBox.setStyle("-fx-padding: 8;");
 
         Label yearLabel = new Label(card.year() > 0 ? String.valueOf(card.year()) : "????");
-        yearLabel.setStyle("-fx-font-size: 24px; -fx-text-fill: white; -fx-font-weight: bold;");
+        yearLabel.setStyle(
+                "-fx-font-size: 15px;" +
+                "-fx-text-fill: white;" +
+                "-fx-font-weight: bold;" +
+                "-fx-effect: dropshadow(gaussian, #00ffff, 8, 0.45, 0, 0);"
+        );
 
         Label titleLabel = new Label(card.title() != null ? card.title() : "???");
-        titleLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: white; -fx-font-size: 14px;");
+        titleLabel.setStyle(
+                "-fx-font-size: 10px;" +
+                "-fx-text-fill: white;" +
+                "-fx-font-weight: bold;"
+        );
         titleLabel.setTextAlignment(TextAlignment.CENTER);
+        titleLabel.setAlignment(Pos.CENTER);
         titleLabel.setWrapText(true);
+        titleLabel.setMaxWidth(CARD_WIDTH - 14);
 
         Label artistLabel = new Label(card.artist() != null ? card.artist() : "???");
-        artistLabel.setStyle("-fx-text-fill: #e0e0e0; -fx-font-size: 12px;");
+        artistLabel.setStyle(
+                "-fx-font-size: 9px;" +
+                "-fx-text-fill: #d8c8ff;"
+        );
         artistLabel.setTextAlignment(TextAlignment.CENTER);
+        artistLabel.setAlignment(Pos.CENTER);
         artistLabel.setWrapText(true);
+        artistLabel.setMaxWidth(CARD_WIDTH - 14);
 
         textBox.getChildren().addAll(yearLabel, titleLabel, artistLabel);
         cardPane.getChildren().add(textBox);
@@ -524,37 +568,57 @@ public class GameController {
         return cardPane;
     }
 
-    private void handleGuessSubmit() {
+    private void sendPlaceSongRequest(int indexPosition) {
+        if (currentSongId == null || isSubmittingTurn) return;
+
         String artist = guessArtistField.getText();
         String title = guessSongField.getText();
 
         if (artist == null || artist.isBlank() || title == null || title.isBlank()) {
-            showAlert("Missing Details", "Please enter both artist and song name.");
+            showAlert("Missing Details", "Please enter both artist and song name before placing the card.");
             return;
         }
 
-        networkService.submitGuess(currentGameId, artist, title).thenAccept(response -> {
+        isSubmittingTurn = true;
+        guessArtistField.setDisable(true);
+        guessSongField.setDisable(true);
+
+        Long songId = currentSongId;
+
+        networkService.submitGuess(currentGameId, artist, title).thenCompose(guessResponse -> {
+            if (!isSuccessfulResponse(guessResponse.statusCode())) {
+                return CompletableFuture.completedFuture(guessResponse);
+            }
+
+            return networkService.placeSong(currentGameId, indexPosition, songId);
+        }).thenAccept(response -> {
             Platform.runLater(() -> {
-                if (response.statusCode() == 200 || response.statusCode() == 201) {
+                isSubmittingTurn = false;
+
+                if (isSuccessfulResponse(response.statusCode())) {
                     guessArtistField.clear();
                     guessSongField.clear();
+                    stopSong();
+                    centerCardImage.setVisible(false);
+                } else {
+                    showAlert("Turn Submit Failed", "Could not submit your turn. Please try again.");
                 }
 
                 fetchGameStateForce();
             });
+        }).exceptionally(error -> {
+            Platform.runLater(() -> {
+                isSubmittingTurn = false;
+                showAlert("Network Error", "Could not submit your turn. Please try again.");
+                fetchGameStateForce();
+            });
+
+            return null;
         });
     }
 
-    private void sendPlaceSongRequest(int indexPosition) {
-        if (currentSongId == null) return;
-
-        networkService.placeSong(currentGameId, indexPosition, currentSongId).thenAccept(response -> {
-            Platform.runLater(() -> {
-                stopSong();
-                centerCardImage.setVisible(false);
-                fetchGameStateForce();
-            });
-        });
+    private boolean isSuccessfulResponse(int statusCode) {
+        return statusCode >= 200 && statusCode < 300;
     }
 
     private void handleChallengeButtonClick() {
@@ -667,10 +731,6 @@ public class GameController {
 
         if (localTimer != null) {
             localTimer.stop();
-        }
-
-        if (challengeTimer != null) {
-            challengeTimer.stop();
         }
 
         stopSong();
