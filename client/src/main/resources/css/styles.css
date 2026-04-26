@@ -335,6 +335,12 @@
     -fx-background-color: transparent;
 }
 
+.timeline-scroll .scroll-bar:horizontal {
+    -fx-opacity: 0;
+    -fx-pref-height: 0;
+    -fx-max-height: 0;
+}
+
 .scroll-arrow-btn {
     -fx-background-color: transparent;
     -fx-text-fill: #00d2ff;

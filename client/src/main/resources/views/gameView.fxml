@@ -24,7 +24,7 @@
                      <children>
                         <Button minWidth="60.0" mnemonicParsing="false" style="-fx-padding: 0;" styleClass="scroll-arrow-btn" text="◄" />
 
-                        <ScrollPane fitToHeight="true" hbarPolicy="AS_NEEDED" maxHeight="Infinity" maxWidth="Infinity" minHeight="105.0" prefHeight="115.0" styleClass="timeline-scroll" vbarPolicy="NEVER" HBox.hgrow="ALWAYS">
+                        <ScrollPane fx:id="opponentTimelineScrollPane" fitToHeight="true" hbarPolicy="NEVER" maxHeight="Infinity" maxWidth="Infinity" minHeight="105.0" prefHeight="115.0" styleClass="timeline-scroll" vbarPolicy="NEVER" HBox.hgrow="ALWAYS">
 
                               <content>
                                  <HBox fx:id="opponentTimelineHBox" alignment="CENTER_LEFT" maxHeight="Infinity" minHeight="90.0" prefHeight="96.0" spacing="8.0">
@@ -93,7 +93,6 @@
                              <children>
                               <Label fx:id="scoreLabel" styleClass="stats-text" text="Score: 0" />
                               <Label fx:id="tokensLabel" styleClass="stats-text" text="Tokens: 0" />
-                              <Button fx:id="useTokenButton" mnemonicParsing="false" prefHeight="43.0" prefWidth="142.0" styleClass="token-btn" text="USE TOKEN" />
                            </children>
                         </HBox>
                      </children>
@@ -106,7 +105,7 @@
                      <children>
                         <Button minWidth="60.0" mnemonicParsing="false" style="-fx-padding: 0;" styleClass="scroll-arrow-btn" text="◄" />
 
-                        <ScrollPane fitToHeight="true" hbarPolicy="AS_NEEDED" maxHeight="Infinity" maxWidth="Infinity" minHeight="105.0" prefHeight="115.0" styleClass="timeline-scroll" vbarPolicy="NEVER" HBox.hgrow="ALWAYS">
+                        <ScrollPane fx:id="playerTimelineScrollPane" fitToHeight="true" hbarPolicy="NEVER" maxHeight="Infinity" maxWidth="Infinity" minHeight="105.0" prefHeight="115.0" styleClass="timeline-scroll" vbarPolicy="NEVER" HBox.hgrow="ALWAYS">
 
                            <content>
                               <HBox fx:id="playerTimelineHBox" alignment="CENTER_LEFT" maxHeight="Infinity" minHeight="90.0" prefHeight="95.0" spacing="8.0">

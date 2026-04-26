@@ -24,8 +24,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
-import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
@@ -61,9 +61,10 @@ public class GameController {
     @FXML private AnchorPane rootPane;
     @FXML private HBox opponentTimelineHBox;
     @FXML private HBox playerTimelineHBox;
+    @FXML private ScrollPane opponentTimelineScrollPane;
+    @FXML private ScrollPane playerTimelineScrollPane;
     @FXML private TextField guessArtistField;
     @FXML private TextField guessSongField;
-    @FXML private Button useTokenButton;
     @FXML private Button backButton;
     @FXML private Label timerLabel;
     @FXML private Label scoreLabel;
@@ -88,9 +89,7 @@ public class GameController {
     private int localSecondsLeft = 0;
 
     private MediaPlayer mediaPlayer;
-
-    private HBox challengePanel;
-    private Label challengeTimerLabel;
+    private boolean isSkippingChallenge = false;
 
     private Integer lastFeedbackTurnNumber = null;
 
@@ -98,9 +97,8 @@ public class GameController {
         ResponsiveScaler.bindToWidth(rootPane);
         currentGameId = GameManager.getInstance().getGameId();
 
-        useTokenButton.setOnAction(e -> handleChallengeButtonClick());
-
         setupDragAndDropSources();
+        setupTimelineScrollControls();
         startGameStatePolling();
         startLocalTimer();
     }
@@ -135,6 +133,39 @@ public class GameController {
                 event.consume();
             });
         }
+    }
+
+    private void setupTimelineScrollControls() {
+        bindTimelineScrollButtons(opponentTimelineScrollPane);
+        bindTimelineScrollButtons(playerTimelineScrollPane);
+    }
+
+    private void bindTimelineScrollButtons(ScrollPane scrollPane) {
+        if (scrollPane == null || !(scrollPane.getParent() instanceof HBox timelineContainer)) {
+            return;
+        }
+
+        List<javafx.scene.Node> children = timelineContainer.getChildren();
+        if (children.size() < 3) {
+            return;
+        }
+
+        Button leftButton = children.get(0) instanceof Button button ? button : null;
+        Button rightButton = children.get(children.size() - 1) instanceof Button button ? button : null;
+
+        if (leftButton != null) {
+            leftButton.setOnAction(e -> scrollTimeline(scrollPane, -1));
+        }
+
+        if (rightButton != null) {
+            rightButton.setOnAction(e -> scrollTimeline(scrollPane, 1));
+        }
+    }
+
+    private void scrollTimeline(ScrollPane scrollPane, int direction) {
+        double step = 0.18;
+        double nextValue = scrollPane.getHvalue() + direction * step;
+        scrollPane.setHvalue(Math.max(0.0, Math.min(1.0, nextValue)));
     }
 
     private void startGameStatePolling() {
@@ -188,6 +219,10 @@ public class GameController {
                 myId.equals(challengeState.challengerPlayerId()) &&
                 me.tokens() > 0;
 
+        if (gameState.phase() != GamePhase.CHALLENGE_WINDOW || !canChallenge) {
+            isSkippingChallenge = false;
+        }
+
         localSecondsLeft = resolveDisplayedTime(gameState);
         updateTimerDisplay();
 
@@ -195,7 +230,6 @@ public class GameController {
         updateCenterToken(gameState);
         updatePlayerStats(me);
         updateControls(gameState, me);
-        updateChallengePanel(gameState);
 
         renderTimeline(playerTimelineHBox, me, true, gameState);
         renderTimeline(opponentTimelineHBox, opponent, false, gameState);
@@ -225,20 +259,22 @@ public class GameController {
         String newSongUrl = gameState.currentSong().audioUrl();
 
         boolean shouldShowCenterCard =
-                gameState.phase() == GamePhase.PLAYER_TURN &&
-                isMyTurn;
+                gameState.phase() == GamePhase.PLAYER_TURN;
 
         centerCardImage.setVisible(shouldShowCenterCard);
         centerCardImage.setManaged(shouldShowCenterCard);
 
-        if (currentSongId == null || !currentSongId.equals(newSongId)) {
+        boolean songChanged = currentSongId == null || !currentSongId.equals(newSongId);
+        if (songChanged) {
             currentSongId = newSongId;
             currentSongUrl = newSongUrl;
+            stopSong();
         }
 
         boolean shouldPlaySong =
-                gameState.phase() == GamePhase.PLAYER_TURN &&
-                isMyTurn &&
+                (gameState.phase() == GamePhase.PLAYER_TURN ||
+                        gameState.phase() == GamePhase.CHALLENGE_WINDOW ||
+                        gameState.phase() == GamePhase.TURN_RESOLVED) &&
                 currentSongUrl != null;
 
         if (shouldPlaySong && mediaPlayer == null) {
@@ -257,7 +293,7 @@ public class GameController {
 
         boolean shouldShowToken =
                 gameState.phase() == GamePhase.CHALLENGE_WINDOW &&
-                canChallenge;
+                gameState.challengeState() != null;
 
         centerTokenImage.setVisible(shouldShowToken);
         centerTokenImage.setManaged(shouldShowToken);
@@ -271,16 +307,6 @@ public class GameController {
         guessArtistField.setDisable(!canPlayTurn || isSubmittingTurn);
         guessSongField.setDisable(!canPlayTurn || isSubmittingTurn);
 
-        boolean canUseChallenge =
-                gameState.phase() == GamePhase.CHALLENGE_WINDOW &&
-                canChallenge &&
-                me.tokens() > 0;
-
-        useTokenButton.setDisable(!canUseChallenge);
-        useTokenButton.setText("CHALLENGE");
-        useTokenButton.setStyle(canUseChallenge
-                ? "-fx-background-color: #ff0033; -fx-text-fill: white;"
-                : "");
     }
 
     private void updatePlayerStats(PlayerGameStateDTO me) {
@@ -290,14 +316,6 @@ public class GameController {
 
         if (tokensLabel != null) {
             tokensLabel.setText("Tokens: " + me.tokens());
-        }
-    }
-
-    private void updateChallengePanel(GameStateDTO gameState) {
-        if (gameState.phase() == GamePhase.CHALLENGE_WINDOW && canChallenge) {
-            showChallengeActionPanel();
-        } else {
-            cleanupChallengePanel();
         }
     }
 
@@ -385,7 +403,7 @@ public class GameController {
 
         slotBtn.setOnAction(e -> {
             if (isChallengeSlot) {
-                showAlert("Challenge", "Drag the token onto a valid slot.");
+                sendChallengeRequest(index);
             } else {
                 sendPlaceSongRequest(index);
             }
@@ -462,67 +480,6 @@ public class GameController {
         return value != null && value.startsWith(CARD_DRAG_PREFIX);
     }
 
-    private void showChallengeActionPanel() {
-        if (challengePanel != null && rootPane.getChildren().contains(challengePanel)) {
-            return;
-        }
-
-        stopSong();
-
-        challengePanel = new HBox(20);
-        challengePanel.setAlignment(Pos.CENTER);
-        challengePanel.setStyle("-fx-background-color: rgba(20, 20, 20, 0.9); -fx-padding: 15 30; -fx-background-radius: 40; -fx-border-color: #ff9900; -fx-border-radius: 40; -fx-border-width: 2;");
-
-        AnchorPane.setBottomAnchor(challengePanel, 360.0);
-        AnchorPane.setLeftAnchor(challengePanel, 700.0);
-        AnchorPane.setRightAnchor(challengePanel, 700.0);
-
-        challengeTimerLabel = new Label();
-        challengeTimerLabel.setFont(Font.font("System", FontWeight.BOLD, 24));
-        challengeTimerLabel.setTextFill(Color.web("#ff9900"));
-
-        Button challengeInfoBtn = new Button("Drag your token to a different slot");
-        challengeInfoBtn.setDisable(true);
-        challengeInfoBtn.setStyle("-fx-background-color: #ff0033; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 20;");
-
-        DropShadow glow = new DropShadow();
-        glow.setColor(Color.web("#ff0033"));
-        glow.setRadius(20);
-        glow.setSpread(0.5);
-        challengeInfoBtn.setEffect(glow);
-
-        ScaleTransition pulse = new ScaleTransition(Duration.millis(600), challengeInfoBtn);
-        pulse.setFromX(1.0);
-        pulse.setFromY(1.0);
-        pulse.setToX(1.05);
-        pulse.setToY(1.05);
-        pulse.setAutoReverse(true);
-        pulse.setCycleCount(Timeline.INDEFINITE);
-        pulse.play();
-
-        Button skipBtn = new Button("SKIP ⏭");
-        skipBtn.setStyle("-fx-background-color: #333333; -fx-text-fill: white; -fx-font-size: 16px; -fx-padding: 10 20; -fx-background-radius: 20; -fx-cursor: hand;");
-        skipBtn.setOnAction(e -> handleSkipChallenge());
-
-        challengePanel.getChildren().addAll(challengeTimerLabel, challengeInfoBtn, skipBtn);
-        rootPane.getChildren().add(challengePanel);
-        updateTimerDisplay();
-
-        FadeTransition fadeIn = new FadeTransition(Duration.millis(300), challengePanel);
-        fadeIn.setFromValue(0.0);
-        fadeIn.setToValue(1.0);
-        fadeIn.play();
-    }
-
-    private void cleanupChallengePanel() {
-        if (challengePanel != null && rootPane.getChildren().contains(challengePanel)) {
-            rootPane.getChildren().remove(challengePanel);
-        }
-
-        challengePanel = null;
-        challengeTimerLabel = null;
-    }
-
     private void startLocalTimer() {
         if (localTimer != null) {
             localTimer.stop();
@@ -541,7 +498,7 @@ public class GameController {
             if (localSecondsLeft <= 0 &&
                     state.phase() == GamePhase.CHALLENGE_WINDOW &&
                     canChallenge &&
-                    challengePanel != null) {
+                    !isSkippingChallenge) {
                 handleSkipChallenge();
             }
         }));
@@ -565,10 +522,6 @@ public class GameController {
             timerLabel.setTextFill(Color.WHITE);
         }
 
-        if (challengeTimerLabel != null) {
-            challengeTimerLabel.setText(secondsLeft + "s");
-            challengeTimerLabel.setTextFill(secondsLeft <= 3 ? Color.RED : Color.web("#ff9900"));
-        }
     }
 
     private void playSong(String audioUrl) {
@@ -582,6 +535,7 @@ public class GameController {
             Media media = new Media(toMediaSource(audioUrl));
             mediaPlayer = new MediaPlayer(media);
             mediaPlayer.setVolume(0.5);
+            mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
             mediaPlayer.play();
         } catch (Exception e) {
             e.printStackTrace();
@@ -727,7 +681,6 @@ public class GameController {
                 if (isSuccessfulResponse(response.statusCode())) {
                     guessArtistField.clear();
                     guessSongField.clear();
-                    stopSong();
                     centerCardImage.setVisible(false);
                 } else {
                     showAlert("Turn Submit Failed", "Could not submit your turn. Please try again.");
@@ -750,21 +703,20 @@ public class GameController {
         return statusCode >= 200 && statusCode < 300;
     }
 
-    private void handleChallengeButtonClick() {
-        showAlert("Challenge", "Drag the token to a different slot than the selected ? card.");
-    }
-
     private void sendChallengeRequest(int suggestedIndex) {
         networkService.challenge(currentGameId, suggestedIndex).thenAccept(response -> {
             Platform.runLater(() -> {
-                cleanupChallengePanel();
                 fetchGameStateForce();
             });
         });
     }
 
     private void handleSkipChallenge() {
-        cleanupChallengePanel();
+        if (isSkippingChallenge) {
+            return;
+        }
+
+        isSkippingChallenge = true;
 
         networkService.skipChallenge(currentGameId).thenAccept(response -> {
             Platform.runLater(this::fetchGameStateForce);

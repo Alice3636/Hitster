@@ -32,6 +32,8 @@ public class GameEngine {
 
         session.getPlayer1Timeline().add(new SongCard(session.getRemainingSongs().poll()));
         session.getPlayer2Timeline().add(new SongCard(session.getRemainingSongs().poll()));
+        session.getPlayer1().addPoint();
+        session.getPlayer2().addPoint();
 
         giveStartingTokens(session.getPlayer1());
         giveStartingTokens(session.getPlayer2());
@@ -286,7 +288,6 @@ public class GameEngine {
             return;
         }
 
-        session.setCurrentSong(null);
         session.setChallengeState(null);
         session.clearPendingTurnInput();
         session.incrementTurnNumber();
@@ -371,7 +372,6 @@ public class GameEngine {
                 false
         ));
 
-        session.setCurrentSong(null);
         session.setLastChallengeResult(null);
         session.setChallengeState(null);
         session.setLastTurnData(null);
