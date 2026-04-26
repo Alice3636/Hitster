@@ -5,7 +5,6 @@ import com.hitster.dto.game.GuessSongRequestDTO;
 import com.hitster.dto.game.PlaceSongRequestDTO;
 import com.hitster.engine.GameEngine;
 import com.hitster.model.GameSession;
-import com.hitster.model.GameStatus;
 import com.hitster.model.Player;
 import com.hitster.model.Room;
 import com.hitster.model.Song;
@@ -125,10 +124,7 @@ public class GameManager {
             throw new NotFoundException("Player not found: " + playerId);
         }
 
-        Player winner = session.getOpponent(quitter);
-        session.setWinner(winner);
-        session.setStatus(GameStatus.FINISHED);
-        session.startPhase(com.hitster.dto.game.GamePhase.FINISHED, 0);
+        gameEngine.finishByForfeit(session, quitter);
 
         return session;
     }

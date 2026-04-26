@@ -5,16 +5,23 @@ import com.hitster.dto.game.ChallengeResultDTO;
 import com.hitster.dto.game.ChallengeStateDTO;
 import com.hitster.dto.game.GamePhase;
 import com.hitster.dto.game.TurnResultDTO;
-import com.hitster.model.*;
+import com.hitster.model.GameSession;
+import com.hitster.model.GameStatus;
+import com.hitster.model.LastTurnData;
+import com.hitster.model.Player;
+import com.hitster.model.Song;
+import com.hitster.model.SongCard;
 
 import java.util.List;
 
 public class GameEngine {
 
     private static final int WINNING_SCORE = 5;
-    private static final int PLAYER_TURN_SECONDS = 180;
-    private static final int CHALLENGE_SECONDS = 60;
+    private static final int PLAYER_TURN_SECONDS = 60;
+    private static final int CHALLENGE_SECONDS = 10;
     private static final int RESOLVE_SECONDS = 2;
+    private static final int STARTING_TOKENS = 2;
+    private static final int MAX_MISSED_TURNS = 3;
 
     public void startGame(GameSession session) {
         if (session.getRemainingSongs().size() < 3) {
@@ -26,10 +33,14 @@ public class GameEngine {
         session.getPlayer1Timeline().add(new SongCard(session.getRemainingSongs().poll()));
         session.getPlayer2Timeline().add(new SongCard(session.getRemainingSongs().poll()));
 
+        giveStartingTokens(session.getPlayer1());
+        giveStartingTokens(session.getPlayer2());
+
         session.setCurrentTurnPlayer(session.getPlayer1());
         session.setLastTurnResult(null);
         session.setLastChallengeResult(null);
         session.setChallengeState(null);
+        session.setLastTurnData(null);
         session.clearPendingTurnInput();
 
         drawNextSongOrFinish(session);
@@ -48,8 +59,7 @@ public class GameEngine {
             case PLAYER_TURN -> handlePlayerTurnTimeout(session);
             case CHALLENGE_WINDOW -> skipChallengeWindow(session);
             case TURN_RESOLVED -> moveToNextTurn(session);
-            default -> {
-            }
+            default -> { }
         }
     }
 
@@ -83,8 +93,7 @@ public class GameEngine {
 
         boolean placementCorrect = isCorrectPlacement(timeline, currentSong, indexPosition);
 
-        timeline.add(indexPosition, new SongCard(currentSong));
-
+        // Do not add card to timeline here.
         session.setPendingActingPlayer(actingPlayer);
         session.setPendingPlacedSong(currentSong);
         session.setPendingInsertPosition(indexPosition);
@@ -124,11 +133,7 @@ public class GameEngine {
         }
 
         ChallengeStateDTO challengeState = session.getChallengeState();
-        if (challengeState == null) {
-            throw new IllegalStateException("No challenge state is available.");
-        }
-
-        if (!challengeState.challengeAvailable()) {
+        if (challengeState == null || !challengeState.challengeAvailable()) {
             throw new IllegalStateException("Challenge is not available.");
         }
 
@@ -145,10 +150,8 @@ public class GameEngine {
             throw new IllegalStateException("Player has no token.");
         }
 
-        Player challengedPlayer = lastTurn.getActingPlayer();
         Song playedSong = lastTurn.getPlayedSong();
-
-        List<SongCard> challengedTimeline = session.getTimelineOfPlayer(challengedPlayer);
+        Player challengedPlayer = lastTurn.getActingPlayer();
         List<SongCard> challengerTimeline = session.getTimelineOfPlayer(challenger);
 
         if (suggestedIndex > challengerTimeline.size()) {
@@ -159,14 +162,9 @@ public class GameEngine {
         boolean cardTransferred = false;
 
         if (challengeCorrect) {
-            SongCard cardToMove = findCardBySongId(challengedTimeline, playedSong.getId());
-
-            if (cardToMove != null) {
-                challengedTimeline.remove(cardToMove);
-                challengerTimeline.add(suggestedIndex, new SongCard(playedSong));
-                challenger.addPoint();
-                cardTransferred = true;
-            }
+            challengerTimeline.add(suggestedIndex, new SongCard(playedSong));
+            challenger.addPoint();
+            cardTransferred = true;
         }
 
         session.setLastChallengeResult(new ChallengeResultDTO(
@@ -196,6 +194,15 @@ public class GameEngine {
         resolveTurn(session);
     }
 
+    public void finishByForfeit(GameSession session, Player quitter) {
+        if (session == null || quitter == null || session.isFinished()) {
+            return;
+        }
+
+        Player winner = session.getOpponent(quitter);
+        finishGame(session, winner);
+    }
+
     private void tryResolveTurn(GameSession session) {
         if (session.getPendingGuessedArtist() == null ||
                 session.getPendingGuessedTitle() == null ||
@@ -208,6 +215,8 @@ public class GameEngine {
         Player actingPlayer = session.getPendingActingPlayer();
         Song playedSong = session.getPendingPlacedSong();
 
+        session.resetMissedTurns(actingPlayer);
+
         boolean artistCorrect = playedSong.getArtist()
                 .trim()
                 .equalsIgnoreCase(session.getPendingGuessedArtist().trim());
@@ -218,10 +227,6 @@ public class GameEngine {
 
         boolean placementCorrect = session.isPendingPlacementCorrect();
         boolean earnedToken = artistCorrect && titleCorrect && placementCorrect;
-
-        if (placementCorrect) {
-            actingPlayer.addPoint();
-        }
 
         if (earnedToken) {
             actingPlayer.addToken();
@@ -245,14 +250,13 @@ public class GameEngine {
         ));
 
         session.setLastChallengeResult(null);
-        session.setCurrentSong(null);
-
-        if (actingPlayer.getScore() >= WINNING_SCORE) {
-            finishGame(session, actingPlayer);
-            return;
-        }
 
         Player challenger = session.getOpponent(actingPlayer);
+
+        if (challenger.getTokens() <= 0) {
+            resolveTurn(session);
+            return;
+        }
 
         session.setChallengeState(new ChallengeStateDTO(
                 parseLongOrNull(challenger.getId()),
@@ -260,17 +264,57 @@ public class GameEngine {
                 parseLongOrNull(playedSong.getId()),
                 session.getPendingInsertPosition(),
                 CHALLENGE_SECONDS,
-                challenger.getTokens() > 0
+                true
         ));
 
         session.startPhase(GamePhase.CHALLENGE_WINDOW, CHALLENGE_SECONDS);
     }
 
     private void resolveTurn(GameSession session) {
+        applyPendingCardResolution(session);
+
+        if (session.isFinished()) {
+            return;
+        }
+
+        session.setCurrentSong(null);
         session.setChallengeState(null);
         session.clearPendingTurnInput();
         session.incrementTurnNumber();
         session.startPhase(GamePhase.TURN_RESOLVED, RESOLVE_SECONDS);
+    }
+
+    private void applyPendingCardResolution(GameSession session) {
+        LastTurnData lastTurn = session.getLastTurnData();
+        if (lastTurn == null) {
+            return;
+        }
+
+        Player actingPlayer = lastTurn.getActingPlayer();
+        Song playedSong = lastTurn.getPlayedSong();
+        int originalIndex = lastTurn.getInsertPosition();
+        boolean originalPlacementCorrect = lastTurn.isPlacementCorrect();
+
+        ChallengeResultDTO challengeResult = session.getLastChallengeResult();
+        boolean challengeSucceeded = challengeResult != null && challengeResult.challengeCorrect();
+
+        if (challengeSucceeded) {
+            return;
+        }
+
+        if (!originalPlacementCorrect) {
+            return; // burned card
+        }
+
+        List<SongCard> actingTimeline = session.getTimelineOfPlayer(actingPlayer);
+        int safeIndex = Math.max(0, Math.min(originalIndex, actingTimeline.size()));
+
+        actingTimeline.add(safeIndex, new SongCard(playedSong));
+        actingPlayer.addPoint();
+
+        if (actingPlayer.getScore() >= WINNING_SCORE) {
+            finishGame(session, actingPlayer);
+        }
     }
 
     private void moveToNextTurn(GameSession session) {
@@ -278,8 +322,11 @@ public class GameEngine {
             return;
         }
 
-        Player current = session.getCurrentTurnPlayer();
-        session.setCurrentTurnPlayer(session.getOpponent(current));
+        Player lastActor = session.getLastTurnData() != null
+                ? session.getLastTurnData().getActingPlayer()
+                : session.getCurrentTurnPlayer();
+
+        session.setCurrentTurnPlayer(session.getOpponent(lastActor));
 
         session.setLastTurnResult(null);
         session.setLastChallengeResult(null);
@@ -297,6 +344,13 @@ public class GameEngine {
     private void handlePlayerTurnTimeout(GameSession session) {
         Player player = session.getCurrentTurnPlayer();
         Song song = session.getCurrentSong();
+
+        session.incrementMissedTurn(player);
+
+        if (session.getMissedTurns(player) >= MAX_MISSED_TURNS) {
+            finishGame(session, session.getOpponent(player));
+            return;
+        }
 
         session.setLastTurnResult(new TurnResultDTO(
                 player != null ? parseLongOrNull(player.getId()) : null,
@@ -364,6 +418,12 @@ public class GameEngine {
         }
     }
 
+    private void giveStartingTokens(Player player) {
+        for (int i = 0; i < STARTING_TOKENS; i++) {
+            player.addToken();
+        }
+    }
+
     private boolean isCorrectPlacement(List<SongCard> timeline, Song song, int insertPosition) {
         if (insertPosition < 0 || insertPosition > timeline.size()) {
             return false;
@@ -371,31 +431,16 @@ public class GameEngine {
 
         int songYear = song.getYear();
 
-        Integer leftYear = null;
-        Integer rightYear = null;
+        Integer leftYear = insertPosition > 0
+                ? timeline.get(insertPosition - 1).getSong().getYear()
+                : null;
 
-        if (insertPosition > 0) {
-            leftYear = timeline.get(insertPosition - 1).getSong().getYear();
-        }
+        Integer rightYear = insertPosition < timeline.size()
+                ? timeline.get(insertPosition).getSong().getYear()
+                : null;
 
-        if (insertPosition < timeline.size()) {
-            rightYear = timeline.get(insertPosition).getSong().getYear();
-        }
-
-        boolean validLeft = leftYear == null || songYear >= leftYear;
-        boolean validRight = rightYear == null || songYear <= rightYear;
-
-        return validLeft && validRight;
-    }
-
-    private SongCard findCardBySongId(List<SongCard> timeline, String songId) {
-        for (SongCard card : timeline) {
-            if (card.getSong().getId().equals(songId)) {
-                return card;
-            }
-        }
-
-        return null;
+        return (leftYear == null || songYear >= leftYear)
+                && (rightYear == null || songYear <= rightYear);
     }
 
     private Long parseLongOrNull(String value) {
