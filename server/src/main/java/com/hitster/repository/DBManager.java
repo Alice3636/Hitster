@@ -13,6 +13,7 @@ public class DBManager {
 
     private static Connection connection = null;
 
+    @SuppressWarnings("unchecked")
     public static Connection connect() {
         try {
             if (connection == null || connection.isClosed()) {
