@@ -1,6 +1,7 @@
 package com.hitster.mapper;
 
 import com.hitster.dto.game.CardDTO;
+import com.hitster.dto.game.ChallengeStateDTO;
 import com.hitster.dto.game.CurrentSongDTO;
 import com.hitster.dto.game.GameStateDTO;
 import com.hitster.dto.game.PlayerGameStateDTO;
@@ -35,18 +36,35 @@ public class GameStateMapper {
                 toPlayerStateDTO(p2, session.getPlayer2Timeline())
         );
 
+        int timeLeftSeconds = session.getTimeLeftSeconds();
+
         return new GameStateDTO(
                 session.getPhase(),
                 session.getTurnNumber(),
-                session.getTimeLeftSeconds(),
+                timeLeftSeconds,
                 activePlayerId,
                 winnerPlayerId,
                 winnerName,
                 toCurrentSongDTO(session.getCurrentSong()),
                 players,
                 session.getLastTurnResult(),
-                session.getChallengeState(),
+                toChallengeStateDTO(session.getChallengeState(), timeLeftSeconds),
                 session.getLastChallengeResult()
+        );
+    }
+
+    private static ChallengeStateDTO toChallengeStateDTO(ChallengeStateDTO challengeState, int timeLeftSeconds) {
+        if (challengeState == null) {
+            return null;
+        }
+
+        return new ChallengeStateDTO(
+                challengeState.challengerPlayerId(),
+                challengeState.challengedPlayerId(),
+                challengeState.songId(),
+                challengeState.originalPlacedIndex(),
+                timeLeftSeconds,
+                challengeState.challengeAvailable()
         );
     }
 
