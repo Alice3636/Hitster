@@ -13,7 +13,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1080.0" prefWidth="1920.0" stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hitster.controllers.GameController">
+<AnchorPane fx:id="rootPane" stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hitster.controllers.GameController">
    <children>
       <VBox alignment="CENTER" spacing="30.0" AnchorPane.bottomAnchor="80.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
          <children>
@@ -34,7 +34,7 @@
                         <Insets left="15.0" right="15.0" />
                      </padding>
                   </HBox>
-                  <HBox alignment="CENTER" maxWidth="-Infinity" minWidth="-Infinity" prefHeight="220.0" prefWidth="1304.0" spacing="15.0" style="-fx-padding: 10px;" styleClass="timeline-container">
+                  <HBox alignment="CENTER" prefHeight="220.0" prefWidth="1304.0" spacing="15.0" style="-fx-padding: 10px;" styleClass="timeline-container">
                      <children>
                         <Button minWidth="60.0" mnemonicParsing="false" style="-fx-padding: 0;" styleClass="scroll-arrow-btn" text="◄" />
                         <ScrollPane hbarPolicy="NEVER" prefHeight="160.0" prefWidth="1052.0" styleClass="timeline-scroll" vbarPolicy="NEVER">
@@ -61,7 +61,7 @@
                               <Image url="@../images/card.png" />
                            </image>
                         </ImageView>
-                        <Label fx:id="timerLabel" minHeight="-Infinity" minWidth="-Infinity" prefHeight="64.0" prefWidth="124.0" style="-fx-padding: 5px 25px;" styleClass="timer-box" text="00:60" textAlignment="CENTER">
+                        <Label fx:id="timerLabel" prefHeight="64.0" prefWidth="124.0" style="-fx-padding: 5px 25px;" styleClass="timer-box" text="00:60" textAlignment="CENTER">
                            <font>
                               <Font size="24.0" />
                            </font>
@@ -69,7 +69,7 @@
                      </children>
                   </VBox>
 
-                  <VBox alignment="CENTER" layoutY="46.0" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="335.0" prefWidth="368.0" spacing="20.0" styleClass="guess-panel" AnchorPane.bottomAnchor="30.0" AnchorPane.rightAnchor="32.0" AnchorPane.topAnchor="46.0">
+                  <VBox alignment="CENTER" layoutY="46.0" prefHeight="335.0" prefWidth="368.0" spacing="20.0" styleClass="guess-panel" AnchorPane.bottomAnchor="30.0" AnchorPane.rightAnchor="32.0" AnchorPane.topAnchor="46.0">
                      <children>
                         <Label styleClass="guess-title" text="GUESS!" />
                         <TextField fx:id="guessArtistField" prefHeight="50.0" promptText="Artist Name" styleClass="text-field" />
@@ -101,7 +101,7 @@
                         <Insets left="15.0" right="15.0" />
                      </padding>
                   </HBox>
-                  <HBox alignment="CENTER" minWidth="-Infinity" prefHeight="250.0" prefWidth="1294.0" spacing="15.0" style="-fx-padding: 10px;" styleClass="timeline-container">
+                  <HBox alignment="CENTER" prefHeight="250.0" prefWidth="1294.0" spacing="15.0" style="-fx-padding: 10px;" styleClass="timeline-container">
                      <children>
                         <Button minWidth="60.0" mnemonicParsing="false" prefHeight="84.0" prefWidth="158.0" style="-fx-padding: 0;" styleClass="scroll-arrow-btn" text="◄" />
                         <ScrollPane hbarPolicy="NEVER" prefWidth="1050.0" styleClass="timeline-scroll" vbarPolicy="NEVER">

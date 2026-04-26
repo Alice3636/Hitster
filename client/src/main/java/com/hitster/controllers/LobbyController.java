@@ -4,6 +4,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import com.hitster.client.utils.ResponsiveScaler;
 import com.hitster.client.utils.SceneNavigator;
 import com.hitster.network.GameNetworkService;
 import com.hitster.session.GameManager;
@@ -17,6 +18,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 
 public class LobbyController {
@@ -52,8 +54,11 @@ public class LobbyController {
     private ScheduledExecutorService pollingExecutor;
     private final Gson gson = new Gson();
 
-    @FXML
+    @FXML 
+    private AnchorPane rootPane;
+
     public void initialize() {
+        ResponsiveScaler.bindToWidth(rootPane);
 
 
         if (!UserSession.getInstance().getIsAdmin()) {
@@ -88,7 +93,6 @@ public class LobbyController {
         if (playButton.getText().equals("Cancel")) {
             stopPolling();
             statusLabel.setVisible(false);
-            statusLabel.setManaged(false);
             playButton.setText("LETS ROLL!");
             leaderboardButton.setDisable(false);
             hamburgerButton.setDisable(false);
@@ -101,7 +105,6 @@ public class LobbyController {
                         statusLabel.setText("Looking for an opponent...");
                         playButton.setText("Cancel");
                         statusLabel.setVisible(true);
-                        statusLabel.setManaged(true);
                         leaderboardButton.setDisable(true);
                         hamburgerButton.setDisable(true);
                     });

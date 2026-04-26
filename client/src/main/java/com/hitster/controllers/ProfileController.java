@@ -1,5 +1,6 @@
 package com.hitster.controllers;
 
+import com.hitster.client.utils.ResponsiveScaler;
 import com.hitster.client.utils.SceneNavigator;
 import com.hitster.dto.user.MatchHistoryDTO;
 import com.hitster.dto.user.UserProfileResponseDTO;
@@ -23,6 +24,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 
 public class ProfileController {
 
@@ -58,8 +60,11 @@ public class ProfileController {
 
     private final UserNetworkService userNetworkService = new UserNetworkService();
 
-    @FXML
+    @FXML 
+    private AnchorPane rootPane;
+
     public void initialize() {
+        ResponsiveScaler.bindToWidth(rootPane);
         opponentCol.setCellValueFactory(cellData -> 
             new javafx.beans.property.SimpleStringProperty(cellData.getValue().enemyUsername()));
             

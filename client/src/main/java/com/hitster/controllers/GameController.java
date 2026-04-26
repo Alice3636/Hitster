@@ -1,6 +1,7 @@
 package com.hitster.controllers;
 
 import com.google.gson.Gson;
+import com.hitster.client.utils.ResponsiveScaler;
 import com.hitster.client.utils.SceneNavigator;
 import com.hitster.dto.game.CardDTO;
 import com.hitster.dto.game.ChallengeStateDTO;
@@ -82,8 +83,8 @@ public class GameController {
 
     private Integer lastFeedbackTurnNumber = null;
 
-    @FXML
     public void initialize() {
+        ResponsiveScaler.bindToWidth(rootPane);
         currentGameId = GameManager.getInstance().getGameId();
 
         submitGuessButton.setOnAction(e -> handleGuessSubmit());

@@ -14,7 +14,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hitster.controllers.RegisterController">
+<AnchorPane fx:id="rootPane" stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hitster.controllers.RegisterController">
    <children>
       <StackPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
@@ -44,7 +44,7 @@
                            </font>
                         </Label>
                         <ImageView fx:id="profileImageView" fitHeight="100.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true" styleClass="avatar-circle" visible="false" managed="false" />
-                        <Button mnemonicParsing="false" onAction="#handleImageUpload" styleClass="token-btn" style="-fx-font-size: 16px;" text="UPLOAD IMAGE" />
+                        <Button mnemonicParsing="false" onAction="#handleImageUpload" styleClass="token-btn" style="-fx-font-size: 1em;" text="UPLOAD IMAGE" />
                      </children>
                   </VBox>
 

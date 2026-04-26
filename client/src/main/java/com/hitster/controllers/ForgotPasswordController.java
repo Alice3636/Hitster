@@ -9,6 +9,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.AnchorPane;
+import com.hitster.client.utils.ResponsiveScaler;
 
 public class ForgotPasswordController {
 
@@ -17,6 +19,13 @@ public class ForgotPasswordController {
     @FXML private Button resetButton;
 
     private final AuthNetworkService authService = new AuthNetworkService();
+
+    @FXML 
+    private AnchorPane rootPane;
+
+    public void initialize() {
+        ResponsiveScaler.bindToWidth(rootPane);
+    }
 
     @FXML
     void handleResetPassword(ActionEvent event) {

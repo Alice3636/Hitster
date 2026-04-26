@@ -1,6 +1,7 @@
 package com.hitster.controllers;
 
 import com.google.gson.Gson;
+import com.hitster.client.utils.ResponsiveScaler;
 import com.hitster.client.utils.SceneNavigator;
 import com.hitster.dto.user.LeaderboardEntryDTO;
 import com.hitster.dto.user.LeaderboardResponseDTO;
@@ -13,6 +14,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.layout.AnchorPane;
 
 public class LeaderboardController {
 
@@ -33,8 +35,11 @@ public class LeaderboardController {
 
     private final UserNetworkService userNetworkService = new UserNetworkService();
 
-    @FXML
+    @FXML 
+    private AnchorPane rootPane;
+
     public void initialize() {
+        ResponsiveScaler.bindToWidth(rootPane);
         rankColumn.setCellValueFactory(cellData -> 
             new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue().rank()));
             

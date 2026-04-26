@@ -2,6 +2,7 @@ package com.hitster.controllers;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.hitster.client.utils.ResponsiveScaler;
 import com.hitster.client.utils.SceneNavigator;
 import com.hitster.dto.auth.LoginResponseDTO;
 import com.hitster.network.AuthNetworkService;
@@ -17,6 +18,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
 
 import java.util.Map;
@@ -39,8 +41,11 @@ public class LoginController {
     private boolean isPasswordVisible = false;
     private final AuthNetworkService authService = new AuthNetworkService();
 
-    @FXML
+    @FXML 
+    private AnchorPane rootPane;
+
     public void initialize() {
+        ResponsiveScaler.bindToWidth(rootPane);
         passwordTextField.textProperty().bindBidirectional(passwordField.textProperty());
     }
 

@@ -1,3 +1,8 @@
+/* Responsive first pass
+   Use ResponsiveScaler.bindToWidth(root) in each controller.
+   The scaler sets the root font size from scene width, so em-based styles scale with the window.
+*/
+
 .root {
     -fx-background-color: radial-gradient(center 50% 50%, radius 120%, #150524, #05020a);
 }
@@ -33,7 +38,7 @@
     -fx-border-color: #4a2a75; 
     -fx-border-width: 2px;
     -fx-border-radius: 8;
-    -fx-font-size: 20px;
+    -fx-font-size: 1.25em;
 }
 
 .text-field:focused {
@@ -46,7 +51,7 @@
     -fx-background-color: linear-gradient(to right, #ff007a, #9013fe, #00d2ff);
     -fx-text-fill: white;
     -fx-font-weight: bold;
-    -fx-font-size: 28px;
+    -fx-font-size: 1.75em;
     -fx-background-radius: 8;
     -fx-cursor: hand;
     -fx-effect: dropshadow(gaussian, rgba(144, 19, 254, 0.4), 20, 0.3, 0, 5);
@@ -55,14 +60,14 @@
 .login-button:hover, .register-button:hover, .forgot-button:hover {
     -fx-scale-x: 1.03;
     -fx-scale-y: 1.03;
-    -fx-font-size: 28px;
+    -fx-font-size: 1.75em;
     -fx-font-weight: bold;
 }
 
 .back-button {
     -fx-background-color: transparent;
     -fx-text-fill: #ff007a; 
-    -fx-font-size: 55px;
+    -fx-font-size: 3.438em;
     -fx-font-weight: bold;
     -fx-cursor: hand;
     -fx-effect: dropshadow(gaussian, #ff007a, 10, 0.3, 0, 0);
@@ -70,7 +75,7 @@
 
 .back-button:hover {
     -fx-text-fill: #ffffff; 
-    -fx-font-size: 55px;
+    -fx-font-size: 3.438em;
     -fx-font-weight: bold;
     -fx-effect: dropshadow(gaussian, #ffffff, 15, 0.5, 0, 0);
     -fx-scale-x: 1.1;
@@ -94,20 +99,20 @@
 .login-here-text, .register-here-text {
     -fx-fill: #1ab8fc;
     -fx-cursor: hand;
-    -fx-font-size: 27px;
+    -fx-font-size: 1.688em;
     -fx-font-weight: bold;
 }
 
 .login-here-text:hover, .register-here-text:hover {
     -fx-fill: #ff007a; 
     -fx-cursor: hand; 
-    -fx-font-size: 27px; 
+    -fx-font-size: 1.688em; 
     -fx-font-weight: bold; 
 }
 
 .hitster-title {
     -fx-text-fill: #ffffff;
-    -fx-font-size: 160px;
+    -fx-font-size: 10em;
     -fx-font-weight: bold;
     -fx-effect: dropshadow(gaussian, #00d2ff, 30, 0.5, 0, 0), dropshadow(gaussian, #9013fe, 15, 0.3, 0, 0); 
     -fx-letter-spacing: 15px;
@@ -115,7 +120,7 @@
 
 .leaderboard-title {
     -fx-text-fill: #ffffff;
-    -fx-font-size: 110px;
+    -fx-font-size: 6.875em;
     -fx-font-weight: bold;
     -fx-letter-spacing: 12px;
     -fx-effect: dropshadow(gaussian, rgba(0, 210, 255, 0.6), 25, 0.4, 0, 0), dropshadow(gaussian, rgba(255, 0, 122, 0.4), 15, 0.2, 0, 0); 
@@ -128,7 +133,7 @@
     -fx-cursor: hand;
     -fx-effect: dropshadow(gaussian, rgba(144, 19, 254, 0.5), 25, 0.3, 0, 0);
     -fx-letter-spacing: 8px;
-    -fx-font-size: 26px;
+    -fx-font-size: 1.625em;
     -fx-font-weight: bold;
 }
 
@@ -137,7 +142,7 @@
     -fx-effect: dropshadow(gaussian, rgba(0, 210, 255, 0.6), 30, 0.4, 0, 0);
     -fx-scale-x: 1.04;
     -fx-scale-y: 1.04;
-    -fx-font-size: 26px;
+    -fx-font-size: 1.625em;
     -fx-font-weight: bold;
 }
 
@@ -145,7 +150,7 @@
     -fx-text-fill: #00d2ff;
     -fx-effect: dropshadow(gaussian, rgba(0, 210, 255, 0.5), 15, 0.3, 0, 0);
     -fx-letter-spacing: 3px;
-    -fx-font-size: 28px;
+    -fx-font-size: 1.75em;
     -fx-font-weight: bold;
 }
 
@@ -159,7 +164,7 @@
     -fx-cursor: hand;
     -fx-effect: dropshadow(gaussian, rgba(255, 0, 122, 0.2), 10, 0.1, 0, 0);
     -fx-letter-spacing: 4px;
-    -fx-font-size: 24px;
+    -fx-font-size: 1.5em;
     -fx-font-weight: bold;
 }
 
@@ -170,7 +175,7 @@
     -fx-effect: dropshadow(gaussian, rgba(255, 0, 122, 0.4), 15, 0.3, 0, 0);
     -fx-scale-x: 1.02;
     -fx-scale-y: 1.02;
-    -fx-font-size: 24px;
+    -fx-font-size: 1.5em;
     -fx-font-weight: bold;
 }
 
@@ -178,14 +183,14 @@
     -fx-background-color: transparent;
     -fx-text-fill: #ffffff;
     -fx-cursor: hand;
-    -fx-font-size: 65px;
+    -fx-font-size: 4.062em;
 }
 
 .hamburger-icon:hover {
     -fx-text-fill: #ff007a;
     -fx-scale-x: 1.1;
     -fx-scale-y: 1.1;
-    -fx-font-size: 65px;
+    -fx-font-size: 4.062em;
 }
 
 .sidebar-panel {
@@ -201,7 +206,7 @@
     -fx-cursor: hand;
     -fx-border-width: 0 0 0 4px;
     -fx-border-color: transparent;
-    -fx-font-size: 26px;
+    -fx-font-size: 1.625em;
     -fx-font-weight: bold;
 }
 
@@ -209,7 +214,7 @@
     -fx-background-color: rgba(144, 19, 254, 0.15);
     -fx-text-fill: #00d2ff;
     -fx-border-color: #00d2ff;
-    -fx-font-size: 26px;
+    -fx-font-size: 1.625em;
     -fx-font-weight: bold;
 }
 
@@ -235,7 +240,7 @@
 .leaderboard-table .column-header .label {
     -fx-text-fill: #00d2ff;
     -fx-font-weight: bold;
-    -fx-font-size: 20px;
+    -fx-font-size: 1.25em;
 }
 
 .leaderboard-table .table-row-cell {
@@ -257,12 +262,12 @@
 
 .leaderboard-table .table-cell {
     -fx-text-fill: #ffffff;
-    -fx-font-size: 20px;
+    -fx-font-size: 1.25em;
 }
 
 .leaderboard-table .placeholder .label {
     -fx-text-fill: #a0a0b5;
-    -fx-font-size: 16px;
+    -fx-font-size: 1em;
 }
 
 .leaderboard-table .scroll-bar:vertical {
@@ -280,7 +285,7 @@
 
 .player-name-text {
     -fx-text-fill: #00d2ff;
-    -fx-font-size: 32px;
+    -fx-font-size: 2em;
     -fx-font-weight: bold;
     -fx-effect: dropshadow(gaussian, rgba(0, 210, 255, 0.8), 10, 0.4, 0, 0);
     -fx-letter-spacing: 4px;
@@ -288,7 +293,7 @@
 
 .stats-text {
     -fx-text-fill: #ffffff;
-    -fx-font-size: 26px;
+    -fx-font-size: 1.625em;
     -fx-font-weight: bold;
     -fx-effect: dropshadow(gaussian, rgba(255, 0, 122, 0.6), 10, 0.4, 0, 0);
 }
@@ -300,7 +305,7 @@
     -fx-border-radius: 8px;
     -fx-text-fill: #ff007a;
     -fx-font-weight: bold;
-    -fx-font-size: 18px;
+    -fx-font-size: 1.125em;
     -fx-cursor: hand;
     -fx-effect: dropshadow(gaussian, rgba(255, 0, 122, 0.4), 8, 0.2, 0, 0);
 }
@@ -333,14 +338,14 @@
 .scroll-arrow-btn {
     -fx-background-color: transparent;
     -fx-text-fill: #00d2ff;
-    -fx-font-size: 40px;
+    -fx-font-size: 2.5em;
     -fx-cursor: hand;
     -fx-effect: dropshadow(gaussian, rgba(0, 210, 255, 0.6), 10, 0.4, 0, 0);
 }
 
 .scroll-arrow-btn:hover {
     -fx-text-fill: #ff007a;
-    -fx-font-size: 40px;
+    -fx-font-size: 2.5em;
     -fx-scale-x: 1.2;
     -fx-scale-y: 1.2;
     -fx-effect: dropshadow(gaussian, rgba(255, 0, 122, 0.8), 15, 0.5, 0, 0);
@@ -352,8 +357,8 @@
     -fx-border-width: 2px;
     -fx-border-radius: 12px;
     -fx-background-radius: 12px;
-    -fx-min-width: 170px;
-    -fx-min-height: 240px;
+    -fx-min-width: 10.62em;
+    -fx-min-height: 15em;
     -fx-effect: dropshadow(gaussian, rgba(144, 19, 254, 0.3), 10, 0.2, 0, 0);
     -fx-cursor: hand;
 }
@@ -371,7 +376,7 @@
     -fx-border-radius: 6px;
     -fx-background-radius: 6px;
     -fx-text-fill: #ffffff;
-    -fx-font-size: 32px;
+    -fx-font-size: 2em;
     -fx-font-weight: bold;
     -fx-padding: 8 20 8 20;
     -fx-alignment: center;
@@ -385,11 +390,11 @@
     -fx-border-radius: 4px;
     -fx-background-radius: 4px;
     -fx-text-fill: #f5f5fa;
-    -fx-font-size: 16px;
+    -fx-font-size: 1em;
     -fx-font-weight: bold;
     -fx-padding: 5 12 5 12;
     -fx-alignment: center;
-    -fx-max-width: 140px;
+    -fx-max-width: 8.75em;
 }
 
 .card-song-box {
@@ -399,11 +404,11 @@
     -fx-border-radius: 4px;
     -fx-background-radius: 4px;
     -fx-text-fill: #f5f5fa;
-    -fx-font-size: 14px;
+    -fx-font-size: 0.875em;
     -fx-font-weight: bold;
     -fx-padding: 5 12 5 12;
     -fx-alignment: center;
-    -fx-max-width: 140px;
+    -fx-max-width: 8.75em;
     -fx-wrap-text: true;
     -fx-text-alignment: center;
 }
@@ -414,8 +419,8 @@
     -fx-border-width: 3px;
     -fx-border-radius: 16px;
     -fx-background-radius: 16px;
-    -fx-min-width: 200px;
-    -fx-min-height: 280px;
+    -fx-min-width: 12.5em;
+    -fx-min-height: 17.5em;
     -fx-effect: dropshadow(gaussian, rgba(0, 210, 255, 0.4), 20, 0.3, 0, 0);
     -fx-cursor: hand;
 }
@@ -427,7 +432,7 @@
 
 .active-card-question {
     -fx-text-fill: #ffffff;
-    -fx-font-size: 110px;
+    -fx-font-size: 6.875em;
     -fx-font-weight: bold;
     -fx-effect: dropshadow(gaussian, rgba(0, 210, 255, 0.5), 15, 0.4, 0, 0);
 }
@@ -454,7 +459,7 @@
 
 .guess-title {
     -fx-text-fill: #00d2ff;
-    -fx-font-size: 38px;
+    -fx-font-size: 2.375em;
     -fx-font-weight: bold;
     -fx-letter-spacing: 2px;
     -fx-effect: dropshadow(gaussian, rgba(0, 210, 255, 0.5), 10, 0.3, 0, 0);
@@ -462,7 +467,7 @@
 
 .admin-title {
     -fx-text-fill: #ffffff;
-    -fx-font-size: 70px;
+    -fx-font-size: 4.375em;
     -fx-font-weight: bold;
     -fx-effect: dropshadow(gaussian, rgba(255, 0, 122, 0.6), 15, 0.4, 0, 0), dropshadow(gaussian, rgba(0, 210, 255, 0.6), 15, 0.4, 0, 0);
     -fx-letter-spacing: 4px;
@@ -485,7 +490,7 @@
     -fx-border-color: #9013fe;
     -fx-border-width: 2px;
     -fx-border-radius: 12px;
-    -fx-font-size: 20px;
+    -fx-font-size: 1.25em;
 }
 
 .search-field:focused {
@@ -497,7 +502,7 @@
     -fx-background-color: linear-gradient(to right, #00d2ff, #9013fe, #ff007a);
     -fx-text-fill: white;
     -fx-font-weight: bold;
-    -fx-font-size: 22px;
+    -fx-font-size: 1.375em;
     -fx-background-radius: 12px;
     -fx-cursor: hand;
     -fx-effect: dropshadow(gaussian, rgba(144, 19, 254, 0.6), 15, 0.3, 0, 0);
@@ -514,7 +519,7 @@
     -fx-background-color: linear-gradient(to right, #ff007a, #cc0000);
     -fx-text-fill: white;
     -fx-font-weight: bold;
-    -fx-font-size: 22px;
+    -fx-font-size: 1.375em;
     -fx-background-radius: 12px;
     -fx-cursor: hand;
     -fx-effect: dropshadow(gaussian, rgba(255, 0, 122, 0.6), 15, 0.3, 0, 0);
@@ -534,7 +539,7 @@
     -fx-border-radius: 12px;
     -fx-background-radius: 12px;
     -fx-text-fill: #a0a0b5;
-    -fx-font-size: 24px;
+    -fx-font-size: 1.5em;
     -fx-font-weight: bold;
     -fx-cursor: hand;
 }
@@ -552,7 +557,7 @@
     -fx-border-radius: 12px;
     -fx-background-radius: 12px;
     -fx-text-fill: #05020a;
-    -fx-font-size: 24px;
+    -fx-font-size: 1.5em;
     -fx-font-weight: bold;
     -fx-cursor: hand;
     -fx-effect: dropshadow(gaussian, rgba(0, 210, 255, 0.6), 15, 0.4, 0, 0);
@@ -581,7 +586,7 @@
 .admin-table .column-header .label {
     -fx-text-fill: #00d2ff;
     -fx-font-weight: bold;
-    -fx-font-size: 20px;
+    -fx-font-size: 1.25em;
 }
 
 .admin-table .table-row-cell {
@@ -604,7 +609,7 @@
 
 .admin-table .table-cell {
     -fx-text-fill: #ffffff;
-    -fx-font-size: 20px;
+    -fx-font-size: 1.25em;
 }
 
 .admin-table .scroll-bar:vertical {
@@ -623,7 +628,7 @@
 .pencil-edit-btn {
     -fx-background-color: transparent;
     -fx-text-fill: #00d2ff;
-    -fx-font-size: 24px;
+    -fx-font-size: 1.5em;
     -fx-cursor: hand;
     -fx-padding: 0;
 }
@@ -637,7 +642,7 @@
 
 .admin-title-accounts {
     -fx-text-fill: #ffffff;
-    -fx-font-size: 70px;
+    -fx-font-size: 4.375em;
     -fx-font-weight: bold;
     -fx-effect: dropshadow(gaussian, rgba(0, 230, 118, 0.6), 15, 0.4, 0, 0), dropshadow(gaussian, rgba(0, 210, 255, 0.6), 15, 0.4, 0, 0);
     -fx-letter-spacing: 4px;
@@ -660,7 +665,7 @@
     -fx-border-color: #0055ff;
     -fx-border-width: 2px;
     -fx-border-radius: 12px;
-    -fx-font-size: 20px;
+    -fx-font-size: 1.25em;
 }
 
 .search-field-accounts:focused {
@@ -675,7 +680,7 @@
     -fx-border-radius: 12px;
     -fx-background-radius: 12px;
     -fx-text-fill: #a0a0b5;
-    -fx-font-size: 24px;
+    -fx-font-size: 1.5em;
     -fx-font-weight: bold;
     -fx-cursor: hand;
 }
@@ -693,7 +698,7 @@
     -fx-border-radius: 12px;
     -fx-background-radius: 12px;
     -fx-text-fill: #05020a;
-    -fx-font-size: 24px;
+    -fx-font-size: 1.5em;
     -fx-font-weight: bold;
     -fx-cursor: hand;
     -fx-effect: dropshadow(gaussian, rgba(0, 230, 118, 0.6), 15, 0.4, 0, 0);
@@ -722,7 +727,7 @@
 .admin-table-accounts .column-header .label {
     -fx-text-fill: #00d2ff;
     -fx-font-weight: bold;
-    -fx-font-size: 20px;
+    -fx-font-size: 1.25em;
 }
 
 .admin-table-accounts .table-row-cell {
@@ -745,7 +750,7 @@
 
 .admin-table-accounts .table-cell {
     -fx-text-fill: #ffffff;
-    -fx-font-size: 20px;
+    -fx-font-size: 1.25em;
 }
 
 .admin-table-accounts .scroll-bar:vertical {
@@ -764,7 +769,7 @@
 .pencil-edit-btn-accounts {
     -fx-background-color: transparent;
     -fx-text-fill: #00d2ff;
-    -fx-font-size: 24px;
+    -fx-font-size: 1.5em;
     -fx-cursor: hand;
     -fx-padding: 0;
 }
@@ -803,7 +808,7 @@
 
 .glow-table .column-header .label {
     -fx-text-fill: #00d2ff;
-    -fx-font-size: 26px; 
+    -fx-font-size: 1.625em; 
     -fx-font-weight: bold;
     -fx-effect: dropshadow(gaussian, rgba(0, 210, 255, 0.6), 10, 0.4, 0, 0);
 }
@@ -820,7 +825,7 @@
 
 .glow-table .table-cell {
     -fx-text-fill: #ffffff;
-    -fx-font-size: 18px; 
+    -fx-font-size: 1.125em; 
     -fx-font-weight: bold;
 }
 
@@ -852,25 +857,25 @@
 
 .glow-table .placeholder .label {
     -fx-text-fill: #3bc6f8;
-    -fx-font-size: 26px;
+    -fx-font-size: 1.625em;
 }
 
 .profile-text-main {
     -fx-text-fill: #ffffff;
-    -fx-font-size: 40px;
+    -fx-font-size: 2.5em;
     -fx-font-weight: bold;
     -fx-effect: dropshadow(gaussian, rgba(0, 210, 255, 0.6), 15, 0.4, 0, 0);
 }
 
 .profile-text-sub {
     -fx-text-fill: #a0a0b5;
-    -fx-font-size: 24px;
+    -fx-font-size: 1.5em;
 }
 
 .edit-btn {
     -fx-background-color: transparent;
     -fx-text-fill: #ff007a;
-    -fx-font-size: 35px;
+    -fx-font-size: 2.188em;
     -fx-cursor: hand;
 }
 
@@ -900,7 +905,7 @@
 
 .stat-value {
     -fx-text-fill: #ffffff;
-    -fx-font-size: 25px;
+    -fx-font-size: 1.562em;
     -fx-font-weight: bold;
     -fx-effect: dropshadow(gaussian, rgba(0, 210, 255, 0.8), 10, 0.5, 0, 0);
 }
@@ -914,7 +919,7 @@
     -fx-text-fill: #ff003c;
     -fx-cursor: hand;
     -fx-letter-spacing: 4px;
-    -fx-font-size: 26px;
+    -fx-font-size: 1.625em;
     -fx-font-weight: bold;
     -fx-effect: dropshadow(gaussian, rgba(255, 0, 60, 0.3), 20, 0.3, 0, 0);
 }
@@ -926,4 +931,17 @@
     -fx-effect: dropshadow(gaussian, rgba(255, 0, 60, 0.8), 30, 0.6, 0, 0);
     -fx-scale-x: 1.02;
     -fx-scale-y: 1.02;
+}
+
+/* Responsive utility classes for future cleanup */
+.responsive-panel {
+    -fx-padding: 3em;
+    -fx-spacing: 2em;
+}
+.responsive-wide-panel {
+    -fx-padding: 2em;
+    -fx-spacing: 1.5em;
+}
+.full-width {
+    -fx-max-width: Infinity;
 }

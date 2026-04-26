@@ -13,7 +13,7 @@ public class SceneNavigator {
     public static final String PROFILE_SCREEN = "/views/profile.fxml";
     public static final String FORGOT_PASSWORD_SCREEN = "/views/forgotPassword.fxml";
     public static final String ADMIN_EDIT_SONGS_SCREEN = "/views/AdminEditSongs.fxml";
-    public static final String ADMIN_EDIT_USERS_SCREEN = "/views/AdminEditUsers.fxml";
+    public static final String ADMIN_EDIT_USERS_SCREEN = "/views/AdminEditAccounts.fxml";
     public static final String GAME_VIEW_SCREEN = "/views/gameView.fxml";
     public static final String LEADERBOARD_SCREEN = "/views/leaderboard.fxml";
     public static final String REGISTER_SCREEN = "/views/register.fxml"; 
@@ -33,7 +33,12 @@ public class SceneNavigator {
             FXMLLoader loader = new FXMLLoader(SceneNavigator.class.getResource(fxmlPath));
             Parent root = loader.load();
 
-            primaryStage.setScene(new Scene(root));
+            if (primaryStage.getScene() == null) {
+                primaryStage.setScene(new Scene(root));
+            } else {
+                primaryStage.getScene().setRoot(root);
+            }
+
             primaryStage.setMaximized(true);
             primaryStage.show();
 

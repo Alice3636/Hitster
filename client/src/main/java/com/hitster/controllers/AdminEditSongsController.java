@@ -14,6 +14,9 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
+import javafx.scene.layout.AnchorPane;
+
+import com.hitster.client.utils.ResponsiveScaler;
 import com.hitster.client.utils.SceneNavigator;
 
 import java.util.List;
@@ -56,8 +59,11 @@ public class AdminEditSongsController {
     // 1. Added the Network Service!
     private final AdminNetworkService adminService = new AdminNetworkService();
 
-    @FXML
+    @FXML 
+    private AnchorPane rootPane;
+
     public void initialize() {
+        ResponsiveScaler.bindToWidth(rootPane);
         // Setup Standard Columns
         idColumn.setCellValueFactory(cellData -> cellData.getValue().idProperty().asObject());        titleColumn.setCellValueFactory(cellData -> cellData.getValue().titleProperty());
         artistColumn.setCellValueFactory(cellData -> cellData.getValue().artistProperty());

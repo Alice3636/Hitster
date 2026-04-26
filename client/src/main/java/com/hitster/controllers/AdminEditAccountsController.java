@@ -10,6 +10,9 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
+import javafx.scene.layout.AnchorPane;
+
+import com.hitster.client.utils.ResponsiveScaler;
 import com.hitster.client.utils.SceneNavigator;
 
 import java.util.List;
@@ -50,7 +53,12 @@ public class AdminEditAccountsController {
     @FXML
     private final AdminNetworkService adminService = new AdminNetworkService();
 
+    @FXML 
+    private AnchorPane rootPane;
+
     public void initialize() {
+        ResponsiveScaler.bindToWidth(rootPane);
+
         // 1. Setup the Table Columns
         idColumn.setCellValueFactory(cellData -> cellData.getValue().idProperty().asObject());
         usernameColumn.setCellValueFactory(cellData -> cellData.getValue().usernameProperty());

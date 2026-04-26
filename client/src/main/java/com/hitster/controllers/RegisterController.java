@@ -1,5 +1,6 @@
 package com.hitster.controllers;
 
+import com.hitster.client.utils.ResponsiveScaler;
 import com.hitster.client.utils.SceneNavigator;
 import com.hitster.network.AuthNetworkService;
 import javafx.application.Platform;
@@ -13,6 +14,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -50,8 +52,11 @@ public class RegisterController {
     private boolean isConfirmPasswordVisible = false;
     private final AuthNetworkService authService = new AuthNetworkService();
 
-    @FXML
+    @FXML 
+    private AnchorPane rootPane;
+
     public void initialize() {
+        ResponsiveScaler.bindToWidth(rootPane);
         if (passwordTextField != null && passwordField != null) {
             passwordTextField.textProperty().bindBidirectional(passwordField.textProperty());
         }
