@@ -152,17 +152,26 @@ public class GameEngine {
 
         Song playedSong = lastTurn.getPlayedSong();
         Player challengedPlayer = lastTurn.getActingPlayer();
-        List<SongCard> challengerTimeline = session.getTimelineOfPlayer(challenger);
+        List<SongCard> challengedTimeline = session.getTimelineOfPlayer(challengedPlayer);
 
-        if (suggestedIndex > challengerTimeline.size()) {
+        if (suggestedIndex > challengedTimeline.size()) {
             throw new IllegalArgumentException("Invalid suggested index: " + suggestedIndex);
         }
 
-        boolean challengeCorrect = isCorrectPlacement(challengerTimeline, playedSong, suggestedIndex);
+        if (suggestedIndex == lastTurn.getInsertPosition()) {
+            throw new IllegalArgumentException("Challenge must choose a different position.");
+        }
+
+        lastTurn.setChallengedSuggestedIndex(suggestedIndex);
+
+        boolean challengeCorrect = isCorrectPlacement(challengedTimeline, playedSong, suggestedIndex);
         boolean cardTransferred = false;
 
         if (challengeCorrect) {
-            challengerTimeline.add(suggestedIndex, new SongCard(playedSong));
+            List<SongCard> challengerTimeline = session.getTimelineOfPlayer(challenger);
+            int challengerInsertPosition = findInsertPosition(challengerTimeline, playedSong);
+
+            challengerTimeline.add(challengerInsertPosition, new SongCard(playedSong));
             challenger.addPoint();
             cardTransferred = true;
         }
@@ -441,6 +450,16 @@ public class GameEngine {
 
         return (leftYear == null || songYear >= leftYear)
                 && (rightYear == null || songYear <= rightYear);
+    }
+
+    private int findInsertPosition(List<SongCard> timeline, Song song) {
+        for (int i = 0; i <= timeline.size(); i++) {
+            if (isCorrectPlacement(timeline, song, i)) {
+                return i;
+            }
+        }
+
+        return timeline.size();
     }
 
     private Long parseLongOrNull(String value) {

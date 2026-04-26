@@ -43,6 +43,10 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
 
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
@@ -50,6 +54,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class GameController {
+
+    private static final String CARD_DRAG_PREFIX = "CARD:";
+    private static final String CHALLENGE_TOKEN_DRAG_VALUE = "CHALLENGE_TOKEN";
 
     @FXML private AnchorPane rootPane;
     @FXML private HBox opponentTimelineHBox;
@@ -59,7 +66,10 @@ public class GameController {
     @FXML private Button useTokenButton;
     @FXML private Button backButton;
     @FXML private Label timerLabel;
+    @FXML private Label scoreLabel;
+    @FXML private Label tokensLabel;
     @FXML private ImageView centerCardImage;
+    @FXML private ImageView centerTokenImage;
 
     private final GameplayNetworkService networkService = new GameplayNetworkService();
     private final Gson gson = new Gson();
@@ -90,26 +100,41 @@ public class GameController {
 
         useTokenButton.setOnAction(e -> handleChallengeButtonClick());
 
-        setupDragAndDropSource();
+        setupDragAndDropSources();
         startGameStatePolling();
         startLocalTimer();
     }
 
-    private void setupDragAndDropSource() {
-        if (centerCardImage == null) return;
+    private void setupDragAndDropSources() {
+        if (centerCardImage != null) {
+            centerCardImage.setOnDragDetected(event -> {
+                if (!isMyTurn || currentSongId == null || canChallenge) {
+                    event.consume();
+                    return;
+                }
 
-        centerCardImage.setOnDragDetected(event -> {
-            if (!isMyTurn || currentSongId == null || canChallenge) {
+                Dragboard db = centerCardImage.startDragAndDrop(TransferMode.ANY);
+                ClipboardContent content = new ClipboardContent();
+                content.putString(CARD_DRAG_PREFIX + currentSongId);
+                db.setContent(content);
                 event.consume();
-                return;
-            }
+            });
+        }
 
-            Dragboard db = centerCardImage.startDragAndDrop(TransferMode.ANY);
-            ClipboardContent content = new ClipboardContent();
-            content.putString(String.valueOf(currentSongId));
-            db.setContent(content);
-            event.consume();
-        });
+        if (centerTokenImage != null) {
+            centerTokenImage.setOnDragDetected(event -> {
+                if (!canChallenge) {
+                    event.consume();
+                    return;
+                }
+
+                Dragboard db = centerTokenImage.startDragAndDrop(TransferMode.ANY);
+                ClipboardContent content = new ClipboardContent();
+                content.putString(CHALLENGE_TOKEN_DRAG_VALUE);
+                db.setContent(content);
+                event.consume();
+            });
+        }
     }
 
     private void startGameStatePolling() {
@@ -167,11 +192,13 @@ public class GameController {
         updateTimerDisplay();
 
         updateCurrentSong(gameState);
+        updateCenterToken(gameState);
+        updatePlayerStats(me);
         updateControls(gameState, me);
         updateChallengePanel(gameState);
 
-        renderTimeline(playerTimelineHBox, me.timeline(), true, gameState);
-        renderTimeline(opponentTimelineHBox, opponent.timeline(), false, gameState);
+        renderTimeline(playerTimelineHBox, me, true, gameState);
+        renderTimeline(opponentTimelineHBox, opponent, false, gameState);
 
         showResultFeedbackIfNeeded(gameState);
     }
@@ -189,6 +216,7 @@ public class GameController {
             currentSongId = null;
             currentSongUrl = null;
             centerCardImage.setVisible(false);
+            centerCardImage.setManaged(false);
             stopSong();
             return;
         }
@@ -201,6 +229,7 @@ public class GameController {
                 isMyTurn;
 
         centerCardImage.setVisible(shouldShowCenterCard);
+        centerCardImage.setManaged(shouldShowCenterCard);
 
         if (currentSongId == null || !currentSongId.equals(newSongId)) {
             currentSongId = newSongId;
@@ -219,6 +248,19 @@ public class GameController {
         if (!shouldPlaySong) {
             stopSong();
         }
+    }
+
+    private void updateCenterToken(GameStateDTO gameState) {
+        if (centerTokenImage == null) {
+            return;
+        }
+
+        boolean shouldShowToken =
+                gameState.phase() == GamePhase.CHALLENGE_WINDOW &&
+                canChallenge;
+
+        centerTokenImage.setVisible(shouldShowToken);
+        centerTokenImage.setManaged(shouldShowToken);
     }
 
     private void updateControls(GameStateDTO gameState, PlayerGameStateDTO me) {
@@ -241,6 +283,16 @@ public class GameController {
                 : "");
     }
 
+    private void updatePlayerStats(PlayerGameStateDTO me) {
+        if (scoreLabel != null) {
+            scoreLabel.setText("Score: " + me.score());
+        }
+
+        if (tokensLabel != null) {
+            tokensLabel.setText("Tokens: " + me.tokens());
+        }
+    }
+
     private void updateChallengePanel(GameStateDTO gameState) {
         if (gameState.phase() == GamePhase.CHALLENGE_WINDOW && canChallenge) {
             showChallengeActionPanel();
@@ -251,11 +303,12 @@ public class GameController {
 
     private void renderTimeline(
             HBox timelineBox,
-            List<CardDTO> cards,
+            PlayerGameStateDTO owner,
             boolean isMyTimeline,
             GameStateDTO gameState
     ) {
         timelineBox.getChildren().clear();
+        List<CardDTO> cards = owner.timeline();
         if (cards == null) return;
 
         boolean showPlacementSlots =
@@ -263,42 +316,50 @@ public class GameController {
                 isMyTurn &&
                 isMyTimeline;
 
+        boolean showPendingCard = shouldShowPendingChallengeCard(owner, gameState);
+        Integer pendingCardIndex = showPendingCard
+                ? gameState.challengeState().originalPlacedIndex()
+                : null;
+
         boolean showChallengeSlots =
                 gameState.phase() == GamePhase.CHALLENGE_WINDOW &&
                 canChallenge &&
-                !isMyTimeline;
+                isChallengeTargetTimeline(owner, gameState);
 
         boolean showSlots = showPlacementSlots || showChallengeSlots;
 
-        Integer blockedChallengeIndex = null;
-        if (showChallengeSlots && gameState.challengeState() != null) {
-            blockedChallengeIndex = gameState.challengeState().originalPlacedIndex();
-        }
+        for (int slotIndex = 0; slotIndex <= cards.size(); slotIndex++) {
+            boolean isOriginalChallengeSlot =
+                    pendingCardIndex != null &&
+                    pendingCardIndex == slotIndex;
 
-        if (showSlots && !isBlockedChallengeSlot(0, showChallengeSlots, blockedChallengeIndex)) {
-            timelineBox.getChildren().add(createPlacementSlot(0, showChallengeSlots));
-        }
-
-        for (int i = 0; i < cards.size(); i++) {
-            timelineBox.getChildren().add(createCardUI(cards.get(i)));
-
-            int slotIndex = i + 1;
-
-            if (showSlots && !isBlockedChallengeSlot(slotIndex, showChallengeSlots, blockedChallengeIndex)) {
+            if (showSlots && !isOriginalChallengeSlot) {
                 timelineBox.getChildren().add(createPlacementSlot(slotIndex, showChallengeSlots));
+            }
+
+            if (isOriginalChallengeSlot) {
+                timelineBox.getChildren().add(createPendingCardUI());
+            }
+
+            if (slotIndex < cards.size()) {
+                timelineBox.getChildren().add(createCardUI(cards.get(slotIndex)));
             }
         }
     }
 
-    private boolean isBlockedChallengeSlot(
-            int slotIndex,
-            boolean showChallengeSlots,
-            Integer blockedChallengeIndex
-    ) {
-        return showChallengeSlots &&
-                blockedChallengeIndex != null &&
-                blockedChallengeIndex == slotIndex;
+    private boolean shouldShowPendingChallengeCard(PlayerGameStateDTO owner, GameStateDTO gameState) {
+        return gameState.phase() == GamePhase.CHALLENGE_WINDOW &&
+                gameState.challengeState() != null &&
+                owner.playerId() != null &&
+                owner.playerId().equals(gameState.challengeState().challengedPlayerId());
     }
+
+    private boolean isChallengeTargetTimeline(PlayerGameStateDTO owner, GameStateDTO gameState) {
+        return gameState.challengeState() != null &&
+                owner.playerId() != null &&
+                owner.playerId().equals(gameState.challengeState().challengedPlayerId());
+    }
+
     private Button createPlacementSlot(int index, boolean isChallengeSlot) {
         final double SLOT_WIDTH = 115;
         final double SLOT_HEIGHT = 85;
@@ -324,14 +385,14 @@ public class GameController {
 
         slotBtn.setOnAction(e -> {
             if (isChallengeSlot) {
-                sendChallengeRequest(index);
+                showAlert("Challenge", "Drag the token onto a valid slot.");
             } else {
                 sendPlaceSongRequest(index);
             }
         });
 
         slotBtn.setOnDragOver(event -> {
-            if (event.getGestureSource() != slotBtn && event.getDragboard().hasString()) {
+            if (event.getGestureSource() != slotBtn && isExpectedDrag(event.getDragboard(), isChallengeSlot)) {
                 event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
             }
             event.consume();
@@ -341,7 +402,7 @@ public class GameController {
             Dragboard db = event.getDragboard();
             boolean success = false;
 
-            if (db.hasString()) {
+            if (isExpectedDrag(db, isChallengeSlot)) {
                 if (isChallengeSlot) {
                     sendChallengeRequest(index);
                 } else {
@@ -355,6 +416,50 @@ public class GameController {
         });
 
         return slotBtn;
+    }
+
+    private StackPane createPendingCardUI() {
+        final double CARD_WIDTH = 115;
+        final double CARD_HEIGHT = 85;
+
+        StackPane cardPane = new StackPane();
+
+        cardPane.setMinSize(CARD_WIDTH, CARD_HEIGHT);
+        cardPane.setPrefSize(CARD_WIDTH, CARD_HEIGHT);
+        cardPane.setMaxSize(CARD_WIDTH, CARD_HEIGHT);
+
+        cardPane.setStyle(
+                "-fx-background-color: linear-gradient(to bottom, #1a1a1a, #050505);" +
+                "-fx-background-radius: 14;" +
+                "-fx-border-color: #ff9900;" +
+                "-fx-border-width: 2;" +
+                "-fx-border-radius: 14;" +
+                "-fx-effect: dropshadow(gaussian, rgba(255,153,0,0.75), 16, 0.45, 0, 0);"
+        );
+
+        Label questionLabel = new Label("?");
+        questionLabel.setFont(Font.font("System", FontWeight.BOLD, 46));
+        questionLabel.setTextFill(Color.web("#ffcc66"));
+        questionLabel.setTextAlignment(TextAlignment.CENTER);
+        questionLabel.setAlignment(Pos.CENTER);
+
+        cardPane.getChildren().add(questionLabel);
+
+        return cardPane;
+    }
+
+    private boolean isExpectedDrag(Dragboard db, boolean isChallengeSlot) {
+        if (db == null || !db.hasString()) {
+            return false;
+        }
+
+        String value = db.getString();
+
+        if (isChallengeSlot) {
+            return CHALLENGE_TOKEN_DRAG_VALUE.equals(value);
+        }
+
+        return value != null && value.startsWith(CARD_DRAG_PREFIX);
     }
 
     private void showChallengeActionPanel() {
@@ -376,7 +481,7 @@ public class GameController {
         challengeTimerLabel.setFont(Font.font("System", FontWeight.BOLD, 24));
         challengeTimerLabel.setTextFill(Color.web("#ff9900"));
 
-        Button challengeInfoBtn = new Button("Choose a slot to challenge");
+        Button challengeInfoBtn = new Button("Drag your token to a different slot");
         challengeInfoBtn.setDisable(true);
         challengeInfoBtn.setStyle("-fx-background-color: #ff0033; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 20;");
 
@@ -474,16 +579,40 @@ public class GameController {
         }
 
         try {
-            if (!audioUrl.startsWith("http") && !audioUrl.startsWith("file:")) {
-                audioUrl = "http://localhost:8080" + (audioUrl.startsWith("/") ? "" : "/") + audioUrl;
-            }
-
-            Media media = new Media(audioUrl);
+            Media media = new Media(toMediaSource(audioUrl));
             mediaPlayer = new MediaPlayer(media);
             mediaPlayer.setVolume(0.5);
             mediaPlayer.play();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private String toMediaSource(String audioUrl) throws URISyntaxException, MalformedURLException {
+        String source = audioUrl.trim();
+
+        if (!source.startsWith("http") && !source.startsWith("file:")) {
+            String path = source.startsWith("/") ? source : "/" + source;
+            return new URI("http", null, "localhost", 8080, path, null, null).toASCIIString();
+        }
+
+        try {
+            return new URI(source).toASCIIString();
+        } catch (URISyntaxException invalidRawUri) {
+            if (!source.startsWith("http")) {
+                throw invalidRawUri;
+            }
+
+            URL url = new URL(source);
+            return new URI(
+                    url.getProtocol(),
+                    url.getUserInfo(),
+                    url.getHost(),
+                    url.getPort(),
+                    url.getPath(),
+                    url.getQuery(),
+                    url.getRef()
+            ).toASCIIString();
         }
     }
 
@@ -622,7 +751,7 @@ public class GameController {
     }
 
     private void handleChallengeButtonClick() {
-        showAlert("Challenge", "Choose a slot in your opponent's timeline.");
+        showAlert("Challenge", "Drag the token to a different slot than the selected ? card.");
     }
 
     private void sendChallengeRequest(int suggestedIndex) {
