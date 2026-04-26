@@ -300,8 +300,8 @@ public class GameController {
                 blockedChallengeIndex == slotIndex;
     }
     private Button createPlacementSlot(int index, boolean isChallengeSlot) {
-        final double SLOT_WIDTH = 90;
-        final double SLOT_HEIGHT = 120;
+        final double SLOT_WIDTH = 115;
+        final double SLOT_HEIGHT = 85;
 
         Button slotBtn = new Button("+");
 
@@ -312,7 +312,7 @@ public class GameController {
         slotBtn.setStyle(
                 "-fx-background-color: rgba(255, 255, 255, 0.08);" +
                 "-fx-text-fill: #00ffff;" +
-                "-fx-font-size: 28px;" +
+                "-fx-font-size: 24px;" +
                 "-fx-font-weight: bold;" +
                 "-fx-cursor: hand;" +
                 "-fx-border-color: #00ffff;" +
@@ -496,8 +496,8 @@ public class GameController {
     }
 
     private StackPane createCardUI(CardDTO card) {
-        final double CARD_WIDTH = 90;
-        final double CARD_HEIGHT = 120;
+        final double CARD_WIDTH = 115;
+        final double CARD_HEIGHT = 85;
 
         StackPane cardPane = new StackPane();
 
@@ -535,7 +535,7 @@ public class GameController {
 
         Label yearLabel = new Label(card.year() > 0 ? String.valueOf(card.year()) : "????");
         yearLabel.setStyle(
-                "-fx-font-size: 18px;" +
+                "-fx-font-size: 15px;" +
                 "-fx-text-fill: white;" +
                 "-fx-font-weight: bold;" +
                 "-fx-effect: dropshadow(gaussian, #00ffff, 8, 0.45, 0, 0);"
