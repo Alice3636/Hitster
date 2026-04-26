@@ -21,12 +21,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String uri = request.getRequestURI();
-        String servletPath = request.getServletPath();
-        String contextPath = request.getContextPath();
-
-        System.out.println("JwtAuthFilter.shouldNotFilter -> uri=" + uri
-                + " | servletPath=" + servletPath
-                + " | contextPath=" + contextPath);
 
         return uri.startsWith("/audio/")
                 || uri.equals("/audio")
@@ -46,9 +40,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-
-        String uri = request.getRequestURI();
-        System.out.println("JwtAuthFilter.doFilterInternal -> uri=" + uri);
 
         String header = request.getHeader("Authorization");
 

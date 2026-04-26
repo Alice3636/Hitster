@@ -38,7 +38,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponseDTO> handleTurnNotYours(TurnNotYoursException ex) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponseDTO("TURN_YOUR_NOT_ERR", ex.getMessage()));
+                .body(new ErrorResponseDTO("TURN_NOT_YOURS_ERR", ex.getMessage()));
     }
 
     @ExceptionHandler(InvalidImageFormatException.class)
@@ -107,8 +107,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponseDTO> handleRuntime(RuntimeException ex) {
         return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
-                .body(new ErrorResponseDTO("INVALID_TOKEN_ERR", ex.getMessage()));
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponseDTO("RUNTIME_ERR", ex.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
