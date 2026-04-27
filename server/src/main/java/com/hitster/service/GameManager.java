@@ -11,14 +11,17 @@ import com.hitster.model.Song;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
 public class GameManager {
 
     private final Map<String, GameSession> activeGames = new HashMap<>();
+    private final Set<String> savedFinishedGames = new HashSet<>();
     private final GameEngine gameEngine = new GameEngine();
 
     public GameSession startGameForRoom(Room room, List<Song> songsPool) {
@@ -54,6 +57,7 @@ public class GameManager {
 
         if (session != null) {
             gameEngine.advanceIfNeeded(session);
+            saveIfFinished(session);
         }
 
         return session;
@@ -73,6 +77,7 @@ public class GameManager {
                 request.songId()
         );
 
+        saveIfFinished(session);
         return session;
     }
 
@@ -90,6 +95,7 @@ public class GameManager {
                 request.title()
         );
 
+        saveIfFinished(session);
         return session;
     }
 
@@ -104,6 +110,7 @@ public class GameManager {
 
         gameEngine.challengeLastTurn(session, challenger, suggestedIndex);
 
+        saveIfFinished(session);
         return session;
     }
 
@@ -112,6 +119,7 @@ public class GameManager {
 
         gameEngine.skipChallengeWindow(session);
 
+        saveIfFinished(session);
         return session;
     }
 
@@ -126,6 +134,7 @@ public class GameManager {
 
         gameEngine.finishByForfeit(session, quitter);
 
+        saveIfFinished(session);
         return session;
     }
 
@@ -137,7 +146,47 @@ public class GameManager {
         }
 
         gameEngine.advanceIfNeeded(session);
+        saveIfFinished(session);
 
         return session;
+    }
+
+    private void saveIfFinished(GameSession session) {
+        if (session == null || !session.isFinished()) {
+            return;
+        }
+
+        if (savedFinishedGames.contains(session.getId())) {
+            return;
+        }
+
+        Long player1Id = parseLongOrNull(session.getPlayer1().getId());
+        Long player2Id = parseLongOrNull(session.getPlayer2().getId());
+
+        if (player1Id == null || player2Id == null) {
+            return;
+        }
+
+        Long winnerId = session.getWinner() != null
+                ? parseLongOrNull(session.getWinner().getId())
+                : null;
+
+        DatabaseService.recordGameResult(
+                player1Id,
+                player2Id,
+                winnerId,
+                session.getPlayer1().getScore(),
+                session.getPlayer2().getScore()
+        );
+
+        savedFinishedGames.add(session.getId());
+    }
+
+    private Long parseLongOrNull(String value) {
+        try {
+            return value == null ? null : Long.parseLong(value);
+        } catch (Exception e) {
+            return null;
+        }
     }
 }
