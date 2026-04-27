@@ -67,6 +67,11 @@ public class LobbyController {
         }
 
         if (room.isStarted() && room.getGameSession() != null) {
+            if (room.getGameSession().isFinished()) {
+                lobbyManager.removeRoom(room.getId());
+                return new LobbyStatusResponseDTO("NOT_FOUND", null);
+            }
+
             String gameId = room.getGameSession().getId();
             return new LobbyStatusResponseDTO("FOUND", gameId);
         }

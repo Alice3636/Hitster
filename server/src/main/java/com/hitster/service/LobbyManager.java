@@ -4,6 +4,7 @@ import com.hitster.model.Player;
 import com.hitster.model.Room;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,37 +15,45 @@ public class LobbyManager {
     private final Map<String, Room> rooms = new HashMap<>();
     private final Map<String, String> playerToRoom = new HashMap<>();
 
-    public Room createRoom(Player hostPlayer) {
+    public synchronized Room createRoom(Player hostPlayer) {
+        cleanupFinishedRooms();
+
         String roomId = UUID.randomUUID().toString();
         Room room = new Room(roomId, hostPlayer);
+
         rooms.put(roomId, room);
         playerToRoom.put(hostPlayer.getId(), roomId);
+
         return room;
     }
 
-    public Room getRoomById(String roomId) {
+    public synchronized Room getRoomById(String roomId) {
+        cleanupFinishedRooms();
         return rooms.get(roomId);
     }
 
-    public Collection<Room> getAllRooms() {
-        return rooms.values();
+    public synchronized Collection<Room> getAllRooms() {
+        cleanupFinishedRooms();
+        return new ArrayList<>(rooms.values());
     }
 
-    public Room findWaitingRoom() {
+    public synchronized Room findWaitingRoom() {
+        cleanupFinishedRooms();
+
         for (Room room : rooms.values()) {
             if (!room.isStarted() && !room.isFull()) {
                 return room;
             }
         }
+
         return null;
     }
 
-    public boolean joinRoom(String roomId, Player player) {
+    public synchronized boolean joinRoom(String roomId, Player player) {
+        cleanupFinishedRooms();
+
         Room room = rooms.get(roomId);
-        if (room == null) {
-            return false;
-        }
-        if (room.isStarted()) {
+        if (room == null || room.isStarted()) {
             return false;
         }
 
@@ -52,16 +61,20 @@ public class LobbyManager {
         if (joined) {
             playerToRoom.put(player.getId(), roomId);
         }
+
         return joined;
     }
 
-    public Room matchPlayerToRoom(Player player) {
-        Room existingRoom = getRoomByPlayerId(player.getId());
+    public synchronized Room matchPlayerToRoom(Player player) {
+        cleanupFinishedRooms();
+
+        Room existingRoom = getRoomByPlayerIdInternal(player.getId());
+
         if (existingRoom != null) {
             return existingRoom;
         }
 
-        Room waitingRoom = findWaitingRoom();
+        Room waitingRoom = findWaitingRoomInternal();
 
         if (waitingRoom != null) {
             boolean joined = waitingRoom.addPlayer(player);
@@ -71,10 +84,16 @@ public class LobbyManager {
             }
         }
 
-        return createRoom(player);
+        String roomId = UUID.randomUUID().toString();
+        Room newRoom = new Room(roomId, player);
+
+        rooms.put(roomId, newRoom);
+        playerToRoom.put(player.getId(), roomId);
+
+        return newRoom;
     }
 
-    public boolean removeRoom(String roomId) {
+    public synchronized boolean removeRoom(String roomId) {
         Room room = rooms.remove(roomId);
         if (room == null) {
             return false;
@@ -83,6 +102,7 @@ public class LobbyManager {
         if (room.getPlayer1() != null) {
             playerToRoom.remove(room.getPlayer1().getId());
         }
+
         if (room.getPlayer2() != null) {
             playerToRoom.remove(room.getPlayer2().getId());
         }
@@ -90,22 +110,17 @@ public class LobbyManager {
         return true;
     }
 
-    public Room getRoomByPlayerId(String playerId) {
-        String roomId = playerToRoom.get(playerId);
-        if (roomId == null) {
-            return null;
-        }
-        return rooms.get(roomId);
+    public synchronized Room getRoomByPlayerId(String playerId) {
+        cleanupFinishedRooms();
+        return getRoomByPlayerIdInternal(playerId);
     }
 
-    public boolean leaveLobby(String playerId) {
-        Room room = getRoomByPlayerId(playerId);
+    public synchronized boolean leaveLobby(String playerId) {
+        cleanupFinishedRooms();
 
-        if (room == null) {
-            return false;
-        }
+        Room room = getRoomByPlayerIdInternal(playerId);
 
-        if (room.isStarted()) {
+        if (room == null || room.isStarted()) {
             return false;
         }
 
@@ -119,7 +134,6 @@ public class LobbyManager {
         playerToRoom.remove(playerId);
 
         if (isPlayer2) {
-            // player2 leaves, room returns to waiting with player1 only
             Room newRoom = new Room(room.getId(), room.getPlayer1());
             rooms.put(room.getId(), newRoom);
             playerToRoom.put(room.getPlayer1().getId(), room.getId());
@@ -127,7 +141,6 @@ public class LobbyManager {
         }
 
         if (isPlayer1 && room.getPlayer2() != null) {
-            // player1 leaves, keep room with player2 as waiting host
             Player remaining = room.getPlayer2();
             Room newRoom = new Room(room.getId(), remaining);
             rooms.put(room.getId(), newRoom);
@@ -135,8 +148,68 @@ public class LobbyManager {
             return true;
         }
 
-        // only player1 existed
         rooms.remove(room.getId());
         return true;
+    }
+
+    private Room getRoomByPlayerIdInternal(String playerId) {
+        String roomId = playerToRoom.get(playerId);
+        if (roomId == null) {
+            return null;
+        }
+
+        Room room = rooms.get(roomId);
+        if (room == null) {
+            playerToRoom.remove(playerId);
+            return null;
+        }
+
+        return room;
+    }
+
+    private Room findWaitingRoomInternal() {
+        for (Room room : rooms.values()) {
+            if (!room.isStarted() && !room.isFull()) {
+                return room;
+            }
+        }
+
+        return null;
+    }
+
+    private void cleanupFinishedRooms() {
+        ArrayList<String> finishedRoomIds = new ArrayList<>();
+
+        for (Room room : rooms.values()) {
+            if (isFinishedRoom(room)) {
+                finishedRoomIds.add(room.getId());
+            }
+        }
+
+        for (String roomId : finishedRoomIds) {
+            removeRoomInternal(roomId);
+        }
+    }
+
+    private void removeRoomInternal(String roomId) {
+        Room room = rooms.remove(roomId);
+        if (room == null) {
+            return;
+        }
+
+        if (room.getPlayer1() != null) {
+            playerToRoom.remove(room.getPlayer1().getId());
+        }
+
+        if (room.getPlayer2() != null) {
+            playerToRoom.remove(room.getPlayer2().getId());
+        }
+    }
+
+    private boolean isFinishedRoom(Room room) {
+        return room != null
+                && room.isStarted()
+                && room.getGameSession() != null
+                && room.getGameSession().isFinished();
     }
 }
