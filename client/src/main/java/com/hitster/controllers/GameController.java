@@ -72,6 +72,8 @@ public class GameController {
 
     private boolean isMyTurn = false;
     private boolean canChallenge = false;
+    private boolean gameOverHandled = false;
+    private boolean quitInProgress = false;
 
     private Timeline localTimer;
     private int localSecondsLeft = 0;
@@ -99,7 +101,7 @@ public class GameController {
         if (centerCardImage == null) return;
 
         centerCardImage.setOnDragDetected(event -> {
-            if (!isMyTurn || currentSongId == null || canChallenge) {
+            if (!isMyTurn || currentSongId == null || canChallenge || gameOverHandled) {
                 event.consume();
                 return;
             }
@@ -118,7 +120,7 @@ public class GameController {
     }
 
     private void fetchGameStateForce() {
-        if (currentGameId == null) return;
+        if (currentGameId == null || gameOverHandled || quitInProgress) return;
 
         networkService.getGameState(currentGameId).thenAccept(response -> {
             if (response.statusCode() == 200) {
@@ -133,13 +135,12 @@ public class GameController {
     }
 
     private void updateUI(GameStateDTO gameState) {
-        if (gameState == null) return;
+        if (gameState == null || gameOverHandled) return;
 
         GameManager.getInstance().updateGameState(gameState);
 
         if (gameState.phase() == GamePhase.FINISHED) {
-            stopPolling();
-            showGameOverAlert(gameState.winnerName());
+            handleGameFinished(gameState);
             return;
         }
 
@@ -157,11 +158,11 @@ public class GameController {
         ChallengeStateDTO challengeState = gameState.challengeState();
         canChallenge =
                 gameState.phase() == GamePhase.CHALLENGE_WINDOW &&
-                challengeState != null &&
-                challengeState.challengeAvailable() &&
-                myId != null &&
-                myId.equals(challengeState.challengerPlayerId()) &&
-                me.tokens() > 0;
+                        challengeState != null &&
+                        challengeState.challengeAvailable() &&
+                        myId != null &&
+                        myId.equals(challengeState.challengerPlayerId()) &&
+                        me.tokens() > 0;
 
         localSecondsLeft = resolveDisplayedTime(gameState);
         updateTimerDisplay();
@@ -174,6 +175,38 @@ public class GameController {
         renderTimeline(opponentTimelineHBox, opponent.timeline(), false, gameState);
 
         showResultFeedbackIfNeeded(gameState);
+    }
+
+    private void handleGameFinished(GameStateDTO gameState) {
+        if (gameOverHandled) return;
+
+        gameOverHandled = true;
+
+        stopPolling();
+        cleanupChallengePanel();
+        stopSong();
+        disableGameControls();
+
+        String winner = gameState.winnerName();
+        String myUsername = UserSession.getInstance().getUserName();
+
+        String message = myUsername != null && myUsername.equals(winner)
+                ? "Congratulations! You Won!"
+                : "Game Over! " + winner + " won.";
+
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Match Finished");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+
+        GameManager.getInstance().endGame();
+
+        try {
+            SceneNavigator.loadScene(SceneNavigator.LOBBY_SCREEN);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private int resolveDisplayedTime(GameStateDTO gameState) {
@@ -198,7 +231,8 @@ public class GameController {
 
         boolean shouldShowCenterCard =
                 gameState.phase() == GamePhase.PLAYER_TURN &&
-                isMyTurn;
+                        isMyTurn &&
+                        !gameOverHandled;
 
         centerCardImage.setVisible(shouldShowCenterCard);
 
@@ -209,8 +243,9 @@ public class GameController {
 
         boolean shouldPlaySong =
                 gameState.phase() == GamePhase.PLAYER_TURN &&
-                isMyTurn &&
-                currentSongUrl != null;
+                        isMyTurn &&
+                        currentSongUrl != null &&
+                        !gameOverHandled;
 
         if (shouldPlaySong && mediaPlayer == null) {
             playSong(currentSongUrl);
@@ -224,7 +259,8 @@ public class GameController {
     private void updateControls(GameStateDTO gameState, PlayerGameStateDTO me) {
         boolean canPlayTurn =
                 gameState.phase() == GamePhase.PLAYER_TURN &&
-                isMyTurn;
+                        isMyTurn &&
+                        !gameOverHandled;
 
         submitGuessButton.setDisable(!canPlayTurn);
         guessArtistField.setDisable(!canPlayTurn);
@@ -232,8 +268,9 @@ public class GameController {
 
         boolean canUseChallenge =
                 gameState.phase() == GamePhase.CHALLENGE_WINDOW &&
-                canChallenge &&
-                me.tokens() > 0;
+                        canChallenge &&
+                        me.tokens() > 0 &&
+                        !gameOverHandled;
 
         useTokenButton.setDisable(!canUseChallenge);
         useTokenButton.setText("CHALLENGE");
@@ -243,7 +280,7 @@ public class GameController {
     }
 
     private void updateChallengePanel(GameStateDTO gameState) {
-        if (gameState.phase() == GamePhase.CHALLENGE_WINDOW && canChallenge) {
+        if (gameState.phase() == GamePhase.CHALLENGE_WINDOW && canChallenge && !gameOverHandled) {
             showChallengeActionPanel();
         } else {
             cleanupChallengePanel();
@@ -261,13 +298,15 @@ public class GameController {
 
         boolean showPlacementSlots =
                 gameState.phase() == GamePhase.PLAYER_TURN &&
-                isMyTurn &&
-                isMyTimeline;
+                        isMyTurn &&
+                        isMyTimeline &&
+                        !gameOverHandled;
 
         boolean showChallengeSlots =
                 gameState.phase() == GamePhase.CHALLENGE_WINDOW &&
-                canChallenge &&
-                !isMyTimeline;
+                        canChallenge &&
+                        !isMyTimeline &&
+                        !gameOverHandled;
 
         boolean showSlots = showPlacementSlots || showChallengeSlots;
 
@@ -290,6 +329,8 @@ public class GameController {
         slotBtn.setPrefSize(80, 160);
 
         slotBtn.setOnAction(e -> {
+            if (gameOverHandled) return;
+
             if (isChallengeSlot) {
                 sendChallengeRequest(index);
             } else {
@@ -298,7 +339,7 @@ public class GameController {
         });
 
         slotBtn.setOnDragOver(event -> {
-            if (event.getGestureSource() != slotBtn && event.getDragboard().hasString()) {
+            if (!gameOverHandled && event.getGestureSource() != slotBtn && event.getDragboard().hasString()) {
                 event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
             }
             event.consume();
@@ -308,7 +349,7 @@ public class GameController {
             Dragboard db = event.getDragboard();
             boolean success = false;
 
-            if (db.hasString()) {
+            if (!gameOverHandled && db.hasString()) {
                 if (isChallengeSlot) {
                     sendChallengeRequest(index);
                 } else {
@@ -379,6 +420,11 @@ public class GameController {
         }
 
         challengeTimer = new Timeline(new KeyFrame(Duration.seconds(1), e -> {
+            if (gameOverHandled) {
+                cleanupChallengePanel();
+                return;
+            }
+
             if (localSecondsLeft > 0) {
                 localSecondsLeft--;
                 chalTimerLabel.setText(localSecondsLeft + "s");
@@ -417,6 +463,8 @@ public class GameController {
         }
 
         localTimer = new Timeline(new KeyFrame(Duration.seconds(1), e -> {
+            if (gameOverHandled) return;
+
             GameStateDTO state = GameManager.getInstance().getCurrentGameState();
 
             if (state == null) return;
@@ -509,6 +557,8 @@ public class GameController {
     }
 
     private void handleGuessSubmit() {
+        if (gameOverHandled) return;
+
         String artist = guessArtistField.getText();
         String title = guessSongField.getText();
 
@@ -530,7 +580,7 @@ public class GameController {
     }
 
     private void sendPlaceSongRequest(int indexPosition) {
-        if (currentSongId == null) return;
+        if (currentSongId == null || gameOverHandled) return;
 
         networkService.placeSong(currentGameId, indexPosition, currentSongId).thenAccept(response -> {
             Platform.runLater(() -> {
@@ -542,10 +592,13 @@ public class GameController {
     }
 
     private void handleChallengeButtonClick() {
+        if (gameOverHandled) return;
         showAlert("Challenge", "Choose a slot in your opponent's timeline.");
     }
 
     private void sendChallengeRequest(int suggestedIndex) {
+        if (gameOverHandled) return;
+
         networkService.challenge(currentGameId, suggestedIndex).thenAccept(response -> {
             Platform.runLater(() -> {
                 cleanupChallengePanel();
@@ -555,6 +608,8 @@ public class GameController {
     }
 
     private void handleSkipChallenge() {
+        if (gameOverHandled) return;
+
         cleanupChallengePanel();
 
         networkService.skipChallenge(currentGameId).thenAccept(response -> {
@@ -563,7 +618,7 @@ public class GameController {
     }
 
     private void showResultFeedbackIfNeeded(GameStateDTO gameState) {
-        if (gameState.phase() != GamePhase.TURN_RESOLVED) {
+        if (gameOverHandled || gameState.phase() != GamePhase.TURN_RESOLVED) {
             return;
         }
 
@@ -586,8 +641,8 @@ public class GameController {
         if (gameState.lastTurnResult() != null) {
             boolean allCorrect =
                     gameState.lastTurnResult().titleCorrect() &&
-                    gameState.lastTurnResult().artistCorrect() &&
-                    gameState.lastTurnResult().placementCorrect();
+                            gameState.lastTurnResult().artistCorrect() &&
+                            gameState.lastTurnResult().placementCorrect();
 
             if (allCorrect) {
                 showAnimatedFeedback("PERFECT!", "You earned a token!", Color.web("#39ff14"));
@@ -600,6 +655,8 @@ public class GameController {
     }
 
     private void showAnimatedFeedback(String title, String subtitle, Color color) {
+        if (gameOverHandled) return;
+
         StackPane overlay = new StackPane();
         overlay.setStyle("-fx-background-color: rgba(0, 0, 0, 0.7);");
 
@@ -646,7 +703,7 @@ public class GameController {
 
     private void stopPolling() {
         if (pollingExecutor != null && !pollingExecutor.isShutdown()) {
-            pollingExecutor.shutdown();
+            pollingExecutor.shutdownNow();
         }
 
         if (localTimer != null) {
@@ -660,8 +717,22 @@ public class GameController {
         stopSong();
     }
 
+    private void disableGameControls() {
+        submitGuessButton.setDisable(true);
+        useTokenButton.setDisable(true);
+        guessArtistField.setDisable(true);
+        guessSongField.setDisable(true);
+        centerCardImage.setVisible(false);
+        isMyTurn = false;
+        canChallenge = false;
+    }
+
     @FXML
     void handleBack(ActionEvent event) {
+        if (quitInProgress || gameOverHandled) {
+            return;
+        }
+
         Alert confirm = new Alert(
                 Alert.AlertType.CONFIRMATION,
                 "Are you sure you want to quit? You will forfeit the match.",
@@ -671,39 +742,39 @@ public class GameController {
 
         confirm.showAndWait().ifPresent(response -> {
             if (response == ButtonType.YES) {
-                stopPolling();
-                networkService.quitGame(currentGameId);
+                quitInProgress = true;
+                disableGameControls();
 
-                try {
-                    SceneNavigator.loadScene(SceneNavigator.LOBBY_SCREEN);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                networkService.quitGame(currentGameId).thenAccept(apiResponse -> {
+                    Platform.runLater(() -> {
+                        if (apiResponse.statusCode() == 200) {
+                            gameOverHandled = true;
+
+                            stopPolling();
+                            cleanupChallengePanel();
+                            stopSong();
+                            GameManager.getInstance().endGame();
+
+                            try {
+                                SceneNavigator.loadScene(SceneNavigator.LOBBY_SCREEN);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                showAlert("Navigation Error", "Could not return to lobby.");
+                            }
+                        } else {
+                            quitInProgress = false;
+                            showAlert("Quit Failed", "Server returned: " + apiResponse.statusCode());
+                        }
+                    });
+                }).exceptionally(ex -> {
+                    Platform.runLater(() -> {
+                        quitInProgress = false;
+                        showAlert("Connection Error", "Could not quit match.\n" + ex.getMessage());
+                    });
+                    return null;
+                });
             }
         });
-    }
-
-    private void showGameOverAlert(String winner) {
-        String myUsername = UserSession.getInstance().getUserName();
-        String message = myUsername != null && myUsername.equals(winner)
-                ? "Congratulations! You Won!"
-                : "Game Over! " + winner + " won.";
-
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Match Finished");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.setOnHidden(e -> {
-            GameManager.getInstance().endGame();
-
-            try {
-                SceneNavigator.loadScene(SceneNavigator.LOBBY_SCREEN);
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        });
-
-        alert.show();
     }
 
     private void showAlert(String title, String message) {
