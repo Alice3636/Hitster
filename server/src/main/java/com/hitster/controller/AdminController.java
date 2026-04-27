@@ -135,10 +135,23 @@ public class AdminController {
         }
     }
 
+    @PutMapping(value = "/songs/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public SongDTO updateSongJson(@PathVariable Long id,
+                                  @RequestBody UpdateSongRequestDTO request,
+                                  HttpServletRequest httpRequest) {
+        return updateSong(id, request, httpRequest);
+    }
+
     @PutMapping(value = "/songs/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public SongDTO updateSong(@PathVariable Long id,
-                              @ModelAttribute UpdateSongRequestDTO request,
-                              HttpServletRequest httpRequest) {
+    public SongDTO updateSongMultipart(@PathVariable Long id,
+                                       @ModelAttribute UpdateSongRequestDTO request,
+                                       HttpServletRequest httpRequest) {
+        return updateSong(id, request, httpRequest);
+    }
+
+    private SongDTO updateSong(Long id,
+                               UpdateSongRequestDTO request,
+                               HttpServletRequest httpRequest) {
         requireAdmin(httpRequest);
 
         if (request == null ||

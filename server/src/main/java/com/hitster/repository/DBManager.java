@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Map;
 import java.util.Properties;
 
@@ -41,6 +42,9 @@ public class DBManager {
                 connectionProps.put("user", user);
                 connectionProps.put("password", password);
                 connectionProps.put("sslMode", sslMode);
+                connectionProps.put("useUnicode", "true");
+                connectionProps.put("characterEncoding", "UTF-8");
+                connectionProps.put("connectionCollation", "utf8mb4_unicode_ci");
 
                 if (!"DISABLED".equalsIgnoreCase(sslMode) && caCertPath != null && !caCertPath.isEmpty()) {
                     connectionProps.put("trustCertificateKeyStoreUrl", "file:" + caCertPath);
@@ -48,6 +52,7 @@ public class DBManager {
                 }
 
                 connection = DriverManager.getConnection(dbUrl, connectionProps);
+                configureUtf8mb4(connection);
             }
         } catch (Exception e) {
             System.err.println(e.getMessage());
@@ -55,6 +60,15 @@ public class DBManager {
         }
 
         return connection;
+    }
+
+    private static void configureUtf8mb4(Connection connection) {
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute("SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci");
+            stmt.execute("ALTER TABLE Songs CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+        } catch (SQLException e) {
+            System.err.println("Could not verify utf8mb4 database encoding: " + e.getMessage());
+        }
     }
 
     public static void closeConnection() {

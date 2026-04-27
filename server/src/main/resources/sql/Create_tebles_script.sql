@@ -11,7 +11,7 @@ CREATE TABLE
         password_hash VARCHAR(255) NOT NULL,
         total_winnings DECIMAL(10, 2) DEFAULT 0,
         is_admin BOOLEAN DEFAULT FALSE
-    );
+    ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- ======================
 -- SONGS
@@ -24,7 +24,7 @@ CREATE TABLE
         release_year YEAR,
         song_path VARCHAR(500),
         cover_path VARCHAR(500)
-    );
+    ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- ======================
 -- GAMES
@@ -45,7 +45,7 @@ CREATE TABLE
         CONSTRAINT FK2_Games_Player2 FOREIGN KEY (player2_id) REFERENCES Users (user_id),
         CONSTRAINT FK3_Games_Turn FOREIGN KEY (current_turn) REFERENCES Users (user_id),
         CONSTRAINT FK4_Games_Winner FOREIGN KEY (winner_id) REFERENCES Users (user_id)
-    );
+    ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- ======================
 -- GAME_SONGS
@@ -60,4 +60,4 @@ CREATE TABLE
         -- FOREIGN KEY ref
         CONSTRAINT FK1_GameSongs_Game FOREIGN KEY (game_id) REFERENCES Games (game_id) ON DELETE CASCADE,
         CONSTRAINT FK2_GameSongs_Song FOREIGN KEY (song_id) REFERENCES Songs (song_id) ON DELETE CASCADE
-    );
+    ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
