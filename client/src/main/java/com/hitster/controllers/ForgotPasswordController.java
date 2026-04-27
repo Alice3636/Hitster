@@ -15,6 +15,9 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import com.hitster.client.utils.ResponsiveScaler;
 
+/**
+ * Controls the password recovery flow from reset-code request through password replacement.
+ */
 public class ForgotPasswordController {
     private final AuthNetworkService authService = new AuthNetworkService();
 
@@ -41,6 +44,9 @@ public class ForgotPasswordController {
     @FXML
     private Button confirmResetButton;
 
+    /**
+     * Initializes responsive scaling for the forgot-password screen.
+     */
     public void initialize() {
         ResponsiveScaler.bindToWidth(rootPane);
     }

@@ -6,6 +6,9 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import java.io.IOException;
 
+/**
+ * Centralizes JavaFX scene loading and navigation between FXML screens.
+ */
 public class SceneNavigator {
 
     public static final String LOGIN_SCREEN = "/views/login.fxml";
@@ -20,10 +23,22 @@ public class SceneNavigator {
 
     private static Stage primaryStage;
 
+    /**
+     * Registers the primary stage used for all scene transitions.
+     *
+     * @param stage application stage managed by the JavaFX runtime
+     */
     public static void setPrimaryStage(Stage stage) {
         primaryStage = stage;
     }
 
+    /**
+     * Loads an FXML screen into the primary stage and displays it maximized.
+     *
+     * @param fxmlPath classpath path to the FXML resource
+     * @throws IllegalStateException if the primary stage has not been registered
+     * @throws RuntimeException if the requested FXML resource cannot be loaded
+     */
     public static void loadScene(String fxmlPath) {
         try {
             if (primaryStage == null) {

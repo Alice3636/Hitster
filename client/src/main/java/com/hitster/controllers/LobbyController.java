@@ -21,6 +21,9 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 
+/**
+ * Controls lobby navigation, matchmaking queue actions, and match status polling.
+ */
 public class LobbyController {
 
     @FXML
@@ -57,6 +60,9 @@ public class LobbyController {
     @FXML 
     private AnchorPane rootPane;
 
+    /**
+     * Initializes lobby layout scaling and hides administrator navigation for non-admin users.
+     */
     public void initialize() {
         ResponsiveScaler.bindToWidth(rootPane);
 

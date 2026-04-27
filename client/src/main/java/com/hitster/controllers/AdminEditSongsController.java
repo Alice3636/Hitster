@@ -32,6 +32,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Controls the administrator song management screen for viewing, adding, editing, and deleting songs.
+ */
 public class AdminEditSongsController {
 
     @FXML private Button navSongsButton;
@@ -54,6 +57,9 @@ public class AdminEditSongsController {
     private final AdminNetworkService adminService = new AdminNetworkService();
     private FilteredList<SongRow> filteredData;
 
+    /**
+     * Initializes song table bindings, search filtering, actions, and initial data loading.
+     */
     @FXML
     public void initialize() {
         ResponsiveScaler.bindToWidth(rootPane);
@@ -427,6 +433,9 @@ public class AdminEditSongsController {
 
     private record EditSongFormResult(String title, String artist, String releaseYearText, String audioUrl) {}
 
+    /**
+     * Table row model used by the administrator song-management table.
+     */
     public static class SongRow {
         private final BooleanProperty selected;
         private final LongProperty id;
@@ -435,6 +444,15 @@ public class AdminEditSongsController {
         private final IntegerProperty year;
         private final StringProperty link;
 
+        /**
+         * Creates a row model for one song.
+         *
+         * @param id song id displayed in the table
+         * @param title song title displayed in the table
+         * @param artist song artist displayed in the table
+         * @param year release year displayed in the table
+         * @param link audio URL displayed in the table
+         */
         public SongRow(long id, String title, String artist, int year, String link) {
             this.selected = new SimpleBooleanProperty(false);
             this.id = new SimpleLongProperty(id);
@@ -444,18 +462,95 @@ public class AdminEditSongsController {
             this.link = new SimpleStringProperty(link);
         }
 
+        /**
+         * Indicates whether this row is selected for bulk deletion.
+         *
+         * @return {@code true} when the row is selected
+         */
         public boolean isSelected() { return selected.get(); }
+
+        /**
+         * Updates whether this row is selected for bulk deletion.
+         *
+         * @param value selected state to apply
+         */
         public void setSelected(boolean value) { selected.set(value); }
+
+        /**
+         * Returns the selected property used by the table checkbox column.
+         *
+         * @return selected state property
+         */
         public BooleanProperty selectedProperty() { return selected; }
+
+        /**
+         * Returns the song id displayed in the table.
+         *
+         * @return song id
+         */
         public long getId() { return id.get(); }
+
+        /**
+         * Returns the song id property used by the table binding.
+         *
+         * @return song id property
+         */
         public LongProperty idProperty() { return id; }
+
+        /**
+         * Returns the song title displayed in the table.
+         *
+         * @return song title
+         */
         public String getTitle() { return title.get(); }
+
+        /**
+         * Returns the song title property used by the table binding.
+         *
+         * @return song title property
+         */
         public StringProperty titleProperty() { return title; }
+
+        /**
+         * Returns the artist displayed in the table.
+         *
+         * @return artist name
+         */
         public String getArtist() { return artist.get(); }
+
+        /**
+         * Returns the artist property used by the table binding.
+         *
+         * @return artist property
+         */
         public StringProperty artistProperty() { return artist; }
+
+        /**
+         * Returns the release year displayed in the table.
+         *
+         * @return release year
+         */
         public int getYear() { return year.get(); }
+
+        /**
+         * Returns the release year property used by the table binding.
+         *
+         * @return release year property
+         */
         public IntegerProperty yearProperty() { return year; }
+
+        /**
+         * Returns the audio URL displayed in the table.
+         *
+         * @return audio URL
+         */
         public String getLink() { return link.get(); }
+
+        /**
+         * Returns the audio URL property used by the table binding.
+         *
+         * @return audio URL property
+         */
         public StringProperty linkProperty() { return link; }
     }
 }

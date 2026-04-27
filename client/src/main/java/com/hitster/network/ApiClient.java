@@ -17,26 +17,51 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Shared HTTP client wrapper for JSON and multipart requests to the Hitster server API.
+ */
 public class ApiClient {
 
     private final HttpClient httpClient;
     private final Gson gson;
 
+    /**
+     * Creates an API client with a default Java HTTP client and JSON serializer.
+     */
     public ApiClient() {
         this.httpClient = HttpClient.newHttpClient();
         this.gson = new Gson();
     }
 
+    /**
+     * Sends an authenticated GET request to a relative API endpoint.
+     *
+     * @param endpoint API path relative to the configured base URL
+     * @return asynchronous HTTP response containing the response body as UTF-8 text
+     */
     public CompletableFuture<HttpResponse<String>> get(String endpoint) {
         HttpRequest request = baseRequest(endpoint).GET().build();
         return send(request);
     }
 
+    /**
+     * Sends an authenticated POST request without a request body.
+     *
+     * @param endpoint API path relative to the configured base URL
+     * @return asynchronous HTTP response containing the response body as UTF-8 text
+     */
     public CompletableFuture<HttpResponse<String>> post(String endpoint) {
         HttpRequest request = baseRequest(endpoint).POST(HttpRequest.BodyPublishers.noBody()).build();
         return send(request);
     }
 
+    /**
+     * Sends an authenticated JSON POST request.
+     *
+     * @param endpoint API path relative to the configured base URL
+     * @param body object serialized as the JSON request body
+     * @return asynchronous HTTP response containing the response body as UTF-8 text
+     */
     public CompletableFuture<HttpResponse<String>> post(String endpoint, Object body) {
         HttpRequest request = baseJsonRequest(endpoint)
                 .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(body), StandardCharsets.UTF_8))
@@ -44,6 +69,13 @@ public class ApiClient {
         return send(request);
     }
 
+    /**
+     * Sends an authenticated JSON PUT request.
+     *
+     * @param endpoint API path relative to the configured base URL
+     * @param body object serialized as the JSON request body
+     * @return asynchronous HTTP response containing the response body as UTF-8 text
+     */
     public CompletableFuture<HttpResponse<String>> put(String endpoint, Object body) {
         HttpRequest request = baseJsonRequest(endpoint)
                 .PUT(HttpRequest.BodyPublishers.ofString(gson.toJson(body), StandardCharsets.UTF_8))
@@ -51,11 +83,24 @@ public class ApiClient {
         return send(request);
     }
 
+    /**
+     * Sends an authenticated DELETE request without a request body.
+     *
+     * @param endpoint API path relative to the configured base URL
+     * @return asynchronous HTTP response containing the response body as UTF-8 text
+     */
     public CompletableFuture<HttpResponse<String>> delete(String endpoint) {
         HttpRequest request = baseRequest(endpoint).DELETE().build();
         return send(request);
     }
 
+    /**
+     * Sends an authenticated DELETE request with a JSON body.
+     *
+     * @param endpoint API path relative to the configured base URL
+     * @param body object serialized as the JSON request body
+     * @return asynchronous HTTP response containing the response body as UTF-8 text
+     */
     public CompletableFuture<HttpResponse<String>> delete(String endpoint, Object body) {
         HttpRequest request = baseJsonRequest(endpoint)
                 .method("DELETE", HttpRequest.BodyPublishers.ofString(gson.toJson(body), StandardCharsets.UTF_8))
@@ -63,6 +108,14 @@ public class ApiClient {
         return send(request);
     }
 
+    /**
+     * Sends an authenticated multipart POST request containing text fields and one file.
+     *
+     * @param endpoint API path relative to the configured base URL
+     * @param textParts form text fields to include in the multipart body
+     * @param filePart file field to include in the multipart body
+     * @return asynchronous HTTP response containing the response body as UTF-8 text
+     */
     public CompletableFuture<HttpResponse<String>> postMultipart(String endpoint, List<MultipartTextPart> textParts, MultipartFilePart filePart) {
         try {
             String boundary = createBoundary();
@@ -76,6 +129,13 @@ public class ApiClient {
         }
     }
 
+    /**
+     * Sends an authenticated multipart PUT request containing text fields.
+     *
+     * @param endpoint API path relative to the configured base URL
+     * @param textParts form text fields to include in the multipart body
+     * @return asynchronous HTTP response containing the response body as UTF-8 text
+     */
     public CompletableFuture<HttpResponse<String>> putMultipart(String endpoint, List<MultipartTextPart> textParts) {
         try {
             String boundary = createBoundary();
@@ -173,7 +233,19 @@ public class ApiClient {
         return ("--" + boundary + "--\r\n").getBytes(StandardCharsets.UTF_8);
     }
 
+    /**
+     * Represents a text field in a multipart form request.
+     *
+     * @param name form field name
+     * @param value form field value
+     */
     public record MultipartTextPart(String name, String value) {}
 
+    /**
+     * Represents a file field in a multipart form request.
+     *
+     * @param name form field name
+     * @param path local file path to upload
+     */
     public record MultipartFilePart(String name, Path path) {}
 }

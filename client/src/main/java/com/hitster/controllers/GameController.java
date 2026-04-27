@@ -53,6 +53,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Controls the active game screen, including timelines, guesses, challenges, audio, and polling.
+ */
 public class GameController {
 
     private static final String CARD_DRAG_PREFIX = "CARD:";
@@ -93,6 +96,9 @@ public class GameController {
 
     private Integer lastFeedbackTurnNumber = null;
 
+    /**
+     * Initializes the game screen and starts local polling, timers, and drag-and-drop behavior.
+     */
     public void initialize() {
         ResponsiveScaler.bindToWidth(rootPane);
         currentGameId = GameManager.getInstance().getGameId();

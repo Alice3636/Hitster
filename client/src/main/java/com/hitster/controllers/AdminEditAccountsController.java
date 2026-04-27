@@ -23,6 +23,9 @@ import com.hitster.dto.admin.UserEntryDTO;
 import com.hitster.dto.admin.UsersResponseDTO;
 import com.hitster.network.AdminNetworkService;
 
+/**
+ * Controls the administrator account management screen for viewing, searching, and deleting users.
+ */
 public class AdminEditAccountsController {
 
     @FXML
@@ -46,7 +49,7 @@ public class AdminEditAccountsController {
     @FXML
     private Button backButton;
 
-    // The raw data list and the filtered list for the search bar
+    // Keep the unfiltered backing list separate so search and sorting can be recomputed locally.
     private final ObservableList<UserRow> masterUserData = FXCollections.observableArrayList();
     private FilteredList<UserRow> filteredData;
 
@@ -56,22 +59,25 @@ public class AdminEditAccountsController {
     @FXML 
     private AnchorPane rootPane;
 
+    /**
+     * Initializes account table bindings, search filtering, navigation, and initial data loading.
+     */
     public void initialize() {
         ResponsiveScaler.bindToWidth(rootPane);
 
-        // 1. Setup the Table Columns
+        // Table columns bind to row properties so JavaFX sorting and filtering stay live.
         idColumn.setCellValueFactory(cellData -> cellData.getValue().idProperty().asObject());
         usernameColumn.setCellValueFactory(cellData -> cellData.getValue().usernameProperty());
         emailColumn.setCellValueFactory(cellData -> cellData.getValue().emailProperty());
 
-        // Setup the Checkbox column
+        // Checkbox edits update row selection state used by the bulk delete action.
         selectColumn.setCellValueFactory(cellData -> cellData.getValue().selectedProperty());
         selectColumn.setCellFactory(CheckBoxTableCell.forTableColumn(selectColumn));
 
-        // Make the table editable so checkboxes can be clicked
+        // Table editing is required for CheckBoxTableCell to commit selection changes.
         usersTable.setEditable(true);
 
-        // 2. Setup the Search Filter
+        // Filter against the backing list so the search field never mutates the source data.
         filteredData = new FilteredList<>(masterUserData, p -> true);
         searchField.textProperty().addListener((observable, oldValue, newValue) -> {
             filteredData.setPredicate(user -> {
@@ -83,18 +89,18 @@ public class AdminEditAccountsController {
             });
         });
 
-        // Bind the sorted/filtered data to the table
+        // SortedList lets TableView sorting compose with the active search predicate.
         SortedList<UserRow> sortedData = new SortedList<>(filteredData);
         sortedData.comparatorProperty().bind(usersTable.comparatorProperty());
         usersTable.setItems(sortedData);
 
-        // 3. Navigation Bindings
+        // Navigation is wired here because this controller owns admin-mode transitions.
         navSongsButton.setOnAction(e -> SceneNavigator.loadScene(SceneNavigator.ADMIN_EDIT_SONGS_SCREEN));
 
-        // 4. Delete Action
+        // Bulk deletion operates on the row selection state maintained by the checkbox column.
         deleteSelectedButton.setOnAction(this::handleDeleteSelected);
 
-        // 5. Load Data from Backend (Simulated here)
+        // Load initial data after table bindings are ready to receive rows.
         loadUserData();
     }
 
@@ -111,7 +117,7 @@ public class AdminEditAccountsController {
                         for (UserEntryDTO user : usersResponse.users()) {
                             masterUserData.add(
                                     new UserRow(
-                                            (int) user.id(), // your UI still uses int
+                                            (int) user.id(), // Table rows store ids as int while the API exposes Long ids.
                                             user.username(),
                                             user.email()
                                     )
@@ -156,7 +162,7 @@ public class AdminEditAccountsController {
             if (response == ButtonType.YES) {
 
                 List<Long> userIds = selectedUsers.stream()
-                        .map(user -> (long) user.getId()) // convert int → long
+                        .map(user -> (long) user.getId()) // Convert UI row ids to the Long ids expected by the API.
                         .collect(Collectors.toList());
                 
                 deleteSelectedButton.setDisable(true);
@@ -200,12 +206,22 @@ public class AdminEditAccountsController {
         alert.showAndWait();
     }
 
+    /**
+     * Table row model used by the administrator user-management table.
+     */
     public static class UserRow {
         private final BooleanProperty selected;
         private final IntegerProperty id;
         private final StringProperty username;
         private final StringProperty email;
 
+        /**
+         * Creates a row model for one user account.
+         *
+         * @param id user id displayed in the table
+         * @param username username displayed in the table
+         * @param email email address displayed in the table
+         */
         public UserRow(int id, String username, String email) {
             this.selected = new SimpleBooleanProperty(false);
             this.id = new SimpleIntegerProperty(id);
@@ -213,38 +229,83 @@ public class AdminEditAccountsController {
             this.email = new SimpleStringProperty(email);
         }
 
+        /**
+         * Indicates whether this row is selected for bulk deletion.
+         *
+         * @return {@code true} when the row is selected
+         */
         public boolean isSelected() {
             return selected.get();
         }
 
+        /**
+         * Updates whether this row is selected for bulk deletion.
+         *
+         * @param value selected state to apply
+         */
         public void setSelected(boolean value) {
             selected.set(value);
         }
 
+        /**
+         * Returns the selected property used by the table checkbox column.
+         *
+         * @return selected state property
+         */
         public BooleanProperty selectedProperty() {
             return selected;
         }
 
+        /**
+         * Returns the user id displayed in the table.
+         *
+         * @return user id
+         */
         public int getId() {
             return id.get();
         }
 
+        /**
+         * Returns the user id property used by the table binding.
+         *
+         * @return user id property
+         */
         public IntegerProperty idProperty() {
             return id;
         }
 
+        /**
+         * Returns the username displayed in the table.
+         *
+         * @return username
+         */
         public String getUsername() {
             return username.get();
         }
 
+        /**
+         * Returns the username property used by the table binding.
+         *
+         * @return username property
+         */
         public StringProperty usernameProperty() {
             return username;
         }
 
+        /**
+         * Returns the email address displayed in the table.
+         *
+         * @return email address
+         */
         public String getEmail() {
             return email.get();
         }
 
+        /**
+         * Returns the email property used by the table binding.
+         *
+         * @return email property
+         */
         public StringProperty emailProperty() {
             return email;
         }

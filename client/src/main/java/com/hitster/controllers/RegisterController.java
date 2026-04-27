@@ -21,6 +21,9 @@ import javafx.stage.Stage;
 
 import java.io.File;
 
+/**
+ * Controls the registration screen, including account creation and optional profile image selection.
+ */
 public class RegisterController {
 
     @FXML
@@ -55,6 +58,9 @@ public class RegisterController {
     @FXML 
     private AnchorPane rootPane;
 
+    /**
+     * Initializes responsive scaling and synchronizes password fields used by visibility toggles.
+     */
     public void initialize() {
         ResponsiveScaler.bindToWidth(rootPane);
         if (passwordTextField != null && passwordField != null) {

@@ -16,6 +16,9 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.AnchorPane;
 
+/**
+ * Controls the leaderboard screen and displays ranked player results.
+ */
 public class LeaderboardController {
 
     @FXML
@@ -38,6 +41,9 @@ public class LeaderboardController {
     @FXML 
     private AnchorPane rootPane;
 
+    /**
+     * Initializes leaderboard table columns, responsive scaling, and data loading.
+     */
     public void initialize() {
         ResponsiveScaler.bindToWidth(rootPane);
         rankColumn.setCellValueFactory(cellData -> 

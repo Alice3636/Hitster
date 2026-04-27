@@ -26,6 +26,9 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 
+/**
+ * Controls the profile screen, including profile data display, edits, and account deletion.
+ */
 public class ProfileController {
 
     @FXML
@@ -63,6 +66,9 @@ public class ProfileController {
     @FXML 
     private AnchorPane rootPane;
 
+    /**
+     * Initializes profile table columns, responsive scaling, and profile data loading.
+     */
     public void initialize() {
         ResponsiveScaler.bindToWidth(rootPane);
         opponentCol.setCellValueFactory(cellData -> 

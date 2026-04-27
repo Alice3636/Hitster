@@ -23,6 +23,9 @@ import javafx.scene.text.Text;
 
 import java.util.Map;
 
+/**
+ * Controls the login screen and stores authenticated user details after a successful login.
+ */
 public class LoginController {
 
     @FXML
@@ -44,6 +47,9 @@ public class LoginController {
     @FXML 
     private AnchorPane rootPane;
 
+    /**
+     * Initializes responsive scaling and links the password field with its visible-text counterpart.
+     */
     public void initialize() {
         ResponsiveScaler.bindToWidth(rootPane);
         passwordTextField.textProperty().bindBidirectional(passwordField.textProperty());

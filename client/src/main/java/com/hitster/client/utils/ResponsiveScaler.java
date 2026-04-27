@@ -4,6 +4,9 @@ import javafx.beans.value.ChangeListener;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 
+/**
+ * Applies responsive font scaling to JavaFX roots based on the active scene width.
+ */
 public final class ResponsiveScaler {
     private static final double DESIGN_WIDTH = 1920.0;
     private static final double BASE_FONT_SIZE = 16.0;
@@ -12,6 +15,11 @@ public final class ResponsiveScaler {
 
     private ResponsiveScaler() {}
 
+    /**
+     * Binds a root node to scene width changes so its font size stays readable across resolutions.
+     *
+     * @param root root node whose scene width should control font scaling
+     */
     public static void bindToWidth(Parent root) {
         if (root == null) {
             return;
