@@ -4,10 +4,13 @@ import com.hitster.dto.auth.ForgotPasswordRequestDTO;
 import com.hitster.dto.auth.LoginRequestDTO;
 import com.hitster.dto.auth.LoginResponseDTO;
 import com.hitster.dto.auth.RegisterRequestDTO;
+import com.hitster.dto.auth.ResetPasswordRequestDTO;
 import com.hitster.service.AuthService;
 import com.hitster.service.DatabaseService;
 import com.hitster.service.EmailValidationUtil;
 import com.hitster.service.JwtUtil;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -39,8 +42,7 @@ public class AuthController {
                 request.username(),
                 request.email(),
                 request.password(),
-                request.picturePath()
-        );
+                request.picturePath());
 
         if (newUserId <= 0) {
             throw new IllegalArgumentException("Registration failed.");
@@ -73,7 +75,7 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public String forgotPassword(@RequestBody ForgotPasswordRequestDTO request) {
+    public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordRequestDTO request) {
         if (request == null || isBlank(request.email())) {
             throw new IllegalArgumentException("Email is required.");
         }
@@ -81,8 +83,24 @@ public class AuthController {
         if (!EmailValidationUtil.isValidEmail(request.email())) {
             throw new InvalidEmailException("Invalid email format or domain.");
         }
+        AuthService.processForgotPassword(request.email());
+        return ResponseEntity.ok("If the email exists, a recovery process has been triggered.");
+    }
 
-        return "If the email exists, a recovery process has been triggered.";
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequestDTO request) {
+        if (request == null || request.email() == null || request.code() == null || request.newPassword() == null) {
+            return ResponseEntity.badRequest().body("All fields are required.");
+        }
+
+        boolean isSuccess = AuthService.verifyCodeAndResetPassword(request.email(), request.code(),
+                request.newPassword());
+
+        if (isSuccess) {
+            return ResponseEntity.ok("Password has been reset successfully.");
+        } else {
+            return ResponseEntity.status(400).body("Invalid or expired verification code.");
+        }
     }
 
     @PostMapping("/logout")

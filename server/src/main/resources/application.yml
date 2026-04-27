@@ -1,0 +1,25 @@
+database:
+  host: "mysql-13f3e246-hitster.k.aivencloud.com"
+  port: 21862
+  name: "DB_Hitster"
+  user: "avnadmin"
+  password: "AVNS_sB1HXeOW0sSvMsZ2_ek"
+  ssl:
+    mode: "REQUIRED"
+    ca_cert: "/ca.pem"
+
+spring:
+  mail:
+    host: smtp.mailersend.net
+    port: 587
+    username: MS_cUQIMy@test-eqvygm0y06jl0p7w.mlsender.net
+    password: mssp.9sht39m.z3m5jgrwvnxldpyo.Z4846ao
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000

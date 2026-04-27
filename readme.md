@@ -142,7 +142,7 @@ Project Root
 ├── Backend/
 │   ├── src/main/java/
 │   ├── src/main/resources/
-│   │   └── config.yml
+│   │   └── application.yml
 │   └── pom.xml
 │
 ├── Frontend/

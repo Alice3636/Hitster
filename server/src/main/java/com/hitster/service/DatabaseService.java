@@ -43,7 +43,7 @@ public class DatabaseService {
     }
 
     public static boolean usernameExists(String username) {
-        String sql = "SELECT 1 FROM Users WHERE username = ? LIMIT 1";
+        String sql = "SELECT * FROM Users WHERE username = ? LIMIT 1";
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, username);
@@ -58,7 +58,7 @@ public class DatabaseService {
     }
 
     public static boolean emailExists(String email) {
-        String sql = "SELECT 1 FROM Users WHERE email = ? LIMIT 1";
+        String sql = "SELECT * FROM Users WHERE email = ? LIMIT 1";
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, email);
@@ -73,7 +73,7 @@ public class DatabaseService {
     }
 
     public static boolean usernameExistsForOtherUser(Long userId, String username) {
-        String sql = "SELECT 1 FROM Users WHERE username = ? AND user_id <> ? LIMIT 1";
+        String sql = "SELECT * FROM Users WHERE username = ? AND user_id <> ? LIMIT 1";
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, username);
@@ -89,7 +89,7 @@ public class DatabaseService {
     }
 
     public static boolean emailExistsForOtherUser(Long userId, String email) {
-        String sql = "SELECT 1 FROM Users WHERE email = ? AND user_id <> ? LIMIT 1";
+        String sql = "SELECT * FROM Users WHERE email = ? AND user_id <> ? LIMIT 1";
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, email);
@@ -181,14 +181,13 @@ public class DatabaseService {
         List<UserEntryDTO> users = new ArrayList<>();
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
+                ResultSet rs = pstmt.executeQuery()) {
 
             while (rs.next()) {
                 users.add(new UserEntryDTO(
                         rs.getLong("user_id"),
                         rs.getString("username"),
-                        rs.getString("email")
-                ));
+                        rs.getString("email")));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -224,8 +223,7 @@ public class DatabaseService {
                             rs.getObject("total_winnings") != null ? rs.getInt("total_winnings") : 0,
                             0.0,
                             new ArrayList<>(),
-                            rs.getString("profile_picture_path")
-                    );
+                            rs.getString("profile_picture_path"));
                 }
             }
         } catch (SQLException e) {
@@ -258,7 +256,7 @@ public class DatabaseService {
         int rank = 1;
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
+                ResultSet rs = pstmt.executeQuery()) {
 
             while (rs.next()) {
                 Integer winnings = rs.getObject("total_winnings") != null ? rs.getInt("total_winnings") : 0;
@@ -267,8 +265,7 @@ public class DatabaseService {
                         rank++,
                         rs.getInt("user_id"),
                         rs.getString("username"),
-                        winnings
-                ));
+                        winnings));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -277,14 +274,12 @@ public class DatabaseService {
         return new LeaderboardResponseDTO(entries);
     }
 
-    // ================= SONGS =================
-
     public static List<SongDTO> getAllSongs() {
         String sql = "SELECT song_id, title, artist, release_year, song_path FROM Songs ORDER BY song_id";
         List<SongDTO> songs = new ArrayList<>();
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
+                ResultSet rs = pstmt.executeQuery()) {
 
             while (rs.next()) {
                 songs.add(new SongDTO(
@@ -292,8 +287,7 @@ public class DatabaseService {
                         rs.getString("title"),
                         rs.getString("artist"),
                         rs.getInt("release_year"),
-                        rs.getString("song_path")
-                ));
+                        rs.getString("song_path")));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -357,4 +351,22 @@ public class DatabaseService {
             return false;
         }
     }
+
+    public static void updateUserPassword(String email, String hashedPassword) {
+
+        String query = "UPDATE Users SET password_hash = ? WHERE email = ?";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+            pstmt.setString(1, hashedPassword);
+            pstmt.setString(2, email);
+
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            System.err.println("Database error while updating password for " + email + ": " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
 }

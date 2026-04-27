@@ -28,6 +28,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 || uri.equals("/favicon.ico")
                 || uri.equals("/api/auth/login")
                 || uri.equals("/api/auth/register")
+                || uri.equals("/api/auth/reset-password")
                 || uri.equals("/api/auth/forgot-password");
     }
 

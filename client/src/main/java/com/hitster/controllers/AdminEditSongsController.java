@@ -59,13 +59,14 @@ public class AdminEditSongsController {
     // 1. Added the Network Service!
     private final AdminNetworkService adminService = new AdminNetworkService();
 
-    @FXML 
+    @FXML
     private AnchorPane rootPane;
 
     public void initialize() {
         ResponsiveScaler.bindToWidth(rootPane);
         // Setup Standard Columns
-        idColumn.setCellValueFactory(cellData -> cellData.getValue().idProperty().asObject());        titleColumn.setCellValueFactory(cellData -> cellData.getValue().titleProperty());
+        idColumn.setCellValueFactory(cellData -> cellData.getValue().idProperty().asObject());
+        titleColumn.setCellValueFactory(cellData -> cellData.getValue().titleProperty());
         artistColumn.setCellValueFactory(cellData -> cellData.getValue().artistProperty());
         yearColumn.setCellValueFactory(cellData -> cellData.getValue().yearProperty().asObject());
         linkColumn.setCellValueFactory(cellData -> cellData.getValue().linkProperty());
@@ -144,9 +145,7 @@ public class AdminEditSongsController {
                                             song.title(),
                                             song.artist(),
                                             song.releaseYear(),
-                                            song.audioUrl()
-                                    )
-                            );
+                                            song.audioUrl()));
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -165,12 +164,10 @@ public class AdminEditSongsController {
     }
 
     private void handleAddSong(ActionEvent event) {
-        // TODO: Open an "Add Song" pop-up dialog or navigate to a new screen
         showAlert("Add Song", "This will open the song creation form.", Alert.AlertType.INFORMATION);
     }
 
     private void handleEditSong(SongRow song) {
-        // TODO: Open an "Edit Song" pop-up pre-filled with this song's data
         showAlert("Edit Song", "Editing: " + song.getTitle(), Alert.AlertType.INFORMATION);
     }
 
@@ -248,23 +245,56 @@ public class AdminEditSongsController {
             this.link = new SimpleStringProperty(link);
         }
 
-        public boolean isSelected() { return selected.get(); }
-        public void setSelected(boolean value) { selected.set(value); }
-        public BooleanProperty selectedProperty() { return selected; }
+        public boolean isSelected() {
+            return selected.get();
+        }
 
-        public long getId() { return id.get(); }
-        public LongProperty idProperty() { return id; }
+        public void setSelected(boolean value) {
+            selected.set(value);
+        }
 
-        public String getTitle() { return title.get(); }
-        public StringProperty titleProperty() { return title; }
+        public BooleanProperty selectedProperty() {
+            return selected;
+        }
 
-        public String getArtist() { return artist.get(); }
-        public StringProperty artistProperty() { return artist; }
+        public long getId() {
+            return id.get();
+        }
 
-        public int getYear() { return year.get(); }
-        public IntegerProperty yearProperty() { return year; }
+        public LongProperty idProperty() {
+            return id;
+        }
 
-        public String getLink() { return link.get(); }
-        public StringProperty linkProperty() { return link; }
+        public String getTitle() {
+            return title.get();
+        }
+
+        public StringProperty titleProperty() {
+            return title;
+        }
+
+        public String getArtist() {
+            return artist.get();
+        }
+
+        public StringProperty artistProperty() {
+            return artist;
+        }
+
+        public int getYear() {
+            return year.get();
+        }
+
+        public IntegerProperty yearProperty() {
+            return year;
+        }
+
+        public String getLink() {
+            return link.get();
+        }
+
+        public StringProperty linkProperty() {
+            return link;
+        }
     }
 }

@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Properties;
 
 public class DBManager {
-    final static String CONFIG_FILE = "config.yml";
+    final static String CONFIG_FILE = "application.yml";
 
     private static Connection connection = null;
 

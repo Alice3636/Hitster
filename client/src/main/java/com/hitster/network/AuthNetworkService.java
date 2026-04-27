@@ -3,6 +3,7 @@ package com.hitster.network;
 import com.hitster.dto.auth.ForgotPasswordRequestDTO;
 import com.hitster.dto.auth.LoginRequestDTO;
 import com.hitster.dto.auth.RegisterRequestDTO;
+import com.hitster.dto.auth.ResetPasswordRequestDTO;
 
 import java.net.http.HttpResponse;
 import java.util.concurrent.CompletableFuture;
@@ -15,7 +16,8 @@ public class AuthNetworkService {
         this.apiClient = new ApiClient();
     }
 
-    public CompletableFuture<HttpResponse<String>> register( String username, String email, String password, String picturePath) {
+    public CompletableFuture<HttpResponse<String>> register(String username, String email, String password,
+            String picturePath) {
         RegisterRequestDTO requestDTO = new RegisterRequestDTO(username, email, password, picturePath);
         return apiClient.post("/auth/register", requestDTO);
     }
@@ -28,5 +30,11 @@ public class AuthNetworkService {
     public CompletableFuture<HttpResponse<String>> login(String email, String password) {
         LoginRequestDTO requestDTO = new LoginRequestDTO(email, password);
         return apiClient.post("/auth/login", requestDTO);
+    }
+
+    public CompletableFuture<HttpResponse<String>> resetPassword(String email, String code, String newPassword) {
+        ResetPasswordRequestDTO requestDTO = new ResetPasswordRequestDTO(email, code, newPassword);
+
+        return apiClient.post("/auth/reset-password", requestDTO);
     }
 }
